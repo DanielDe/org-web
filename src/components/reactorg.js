@@ -3,12 +3,17 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as dropboxActions from '../actions/dropbox';
 import FileList from './file_list';
+import OrgFile from './org_file';
 
 class Reactorg extends Component {
   constructor(props) {
     super(props);
     this.state = {};
     this.authenticateWithDropbox = this.authenticateWithDropbox.bind(this);
+
+    // TODO: Remove this.
+    this.authenticateWithDropbox();
+    this.props.actions.downloadFile('/test.org');
   }
 
   authenticateWithDropbox() {
@@ -19,7 +24,11 @@ class Reactorg extends Component {
   render() {
     if (this.props.fileContents) {
       return (
-        <pre>{this.props.fileContents}</pre>
+        <div style={{ margin: 5 }}>
+          <OrgFile />
+          <hr />
+          <pre>{this.props.fileContents}</pre>
+        </div>
       );
     } else {
       if (this.props.dropboxAccessToken) {

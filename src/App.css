@@ -1,7 +1,3 @@
-.App {
-  text-align: center;
-}
-
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 80px;
@@ -12,6 +8,7 @@
   height: 150px;
   padding: 20px;
   color: white;
+  text-align: center;
 }
 
 .App-intro {
@@ -23,6 +20,14 @@
   to { transform: rotate(360deg); }
 }
 
-.selected {
-    border: 1px solid red;
+.todo-keyword {
+    font-weight: bold;
+}
+
+.todo-keyword--todo {
+    color: red;
+}
+
+.todo-keyword--done {
+    color: green;
 }

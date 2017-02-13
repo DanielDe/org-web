@@ -10,13 +10,6 @@ export const addFile = (filename, fileId, path) => {
   };
 };
 
-export const selectFile = (fileId) => {
-  return {
-    type: 'selectFile',
-    fileId
-  };
-};
-
 export const downloadFile = (filePath) => {
   return (dispatch, getState) => {
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });

@@ -13,11 +13,6 @@ export default (state = new Immutable.Map(), payload) => {
       path: payload.path
     });
     return state.update('files', files => files.push(newFile));
-  case 'selectFile':
-    return state.update('files', files => {
-      return files.update(files.findIndex(file => file.get('id') === payload.fileId),
-                          file => file.set('selected', !file.get('selected')));
-    });
   case 'authenticate':
     return state.set('dropboxAccessToken', payload.accessToken);
   default:
