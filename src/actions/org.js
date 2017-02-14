@@ -11,3 +11,10 @@ export const displayFile = (fileContents) => {
     fileContents
   };
 };
+
+export const toggleHeaderOpened = (headerId) => {
+  return {
+    type: 'toggleHeaderOpened',
+    headerId
+  };
+};

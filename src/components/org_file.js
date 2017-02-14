@@ -4,6 +4,15 @@ import { connect } from 'react-redux';
 import * as orgActions from '../actions/org';
 
 class OrgFile extends Component {
+  constructor(props) {
+    super(props);
+    this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
+  }
+
+  handleTitleLineClick(headerId) {
+    this.props.actions.toggleHeaderOpened(headerId);
+  }
+
   renderHeaderList(headers) {
     if (headers.length === 0) {
       return '';
@@ -19,14 +28,20 @@ class OrgFile extends Component {
           todoKeyword = <span className='todo-keyword todo-keyword--done'>{todoKeyword}</span>;
         }
       }
+      const opened = header.get('opened');
 
-      const content = header.get('content') ? <div>{header.get('content')}</div> : '';
+      let content = '';
+      if (opened) {
+        const description = header.get('description');
+        const subheaders = this.renderHeaderList(header.get('subheaders'));
+
+        content = <div>{description} {subheaders}</div>;
+      }
 
       return (
         <li key={index}>
-          {todoKeyword} {title}
+          <span onClick={() => this.handleTitleLineClick(header.get('id'))}>{todoKeyword} {title} {opened ? '' : '...'}</span>
           {content}
-          {this.renderHeaderList(header.get('subheaders'))}
         </li>
       );
     });

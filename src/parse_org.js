@@ -1,6 +1,6 @@
 const TODO_KEYWORDS = ['TODO', 'DONE'];
 
-const newHeaderWithTitle = (titleLine) => {
+const newHeaderWithTitle = (titleLine, parentId = []) => {
   const todoKeyword = TODO_KEYWORDS.filter(keyword => titleLine.startsWith(keyword))[0];
   let title = titleLine;
   if (todoKeyword) {
@@ -12,25 +12,27 @@ const newHeaderWithTitle = (titleLine) => {
       title, todoKeyword
     },
     subheaders: [],
-    content: ''
+    description: '',
+    opened: false,
+    id: [...parentId, Math.random()]
   };
 };
 
-const addContentToLastHeader = (header, content) => {
+const addDescriptionToLastHeader = (header, description) => {
   if (header.subheaders.length === 0) {
-    // Content belongs to this header.
-    header.content += content + '\n';
+    // Description belongs to this header.
+    header.description += description + '\n';
   } else {
-    addContentToLastHeader(header.subheaders[header.subheaders.length - 1], content);
+    addDescriptionToLastHeader(header.subheaders[header.subheaders.length - 1], description);
   }
 };
 
 const insertHeaderWithNestingLevel = (parentHeader, nestingLevel, title) => {
   if (nestingLevel === 2) {
-    parentHeader.subheaders.push(newHeaderWithTitle(title));
+    parentHeader.subheaders.push(newHeaderWithTitle(title, parentHeader.id));
   } else if (nestingLevel > 2) {
     if (parentHeader.subheaders.length === 0) {
-      parentHeader.subheaders.push(newHeaderWithTitle(''));
+      parentHeader.subheaders.push(newHeaderWithTitle('', parentHeader.id));
     }
     let lastSubheader = parentHeader.subheaders[parentHeader.subheaders.length - 1];
     insertHeaderWithNestingLevel(lastSubheader, nestingLevel - 1, title);
@@ -60,9 +62,11 @@ const parseOrg = (fileContents) => {
       let lastHeader = headers[headers.length - 1];
       insertHeaderWithNestingLevel(lastHeader, nestingLevel, title);
     } else {
-      let lastHeader = headers[headers.length - 1];
-      if (lastHeader) {
-        addContentToLastHeader(lastHeader, line);
+      if (headers.length > 0) {
+        let lastHeader = headers[headers.length - 1];
+        if (lastHeader) {
+          addDescriptionToLastHeader(lastHeader, line);
+        }
       }
     }
   });
