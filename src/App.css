@@ -31,3 +31,7 @@
 .todo-keyword--done {
     color: green;
 }
+
+.todo-keyword--none {
+    color: lightgray;
+}

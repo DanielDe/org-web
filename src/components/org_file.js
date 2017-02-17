@@ -7,10 +7,16 @@ class OrgFile extends Component {
   constructor(props) {
     super(props);
     this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
+    this.handleTodoClick = this.handleTodoClick.bind(this);
   }
 
   handleTitleLineClick(headerId) {
     this.props.actions.toggleHeaderOpened(headerId);
+  }
+
+  handleTodoClick(headerId, event) {
+    this.props.actions.advanceTodoState(headerId);
+    event.stopPropagation();
   }
 
   renderHeaderList(headers) {
@@ -20,14 +26,15 @@ class OrgFile extends Component {
 
     const headerListElements = headers.map((header, index) => {
       const title = header.getIn(['titleLine', 'title']);
+
       let todoKeyword = header.getIn(['titleLine', 'todoKeyword']);
-      if (todoKeyword) {
-        if (todoKeyword === 'TODO') {
-          todoKeyword = <span className='todo-keyword todo-keyword--todo'>{todoKeyword}</span>;
-        } else {
-          todoKeyword = <span className='todo-keyword todo-keyword--done'>{todoKeyword}</span>;
-        }
+      let todoClasses = ['todo-keyword'];
+      if (!todoKeyword) {
+        todoKeyword = 'NONE';
       }
+      todoClasses.push(`todo-keyword--${todoKeyword.toLowerCase()}`);
+      const todo = <span onClick={(event) => this.handleTodoClick(header.get('id'), event)} className={todoClasses.join(' ')}>{todoKeyword}</span>;
+
       const opened = header.get('opened');
 
       let content = '';
@@ -38,9 +45,13 @@ class OrgFile extends Component {
         content = <div>{description} {subheaders}</div>;
       }
 
+      const hasContent = !!header.get('description') || !!header.get('subheaders').size;
+
       return (
         <li key={index}>
-          <span onClick={() => this.handleTitleLineClick(header.get('id'))}>{todoKeyword} {title} {opened ? '' : '...'}</span>
+          <span onClick={() => this.handleTitleLineClick(header.get('id'))}>
+            {todo} {title} {(opened || !hasContent) ? '' : '...'}
+          </span>
           {content}
         </li>
       );

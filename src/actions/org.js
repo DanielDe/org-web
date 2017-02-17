@@ -18,3 +18,10 @@ export const toggleHeaderOpened = (headerId) => {
     headerId
   };
 };
+
+export const advanceTodoState = (headerId) => {
+  return {
+    type: 'advanceTodoState',
+    headerId
+  };
+};
