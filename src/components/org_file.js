@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as orgActions from '../actions/org';
+import * as dropboxActions from '../actions/dropbox';
 import HeaderList from './header_list';
 
 class OrgFile extends Component {
@@ -10,6 +11,9 @@ class OrgFile extends Component {
     this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
     this.handleAddHeader = this.handleAddHeader.bind(this);
+    this.handlePushClick = this.handlePushClick.bind(this);
+    this.handleTitleEdit = this.handleTitleEdit.bind(this);
+    this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
   }
 
   handleTitleLineClick(headerId) {
@@ -22,27 +26,47 @@ class OrgFile extends Component {
 
   handleAddHeader(parentHeaderId, headerText) {
     this.props.actions.addHeader(parentHeaderId, headerText);
+    this.props.actions.openHeader(parentHeaderId);
+  }
+
+  handlePushClick() {
+    this.props.dropboxActions.push(this.props.filePath);
+  }
+
+  handleTitleEdit(headerId, newTitle) {
+    this.props.actions.editHeaderTitle(headerId, newTitle);
+  }
+
+  handleDescriptionEdit(headerId, newDescription) {
+    this.props.actions.editHeaderDescription(headerId, newDescription);
   }
 
   render() {
     return (
-      <HeaderList headers={this.props.parsedFile}
-                  titleClick={(headerId) => this.handleTitleLineClick(headerId)}
-                  todoClick={(headerId) => this.handleTodoClick(headerId)}
-                  addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)} />
+      <div style={{whiteSpace: 'pre'}}>
+        <HeaderList headers={this.props.parsedFile}
+                    titleClick={(headerId) => this.handleTitleLineClick(headerId)}
+                    todoClick={(headerId) => this.handleTodoClick(headerId)}
+                    addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)}
+                    titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}
+                    descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId, newDescription)} />
+        <button onClick={() => this.handlePushClick()}>Push to Dropbox</button>
+      </div>
     );
   }
 }
 
 function mapStateToProps(state, props) {
   return {
-    parsedFile: state.org.get('parsedFile')
+    parsedFile: state.org.get('parsedFile'),
+    filePath: state.org.get('filePath')
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(orgActions, dispatch)
+    actions: bindActionCreators(orgActions, dispatch),
+    dropboxActions: bindActionCreators(dropboxActions, dispatch)
   };
 }
 

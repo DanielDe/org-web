@@ -8,6 +8,8 @@ class HeaderList extends Component {
     this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
     this.handleAddHeader = this.handleAddHeader.bind(this);
+    this.handleTitleEdit = this.handleTitleEdit.bind(this);
+    this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
   }
 
   handleTitleLineClick(headerId) {
@@ -20,6 +22,14 @@ class HeaderList extends Component {
 
   handleAddHeader(parentHeaderId, headerText) {
     this.props.addHeader(parentHeaderId, headerText);
+  }
+
+  handleTitleEdit(headerId, newTitle) {
+    this.props.titleEdit(headerId, newTitle);
+  }
+
+  handleDescriptionEdit(headerId, newDescription) {
+    this.props.descriptionEdit(headerId, newDescription);
   }
 
   render() {
@@ -40,14 +50,16 @@ class HeaderList extends Component {
                      opened={opened}
                      hasContent={hasContent}
                      titleClick={() => this.handleTitleLineClick(header.get('id'))}
-                     todoClick={() => this.handleTodoClick(header.get('id'))} />
+                     todoClick={() => this.handleTodoClick(header.get('id'))}
+                     titleEdit={(newTitle) => this.handleTitleEdit(header.get('id'), newTitle)} />
           <HeaderContent description={header.get('description')}
                          subheaders={header.get('subheaders')}
                          opened={opened}
                          headerId={header.get('id')}
                          titleClick={(headerId) => this.handleTitleLineClick(headerId)}
                          todoClick={(headerId) => this.handleTodoClick(headerId)}
-                         addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)} />
+                         addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)}
+                         descriptionEdit={(newDescription) => this.handleDescriptionEdit(header.get('id'), newDescription)} />
         </li>
       );
     });

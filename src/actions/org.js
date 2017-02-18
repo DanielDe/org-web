@@ -6,10 +6,11 @@ export const addHeader = (parentHeaderId, headerText) => {
   };
 };
 
-export const displayFile = (fileContents) => {
+export const displayFile = (fileContents, filePath) => {
   return {
     type: 'displayFile',
-    fileContents
+    fileContents,
+    filePath
   };
 };
 
@@ -20,9 +21,32 @@ export const toggleHeaderOpened = (headerId) => {
   };
 };
 
+export const openHeader = (headerId) => {
+  return {
+    type: 'openHeader',
+    headerId
+  };
+};
+
 export const advanceTodoState = (headerId) => {
   return {
     type: 'advanceTodoState',
     headerId
+  };
+};
+
+export const editHeaderTitle = (headerId, newTitle) => {
+  return {
+    type: 'editHeaderTitle',
+    headerId,
+    newTitle
+  };
+};
+
+export const editHeaderDescription = (headerId, newDescription) => {
+  return {
+    type: 'editHeaderDescription',
+    headerId,
+    newDescription
   };
 };

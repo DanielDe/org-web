@@ -34,12 +34,22 @@ export default (state = new Immutable.Map(), payload) => {
     return state.updateIn(['parsedFile', ...augmentedIndexPath, 'subheaders'],
                           subheaders => subheaders.push(newHeader));
   case 'displayFile':
+    state = state.set('filePath', payload.filePath);
     state = state.set('fileContents', payload.fileContents);
     state = state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));
     return state;
   case 'toggleHeaderOpened':
     return state.updateIn(['parsedFile', ...augmentedIndexPath],
                           header => header.set('opened', !header.get('opened')));
+  case 'openHeader':
+    return state.updateIn(['parsedFile', ...augmentedIndexPath],
+                          header => header.set('opened', true));
+  case 'editHeaderTitle':
+    return state.setIn(['parsedFile', ...augmentedIndexPath, 'titleLine', 'title'],
+                       payload.newTitle);
+  case 'editHeaderDescription':
+    return state.setIn(['parsedFile', ...augmentedIndexPath, 'description'],
+                       payload.newDescription);
   case 'advanceTodoState':
     const currentTodoState = state.getIn(['parsedFile',
                                           ...augmentedIndexPath,

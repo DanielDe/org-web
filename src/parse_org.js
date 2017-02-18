@@ -21,7 +21,10 @@ export const newHeaderWithTitle = (titleLine, parentId = []) => {
 const addDescriptionToLastHeader = (header, description) => {
   if (header.subheaders.length === 0) {
     // Description belongs to this header.
-    header.description += description + '\n';
+    if (header.description) {
+      header.description += '\n';
+    }
+    header.description += description;
   } else {
     addDescriptionToLastHeader(header.subheaders[header.subheaders.length - 1], description);
   }

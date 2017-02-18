@@ -26,8 +26,6 @@ class Reactorg extends Component {
       return (
         <div style={{ margin: 5 }}>
           <OrgFile />
-          <hr />
-          <pre>{this.props.fileContents}</pre>
         </div>
       );
     } else {

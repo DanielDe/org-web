@@ -1,5 +1,6 @@
 /* globals Dropbox, FileReader */
 import { displayFile } from './org';
+import exportOrg from '../export_org';
 
 export const addFile = (filename, fileId, path) => {
   return {
@@ -18,7 +19,7 @@ export const downloadFile = (filePath) => {
       const reader = new FileReader();
       reader.addEventListener('loadend', () => {
         const contents = reader.result;
-        dispatch(displayFile(contents));
+        dispatch(displayFile(contents, filePath));
       });
       reader.readAsText(response.fileBlob);
     });
@@ -47,6 +48,27 @@ export const getFileList = (path = '') => {
       });
     }).catch(error => {
       console.error('There was an error retriving files!');
+      console.error(error);
+    });
+  };
+};
+
+export const push = (filePath) => {
+  return (dispatch, getState) => {
+    const contents = exportOrg(getState().org.get('parsedFile'));
+
+    const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
+    dropbox.filesUpload({
+      path: filePath,
+      contents: contents,
+      mode: {
+        '.tag' : 'overwrite'
+      },
+      autorename: true
+    }).then(response => {
+      console.log('File pushed!');
+    }).catch(error => {
+      console.error('There was an error pushing the file!');
       console.error(error);
     });
   };

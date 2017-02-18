@@ -5,6 +5,12 @@ class TitleLine extends Component {
     super(props);
     this.handleTitleClick = this.handleTitleClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
+    this.handleEditModeClick = this.handleEditModeClick.bind(this);
+    this.handleTitleChange = this.handleTitleChange.bind(this);
+    this.handleTitleFieldClick = this.handleTitleFieldClick.bind(this);
+
+    this.state = { titleValue: props.title,
+                   editMode: false };
   }
 
   handleTitleClick() {
@@ -14,6 +20,24 @@ class TitleLine extends Component {
   handleTodoClick(event) {
     event.stopPropagation();
     this.props.todoClick();
+  }
+
+  handleEditModeClick(event) {
+    event.stopPropagation();
+    const newEditMode = !this.state.editMode;
+    this.setState({ ...this.state, editMode: newEditMode });
+
+    if (!newEditMode) {
+      this.props.titleEdit(this.state.titleValue);
+    }
+  }
+
+  handleTitleChange(event) {
+    this.setState({ ...this.state, titleValue: event.target.value });
+  }
+
+  handleTitleFieldClick(event) {
+    event.stopPropagation();
   }
 
   render() {
@@ -31,9 +55,24 @@ class TitleLine extends Component {
 
     const tail = (this.props.opened || !this.props.hasContent) ? '' : '...';
 
+    let title = this.props.title;
+    if (this.state.editMode) {
+      title = <input type="text"
+                     autoFocus
+                     value={this.state.titleValue}
+                     onChange={this.handleTitleChange}
+                     onClick={(event) => this.handleTitleFieldClick(event)} />;
+    }
+
+    const editButton = (
+      <button onClick={(event) => this.handleEditModeClick(event)}>
+        {this.state.editMode ? 'Done' : 'Edit'}
+      </button>
+    );
+
     return (
       <span onClick={() => this.handleTitleClick()}>
-        {todo} {this.props.title} {tail}
+        {todo} {title} {editButton} {tail}
       </span>
     );
   }
