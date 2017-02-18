@@ -1,6 +1,6 @@
 export const TODO_KEYWORDS = ['TODO', 'DONE'];
 
-const newHeaderWithTitle = (titleLine, parentId = []) => {
+export const newHeaderWithTitle = (titleLine, parentId = []) => {
   const todoKeyword = TODO_KEYWORDS.filter(keyword => titleLine.startsWith(keyword))[0];
   let title = titleLine;
   if (todoKeyword) {

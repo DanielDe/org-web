@@ -22,14 +22,17 @@ const augmentedIndexPathForHeaderWithId = (headerId, headers) => {
 
 export default (state = new Immutable.Map(), payload) => {
   let augmentedIndexPath;
-  if (payload.headerId) {
-    augmentedIndexPath = augmentedIndexPathForHeaderWithId(payload.headerId,
+  if (payload.headerId || payload.parentHeaderId) {
+    augmentedIndexPath = augmentedIndexPathForHeaderWithId(payload.headerId || payload.parentHeaderId,
                                                            state.get('parsedFile'));
   }
 
   switch (payload.type) {
   case 'addHeader':
-    return { ...state, headers: [...state.headers, payload.header] };
+    const newHeader = Immutable.fromJS(parseOrg.newHeaderWithTitle(payload.headerText,
+                                                                   payload.parentHeaderId));
+    return state.updateIn(['parsedFile', ...augmentedIndexPath, 'subheaders'],
+                          subheaders => subheaders.push(newHeader));
   case 'displayFile':
     state = state.set('fileContents', payload.fileContents);
     state = state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));

@@ -2,67 +2,34 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as orgActions from '../actions/org';
+import HeaderList from './header_list';
 
 class OrgFile extends Component {
   constructor(props) {
     super(props);
     this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
+    this.handleAddHeader = this.handleAddHeader.bind(this);
   }
 
   handleTitleLineClick(headerId) {
     this.props.actions.toggleHeaderOpened(headerId);
   }
 
-  handleTodoClick(headerId, event) {
+  handleTodoClick(headerId) {
     this.props.actions.advanceTodoState(headerId);
-    event.stopPropagation();
   }
 
-  renderHeaderList(headers) {
-    if (headers.length === 0) {
-      return '';
-    }
-
-    const headerListElements = headers.map((header, index) => {
-      const title = header.getIn(['titleLine', 'title']);
-
-      let todoKeyword = header.getIn(['titleLine', 'todoKeyword']);
-      let todoClasses = ['todo-keyword'];
-      if (!todoKeyword) {
-        todoKeyword = 'NONE';
-      }
-      todoClasses.push(`todo-keyword--${todoKeyword.toLowerCase()}`);
-      const todo = <span onClick={(event) => this.handleTodoClick(header.get('id'), event)} className={todoClasses.join(' ')}>{todoKeyword}</span>;
-
-      const opened = header.get('opened');
-
-      let content = '';
-      if (opened) {
-        const description = header.get('description');
-        const subheaders = this.renderHeaderList(header.get('subheaders'));
-
-        content = <div>{description} {subheaders}</div>;
-      }
-
-      const hasContent = !!header.get('description') || !!header.get('subheaders').size;
-
-      return (
-        <li key={index}>
-          <span onClick={() => this.handleTitleLineClick(header.get('id'))}>
-            {todo} {title} {(opened || !hasContent) ? '' : '...'}
-          </span>
-          {content}
-        </li>
-      );
-    });
-
-    return <ul>{headerListElements}</ul>;
+  handleAddHeader(parentHeaderId, headerText) {
+    this.props.actions.addHeader(parentHeaderId, headerText);
   }
 
   render() {
     return (
-      <div>{this.renderHeaderList(this.props.parsedFile)}</div>
+      <HeaderList headers={this.props.parsedFile}
+                  titleClick={(headerId) => this.handleTitleLineClick(headerId)}
+                  todoClick={(headerId) => this.handleTodoClick(headerId)}
+                  addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)} />
     );
   }
 }

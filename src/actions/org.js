@@ -1,8 +1,9 @@
-export const addHeader = (header) => {
-    return {
-        type: 'addHeader',
-        header
-    };
+export const addHeader = (parentHeaderId, headerText) => {
+  return {
+    type: 'addHeader',
+    headerText,
+    parentHeaderId
+  };
 };
 
 export const displayFile = (fileContents) => {

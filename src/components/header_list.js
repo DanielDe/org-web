@@ -1,45 +1,59 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-import * as orgActions from '../actions/org';
+import TitleLine from './title_line';
+import HeaderContent from './header_content';
 
 class HeaderList extends Component {
-    constructor(props) {
-        super(props);
-        this.onAddHeader = this.onAddHeader.bind(this);
-        this.state = {};
+  constructor(props) {
+    super(props);
+    this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
+    this.handleTodoClick = this.handleTodoClick.bind(this);
+    this.handleAddHeader = this.handleAddHeader.bind(this);
+  }
+
+  handleTitleLineClick(headerId) {
+    this.props.titleClick(headerId);
+  }
+
+  handleTodoClick(headerId) {
+    this.props.todoClick(headerId);
+  }
+
+  handleAddHeader(parentHeaderId, headerText) {
+    this.props.addHeader(parentHeaderId, headerText);
+  }
+
+  render() {
+    if (this.props.headers.length === 0) {
+      return <div></div>;
     }
 
-    onAddHeader(header) {
-        this.props.actions.addHeader(header);
-    }
+    const headerListElements = this.props.headers.map((header, index) => {
+      const title = header.getIn(['titleLine', 'title']);
+      let todoKeyword = header.getIn(['titleLine', 'todoKeyword']);
+      const opened = header.get('opened');
+      const hasContent = !!header.get('description') || !!header.get('subheaders').size;
 
-    render() {
-        const headerList = this.props.headers.map((header, idx) => {
-            return <li key={idx}>{header}</li>;
-        });
+      return (
+        <li key={index}>
+          <TitleLine title={title}
+                     todoKeyword={todoKeyword}
+                     opened={opened}
+                     hasContent={hasContent}
+                     titleClick={() => this.handleTitleLineClick(header.get('id'))}
+                     todoClick={() => this.handleTodoClick(header.get('id'))} />
+          <HeaderContent description={header.get('description')}
+                         subheaders={header.get('subheaders')}
+                         opened={opened}
+                         headerId={header.get('id')}
+                         titleClick={(headerId) => this.handleTitleLineClick(headerId)}
+                         todoClick={(headerId) => this.handleTodoClick(headerId)}
+                         addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)} />
+        </li>
+      );
+    });
 
-        return (
-            <div className="Header">
-              <ol>
-                {headerList}
-              </ol>
-              <button onClick={() => this.onAddHeader('Test header')}>Add header</button>
-            </div>
-        );
-    }
+    return <ul>{headerListElements}</ul>;
+  }
 }
 
-function mapStateToProps(state, props) {
-    return {
-        headers: state.org.headers
-    };
-}
-
-function mapDispatchToProps(dispatch) {
-    return {
-        actions: bindActionCreators(orgActions, dispatch)
-    };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(HeaderList);
+export default HeaderList;
