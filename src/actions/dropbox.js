@@ -2,15 +2,6 @@
 import { displayFile } from './org';
 import exportOrg from '../export_org';
 
-export const addFile = (filename, fileId, path) => {
-  return {
-    type: 'addFile',
-    filename,
-    fileId,
-    path
-  };
-};
-
 export const downloadFile = (filePath) => {
   return (dispatch, getState) => {
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
@@ -33,19 +24,29 @@ export const authenticate = (accessToken) => {
   };
 };
 
+export const setDirectoryListing = (directoryPath, directoryListing) => {
+  return {
+    type: 'setDirectoryListing',
+    directoryPath,
+    directoryListing
+  };
+};
+
 export const getFileList = (path = '') => {
   return (dispatch, getState) => {
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
 
     dropbox.filesListFolder({ path }).then(response => {
-      response.entries.forEach(entry => {
-        let name = entry.name;
-        if (entry['.tag'] === 'folder') {
-          name += '/';
-        }
-
-        dispatch(addFile(name, entry.id, entry.path_display));
+      const directoryListing = response.entries.map(entry => {
+        return {
+          id: entry.id,
+          name: entry.name,
+          directory: entry['.tag'] === 'folder',
+          path: entry.path_display
+        };
       });
+
+      dispatch(setDirectoryListing(path, directoryListing));
     }).catch(error => {
       console.error('There was an error retriving files!');
       console.error(error);
