@@ -13,3 +13,26 @@
 .todo-keyword--none {
     color: lightgray;
 }
+
+.org-header-list {
+    font-family: Courier;
+    padding-left: 20px;
+}
+
+.org-header {
+    border-top: 1px solid #D8D8D8;
+}
+
+.title-line {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -18px;
+}
+
+.header-text {
+    width: 90%;
+}
+
+.edit-icon {
+    flex: 0 0 15px;
+}

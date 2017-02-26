@@ -44,7 +44,7 @@ class Reactorg extends Component {
           <div className="dropbox-authenticate">
             <h3 className="dropbox-authenticate__header">Authenticate with Dropbox</h3>
             <br />
-            <button onClick={() => this.authenticateWithDropbox()}>Authenticate</button>
+            <button className="btn" onClick={() => this.authenticateWithDropbox()}>Authenticate</button>
           </div>
         );
       }

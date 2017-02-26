@@ -64,16 +64,18 @@ class TitleLine extends Component {
                      onClick={(event) => this.handleTitleFieldClick(event)} />;
     }
 
+    const editIcon = this.state.editMode ? 'check' : 'pencil';
     const editButton = (
-      <button onClick={(event) => this.handleEditModeClick(event)}>
-        {this.state.editMode ? 'Done' : 'Edit'}
-      </button>
+      <i className={`fa fa-${editIcon} edit-icon`} onClick={(event) => this.handleEditModeClick(event)}></i>
     );
 
     return (
-      <span onClick={() => this.handleTitleClick()}>
-        {todo} {title} {editButton} {tail}
-      </span>
+      <div className="title-line" onClick={() => this.handleTitleClick()}>
+        <div className="header-text">
+          {todo} {title} {tail}
+        </div>
+        {editButton}
+      </div>
     );
   }
 }

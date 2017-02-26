@@ -44,7 +44,7 @@ class HeaderList extends Component {
       const hasContent = !!header.get('description') || !!header.get('subheaders').size;
 
       return (
-        <li key={index}>
+        <li className="org-header" key={index}>
           <TitleLine title={title}
                      todoKeyword={todoKeyword}
                      opened={opened}
@@ -64,7 +64,7 @@ class HeaderList extends Component {
       );
     });
 
-    return <ul>{headerListElements}</ul>;
+    return <ul className="org-header-list">{headerListElements}</ul>;
   }
 }
 

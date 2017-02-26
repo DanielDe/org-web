@@ -12,7 +12,10 @@ class FileChooser extends Component {
   }
 
   componentDidMount() {
-    this.props.actions.getFileList();
+    // this.props.actions.getFileList();
+
+    // TODO: undo this.
+    this.props.actions.downloadFile('/test.org');
   }
 
   handleFileClick(fileId) {
@@ -35,7 +38,7 @@ class FileChooser extends Component {
     let fileList = this.props.currentDirectoryListing.map((file, index) => {
       const isDirectory = file.get('directory');
       return (
-        <li key={index} onClick={() => this.handleFileClick(file.get('id'))}>
+        <li className="file-list-element" key={index} onClick={() => this.handleFileClick(file.get('id'))}>
           {file.get('name')}{isDirectory ? '/' : ''}
         </li>
       );
@@ -46,7 +49,7 @@ class FileChooser extends Component {
       directoryPath = '/';
     } else {
       const parentDirectoryListing = (
-        <li key={-1} onClick={() => this.handleParentDirectoryClick()}>
+        <li className="file-list-element" key={-1} onClick={() => this.handleParentDirectoryClick()}>
           ..
         </li>
       );
@@ -54,9 +57,9 @@ class FileChooser extends Component {
     }
 
     return (
-      <div className="file-list">
-        <h3>Directory: {directoryPath}</h3>
-        <ul>
+      <div>
+        <h3 className="file-list-header">Directory: {directoryPath}</h3>
+        <ul className="file-list">
           {fileList}
         </ul>
       </div>

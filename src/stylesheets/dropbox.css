@@ -7,6 +7,21 @@
     font-weight: normal;
 }
 
-.file-list {
+.file-list-header {
     margin: 5px;
+}
+
+.file-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.file-list-element {
+    border-top: 1px solid #D8D8D8;
+    padding: 10px;
+    font-family: Courier;
+}
+
+.file-list-element:last-of-type {
+    border-bottom: 1px solid #D8D8D8;
 }
