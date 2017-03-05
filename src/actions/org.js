@@ -6,6 +6,13 @@ export const addHeader = (parentHeaderId, headerText) => {
   };
 };
 
+export const removeHeader = (headerId) => {
+  return {
+    type: 'removeHeader',
+    headerId
+  };
+};
+
 export const displayFile = (fileContents, filePath) => {
   return {
     type: 'displayFile',

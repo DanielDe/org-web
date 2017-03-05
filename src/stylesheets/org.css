@@ -1,5 +1,6 @@
 .todo-keyword {
     font-weight: bold;
+    margin-right: 5px;
 }
 
 .todo-keyword--todo {
@@ -17,10 +18,7 @@
 .org-header-list {
     font-family: Courier;
     padding-left: 20px;
-}
-
-.org-header {
-    border-top: 1px solid #D8D8D8;
+    margin-top: 30px;
 }
 
 .title-line {
@@ -30,9 +28,10 @@
 }
 
 .header-text {
+    display: flex;
     width: 90%;
 }
 
 .edit-icon {
-    flex: 0 0 15px;
+    flex: 0 0 40px;
 }

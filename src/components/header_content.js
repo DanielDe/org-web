@@ -5,25 +5,19 @@ class HeaderContent extends Component {
   constructor(props) {
     super(props);
     this.handleAddHeaderClick = this.handleAddHeaderClick.bind(this);
-    this.handleEditModeClick = this.handleEditModeClick.bind(this);
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
 
-    this.state = { descriptionValue: props.description,
-                   editMode: false };
+    this.state = { descriptionValue: props.description };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.editMode) {
+      this.props.descriptionEdit(null, this.state.descriptionValue);
+    }
   }
 
   handleAddHeaderClick(parentHeaderId) {
     this.props.addHeader(parentHeaderId, 'New header!');
-  }
-
-  handleEditModeClick(event) {
-    event.stopPropagation();
-    const newEditMode = !this.state.editMode;
-    this.setState({ ...this.state, editMode: newEditMode });
-
-    if (!newEditMode) {
-      this.props.descriptionEdit(this.state.descriptionValue);
-    }
   }
 
   handleDescriptionChange(event) {
@@ -31,14 +25,8 @@ class HeaderContent extends Component {
   }
 
   render() {
-    const editButton = (
-      <button onClick={(event) => this.handleEditModeClick(event)}>
-        {this.state.editMode ? 'Done' : 'Edit description'}
-      </button>
-    );
-
     let description = <div>{this.props.description}</div>;
-    if (this.state.editMode) {
+    if (this.props.editMode) {
       description = <textarea autoFocus
                               value={this.state.descriptionValue}
                               onChange={this.handleDescriptionChange} />;
@@ -49,12 +37,15 @@ class HeaderContent extends Component {
       content = (
         <div>
           {description}
-          {editButton}
 
           <HeaderList headers={this.props.subheaders}
                       titleClick={this.props.titleClick}
                       todoClick={this.props.todoClick}
-                      addHeader={this.props.addHeader} />
+                      addHeader={this.props.addHeader}
+                      openHeader={this.props.openHeader}
+                      removeHeader={this.props.removeHeader}
+                      titleEdit={(headerId, newTitle) => this.props.titleEdit(headerId, newTitle)}
+                      descriptionEdit={(headerId, newDescription) => this.props.descriptionEdit(headerId, newDescription)} />
         </div>
       );
     }
@@ -62,8 +53,6 @@ class HeaderContent extends Component {
     return (
       <div>
         {content}
-
-        <button onClick={() => this.handleAddHeaderClick(this.props.headerId)}>Add header</button>
       </div>
     );
   }

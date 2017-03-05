@@ -5,12 +5,19 @@ class TitleLine extends Component {
     super(props);
     this.handleTitleClick = this.handleTitleClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
-    this.handleEditModeClick = this.handleEditModeClick.bind(this);
+    this.handleDrawerButtonClick = this.handleDrawerButtonClick.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleTitleFieldClick = this.handleTitleFieldClick.bind(this);
 
-    this.state = { titleValue: props.title,
-                   editMode: false };
+    this.state = {
+      titleValue: props.title
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.editMode) {
+      this.props.titleEdit(this.state.titleValue);
+    }
   }
 
   handleTitleClick() {
@@ -22,14 +29,9 @@ class TitleLine extends Component {
     this.props.todoClick();
   }
 
-  handleEditModeClick(event) {
+  handleDrawerButtonClick(event) {
     event.stopPropagation();
-    const newEditMode = !this.state.editMode;
-    this.setState({ ...this.state, editMode: newEditMode });
-
-    if (!newEditMode) {
-      this.props.titleEdit(this.state.titleValue);
-    }
+    this.props.actionDrawerToggle();
   }
 
   handleTitleChange(event) {
@@ -55,8 +57,8 @@ class TitleLine extends Component {
 
     const tail = (this.props.opened || !this.props.hasContent) ? '' : '...';
 
-    let title = this.props.title;
-    if (this.state.editMode) {
+    let title = <span style={{fontWeight: 'bold'}}>{this.props.title} {tail}</span>;
+    if (this.props.editMode) {
       title = <input type="text"
                      autoFocus
                      value={this.state.titleValue}
@@ -64,17 +66,17 @@ class TitleLine extends Component {
                      onClick={(event) => this.handleTitleFieldClick(event)} />;
     }
 
-    const editIcon = this.state.editMode ? 'check' : 'pencil';
-    const editButton = (
-      <i className={`fa fa-${editIcon} edit-icon`} onClick={(event) => this.handleEditModeClick(event)}></i>
+    const drawerButton = (
+      <i className={`fa fa-bars`}
+         onClick={(event) => this.handleDrawerButtonClick(event)}></i>
     );
 
     return (
       <div className="title-line" onClick={() => this.handleTitleClick()}>
         <div className="header-text">
-          {todo} {title} {tail}
+          {todo} {title}
         </div>
-        {editButton}
+        {drawerButton}
       </div>
     );
   }

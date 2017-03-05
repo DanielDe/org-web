@@ -33,6 +33,12 @@ export default (state = new Immutable.Map(), payload) => {
                                                                    payload.parentHeaderId));
     return state.updateIn(['parsedFile', ...augmentedIndexPath, 'subheaders'],
                           subheaders => subheaders.push(newHeader));
+  case 'removeHeader':
+    let [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
+    parentAugmentedIndexPath.reverse();
+
+    return state.updateIn(['parsedFile', ...parentAugmentedIndexPath],
+                          subheaders => subheaders.delete(headerIndex));
   case 'displayFile':
     state = state.set('filePath', payload.filePath);
     state = state.set('fileContents', payload.fileContents);
