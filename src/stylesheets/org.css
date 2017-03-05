@@ -32,6 +32,11 @@
     width: 90%;
 }
 
+.drawer-container {
+    width: 9%;
+    text-align: center;
+}
+
 .edit-icon {
     flex: 0 0 40px;
 }

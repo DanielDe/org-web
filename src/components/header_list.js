@@ -131,6 +131,7 @@ class HeaderList extends Component {
           borderBottom: '1px solid lightgray',
           padding: '5px 0',
           marginTop: 5,
+          marginBottom: 5,
           display: 'flex',
           justifyContent: 'space-around'
         };
@@ -142,7 +143,7 @@ class HeaderList extends Component {
       }
 
       return (
-        <li className="org-header" key={index}>
+        <li className="org-header" key={index} style={{marginBottom: 2}}>
           <TitleLine title={title}
                      todoKeyword={todoKeyword}
                      opened={opened}

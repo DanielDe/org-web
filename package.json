@@ -2,6 +2,7 @@
   "name": "reactorg",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://danieldehaas.com/reactorg",
   "devDependencies": {
     "react-scripts": "0.8.5"
   },

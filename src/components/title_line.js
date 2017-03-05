@@ -67,8 +67,11 @@ class TitleLine extends Component {
     }
 
     const drawerButton = (
-      <i className={`fa fa-bars`}
-         onClick={(event) => this.handleDrawerButtonClick(event)}></i>
+      <div className="drawer-container"
+           style={{borderLeft: '1px solid lightgray'}}
+           onClick={(event) => this.handleDrawerButtonClick(event)}>
+        <i className={`fa fa-bars`}></i>
+      </div>
     );
 
     return (
