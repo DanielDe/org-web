@@ -10,8 +10,10 @@ import parseQueryString from '../parse_query_string';
 class Reactorg extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
     this.authenticateWithDropbox = this.authenticateWithDropbox.bind(this);
+    this.handlePushToDropbox = this.handlePushToDropbox.bind(this);
+
+    this.state = {};
   }
 
   componentDidMount() {
@@ -27,11 +29,18 @@ class Reactorg extends Component {
     window.location = authUrl;
   }
 
+  handlePushToDropbox() {
+    this.props.actions.push(this.props.filePath);
+  }
+
   render() {
     if (this.props.fileContents) {
       return (
         <div style={{ margin: 5 }}>
           <OrgFile />
+          <button onClick={() => this.handlePushToDropbox()}
+                  style={{marginTop: 20}}
+                  className="btn">Push to Dropbox</button>
         </div>
       );
     } else {
@@ -55,7 +64,8 @@ class Reactorg extends Component {
 function mapStateToProps(state, props) {
   return {
     dropboxAccessToken: state.dropbox.get('dropboxAccessToken'),
-    fileContents: state.org.get('fileContents')
+    fileContents: state.org.get('fileContents'),
+    filePath: state.org.get('filePath')
   };
 }
 

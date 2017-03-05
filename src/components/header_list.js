@@ -142,8 +142,14 @@ class HeaderList extends Component {
         );
       }
 
+      const style = {
+        marginBottom: 2,
+        marginTop: 25,
+        paddingLeft: 20
+      };
       return (
-        <li className="org-header" key={index} style={{marginBottom: 2, marginTop: 20}}>
+        <div className="org-header" key={index} style={style}>
+          <div style={{marginLeft: -20}}>*</div>
           <TitleLine title={title}
                      todoKeyword={todoKeyword}
                      opened={opened}
@@ -166,11 +172,11 @@ class HeaderList extends Component {
                          titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}
                          editMode={inDescriptionEditMode}
                          descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId || header.get('id'), newDescription)} />
-        </li>
+        </div>
       );
     });
 
-    return <ul className="org-header-list">{headerListElements}</ul>;
+    return <div className="org-header-list">{headerListElements}</div>;
   }
 }
 
