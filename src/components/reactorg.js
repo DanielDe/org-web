@@ -23,7 +23,7 @@ class Reactorg extends Component {
 
   authenticateWithDropbox() {
     const dropbox = new Dropbox({ clientId: 'hw7j3cwzcg3r5mn' });
-    const authUrl = dropbox.getAuthenticationUrl('http://localhost:3000');
+    const authUrl = dropbox.getAuthenticationUrl(window.location.href);
     window.location = authUrl;
   }
 

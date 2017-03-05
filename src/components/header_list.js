@@ -143,7 +143,7 @@ class HeaderList extends Component {
       }
 
       return (
-        <li className="org-header" key={index} style={{marginBottom: 2}}>
+        <li className="org-header" key={index} style={{marginBottom: 2, marginTop: 20}}>
           <TitleLine title={title}
                      todoKeyword={todoKeyword}
                      opened={opened}
