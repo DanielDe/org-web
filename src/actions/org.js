@@ -21,6 +21,13 @@ export const displayFile = (fileContents, filePath) => {
   };
 };
 
+export const setFileContents = (fileContents) => {
+  return {
+    type: 'setFileContents',
+    fileContents
+  };
+};
+
 export const stopDisplayingFile = () => {
   return {
     type: 'stopDisplayingFile'

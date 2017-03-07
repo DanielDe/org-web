@@ -1,5 +1,5 @@
 /* globals Dropbox, FileReader */
-import { displayFile, stopDisplayingFile } from './org';
+import { displayFile, stopDisplayingFile, setFileContents } from './org';
 import exportOrg from '../export_org';
 
 export const downloadFile = (filePath) => {
@@ -73,17 +73,27 @@ export const push = (filePath) => {
 
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
     dropbox.filesUpload({
-      path: filePath,
-      contents: contents,
+      path: filePath + '.reactorg-bak',
+      contents: getState().org.get('fileContents'),
       mode: {
-        '.tag' : 'overwrite'
+        '.tag': 'overwrite'
       },
       autorename: true
-    }).then(response => {
-      console.log('File pushed!');
-    }).catch(error => {
-      console.error('There was an error pushing the file!');
-      console.error(error);
+    }).then(() => {
+      dropbox.filesUpload({
+        path: filePath,
+        contents: contents,
+        mode: {
+          '.tag' : 'overwrite'
+        },
+        autorename: true
+      }).then(response => {
+        dispatch(setFileContents(contents));
+        console.log('File pushed!');
+      }).catch(error => {
+        console.error('There was an error pushing the file!');
+        console.error(error);
+      });
     });
   };
 };
