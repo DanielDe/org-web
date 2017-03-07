@@ -12,10 +12,7 @@ class FileChooser extends Component {
   }
 
   componentDidMount() {
-    // this.props.actions.getFileList();
-
-    // TODO: undo this.
-    this.props.actions.downloadFile('/test.org');
+    this.props.actions.getFileList(this.props.currentDirectoryPath);
   }
 
   handleFileClick(fileId) {

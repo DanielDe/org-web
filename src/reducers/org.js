@@ -1,3 +1,4 @@
+/* globals localStorage */
 import Immutable from 'immutable';
 import * as parseOrg from '../parse_org';
 
@@ -40,10 +41,14 @@ export default (state = new Immutable.Map(), payload) => {
     return state.updateIn(['parsedFile', ...parentAugmentedIndexPath],
                           subheaders => subheaders.delete(headerIndex));
   case 'displayFile':
+    localStorage.setItem('filePath', payload.filePath);
     state = state.set('filePath', payload.filePath);
     state = state.set('fileContents', payload.fileContents);
     state = state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));
     return state;
+  case 'stopDisplayingFile':
+    localStorage.setItem('filePath', '');
+    return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
   case 'toggleHeaderOpened':
     return state.updateIn(['parsedFile', ...augmentedIndexPath],
                           header => header.set('opened', !header.get('opened')));

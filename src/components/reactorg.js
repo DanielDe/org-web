@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as dropboxActions from '../actions/dropbox';
+import * as orgActions from '../actions/org';
 import FileChooser from './file_chooser';
 import OrgFile from './org_file';
 import parseQueryString from '../parse_query_string';
@@ -12,6 +13,8 @@ class Reactorg extends Component {
     super(props);
     this.authenticateWithDropbox = this.authenticateWithDropbox.bind(this);
     this.handlePushToDropbox = this.handlePushToDropbox.bind(this);
+    this.handleBackToFileChooser = this.handleBackToFileChooser.bind(this);
+    this.handleSignOut = this.handleSignOut.bind(this);
 
     this.state = {};
   }
@@ -20,6 +23,17 @@ class Reactorg extends Component {
     const accessToken = parseQueryString(window.location.hash).access_token;
     if (accessToken) {
       this.props.actions.authenticate(accessToken);
+      window.location.hash = '';
+    } else {
+      const accessToken = localStorage.getItem('dropboxAccessToken');
+      if (accessToken) {
+        this.props.actions.authenticate(accessToken);
+      }
+    }
+
+    const filePath = localStorage.getItem('filePath');
+    if (filePath) {
+      this.props.actions.downloadFile(filePath);
     }
   }
 
@@ -33,7 +47,19 @@ class Reactorg extends Component {
     this.props.actions.push(this.props.filePath);
   }
 
+  handleBackToFileChooser() {
+    this.props.orgActions.stopDisplayingFile();
+  }
+
+  handleSignOut() {
+    this.props.actions.signOut();
+  }
+
   render() {
+    const signOutButton = (
+      <button onClick={() => this.handleSignOut()} className="btn">Sign out</button>
+    );
+
     if (this.props.fileContents) {
       return (
         <div style={{ margin: 5 }}>
@@ -41,12 +67,22 @@ class Reactorg extends Component {
           <button onClick={() => this.handlePushToDropbox()}
                   style={{marginTop: 20}}
                   className="btn">Push to Dropbox</button>
+          <br />
+          <br />
+          <button onClick={() => this.handleBackToFileChooser()}
+                  className="btn">Back to file chooser</button>
+          <br />
+          <br />
+          {signOutButton}
         </div>
       );
     } else {
       if (this.props.dropboxAccessToken) {
         return (
-          <FileChooser />
+          <div>
+            <FileChooser />
+            {signOutButton}
+          </div>
         );
       } else {
         return (
@@ -71,7 +107,8 @@ function mapStateToProps(state, props) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(dropboxActions, dispatch)
+    actions: bindActionCreators(dropboxActions, dispatch),
+    orgActions: bindActionCreators(orgActions, dispatch)
   };
 }
 

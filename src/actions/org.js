@@ -21,6 +21,12 @@ export const displayFile = (fileContents, filePath) => {
   };
 };
 
+export const stopDisplayingFile = () => {
+  return {
+    type: 'stopDisplayingFile'
+  };
+};
+
 export const toggleHeaderOpened = (headerId) => {
   return {
     type: 'toggleHeaderOpened',

@@ -1,5 +1,5 @@
 /* globals Dropbox, FileReader */
-import { displayFile } from './org';
+import { displayFile, stopDisplayingFile } from './org';
 import exportOrg from '../export_org';
 
 export const downloadFile = (filePath) => {
@@ -21,6 +21,19 @@ export const authenticate = (accessToken) => {
   return {
     type: 'authenticate',
     accessToken
+  };
+};
+
+export const unauthenticate = () => {
+  return {
+    type: 'unauthenticate'
+  };
+};
+
+export const signOut = () => {
+  return (dispatch, getState) => {
+    dispatch(stopDisplayingFile());
+    dispatch(unauthenticate());
   };
 };
 
