@@ -46,8 +46,15 @@ export default (state = new Immutable.Map(), payload) => {
     state = state.set('fileContents', payload.fileContents);
     state = state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));
     return state;
+  case 'displaySampleFile':
+    state = state.set('fileContents', payload.sampleFileContents);
+    return state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.sampleFileContents)));
   case 'setFileContents':
     return state.set('fileContents', payload.fileContents);
+  case 'enterSampleMode':
+    return state.set('sampleMode', true);
+  case 'exitSampleMode':
+    return state.set('sampleMode', false).set('fileContents', null);
   case 'stopDisplayingFile':
     localStorage.setItem('filePath', '');
     return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);

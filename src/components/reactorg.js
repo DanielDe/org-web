@@ -15,6 +15,8 @@ class Reactorg extends Component {
     this.handlePushToDropbox = this.handlePushToDropbox.bind(this);
     this.handleBackToFileChooser = this.handleBackToFileChooser.bind(this);
     this.handleSignOut = this.handleSignOut.bind(this);
+    this.viewSampleFile = this.viewSampleFile.bind(this);
+    this.exitSampleMode = this.exitSampleMode.bind(this);
 
     this.state = {};
   }
@@ -55,25 +57,50 @@ class Reactorg extends Component {
     this.props.actions.signOut();
   }
 
+  viewSampleFile() {
+    const sampleFileContents = "\n* This is a top level header\nHere is the contents of the top level header.\n** This is a subheader\n** Todos\n*** TODO Todo item 1\n*** DONE Todo item 2\nCLOSED: [2017-03-06 Mon 21:30]\n*** TODO Todo item 3\n* This is another top level header\n** Tags                                                          :tag1:tag2:\nTags aren't natively supported, but Org mode is text based, so you can still edit tags yourself!\n";
+    this.props.orgActions.displaySample(sampleFileContents);
+  }
+
+  exitSampleMode() {
+    this.props.orgActions.exitSampleMode();
+  }
+
   render() {
     const signOutButton = (
       <button onClick={() => this.handleSignOut()} className="btn">Sign out</button>
     );
 
+    const nonSampleModeButtons = (
+      <div>
+        <button onClick={() => this.handlePushToDropbox()}
+                style={{marginTop: 20}}
+                className="btn">Push to Dropbox</button>
+        <br />
+        <br />
+        <button onClick={() => this.handleBackToFileChooser()}
+                  className="btn">Back to file chooser</button>
+        <br />
+        <br />
+        {signOutButton}
+      </div>
+    );
+
+    const exitSampleButton = (
+      <div>
+        <br />
+        <br />
+        <button onClick={() => this.exitSampleMode()} className="btn">Exit sample</button>
+      </div>
+    );
+
+    const trailingContents = this.props.sampleMode ? exitSampleButton : nonSampleModeButtons;
+
     if (this.props.fileContents) {
       return (
         <div style={{ margin: 5 }}>
           <OrgFile />
-          <button onClick={() => this.handlePushToDropbox()}
-                  style={{marginTop: 20}}
-                  className="btn">Push to Dropbox</button>
-          <br />
-          <br />
-          <button onClick={() => this.handleBackToFileChooser()}
-                  className="btn">Back to file chooser</button>
-          <br />
-          <br />
-          {signOutButton}
+          {trailingContents}
         </div>
       );
     } else {
@@ -90,6 +117,9 @@ class Reactorg extends Component {
             <h3 className="dropbox-authenticate__header">Authenticate with Dropbox</h3>
             <br />
             <button className="btn" onClick={() => this.authenticateWithDropbox()}>Authenticate</button>
+            <br />
+            <br />
+            <button className="btn" onClick={() => this.viewSampleFile()}>View sample file</button>
           </div>
         );
       }
@@ -101,7 +131,8 @@ function mapStateToProps(state, props) {
   return {
     dropboxAccessToken: state.dropbox.get('dropboxAccessToken'),
     fileContents: state.org.get('fileContents'),
-    filePath: state.org.get('filePath')
+    filePath: state.org.get('filePath'),
+    sampleMode: state.org.get('sampleMode')
   };
 }
 

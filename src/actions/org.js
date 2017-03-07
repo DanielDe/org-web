@@ -28,6 +28,32 @@ export const setFileContents = (fileContents) => {
   };
 };
 
+export const enterSampleMode = () => {
+  return {
+    type: 'enterSampleMode'
+  };
+};
+
+export const exitSampleMode = () => {
+  return {
+    type: 'exitSampleMode'
+  };
+};
+
+export const displaySampleFile = (sampleFileContents) => {
+  return {
+    type: 'displaySampleFile',
+    sampleFileContents
+  };
+};
+
+export const displaySample = (sampleFileContents) => {
+  return (dispatch, getState) => {
+    dispatch(displaySampleFile(sampleFileContents));
+    dispatch(enterSampleMode());
+  };
+};
+
 export const stopDisplayingFile = () => {
   return {
     type: 'stopDisplayingFile'
