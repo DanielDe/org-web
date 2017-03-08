@@ -16,6 +16,13 @@ const indexPathForHeaderWithId = (headerId, headers, nestingLevel = 0) => {
                                              nestingLevel + 1)];
 };
 
+// Given a header, closes all subheaders, and returns the new state.
+const closeAllSubheaders = (header) => {
+  header = header.set('opened', false);
+  return header.set('subheaders',
+                    header.get('subheaders').map(subheader => closeAllSubheaders(subheader)));
+};
+
 const augmentedIndexPathForHeaderWithId = (headerId, headers) => {
   const indexPath = indexPathForHeaderWithId(headerId, headers);
   return indexPath.join('.subheaders.').split('.');
@@ -58,8 +65,13 @@ export default (state = new Immutable.Map(), payload) => {
     localStorage.setItem('filePath', '');
     return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
   case 'toggleHeaderOpened':
-    return state.updateIn(['parsedFile', ...augmentedIndexPath],
-                          header => header.set('opened', !header.get('opened')));
+    const opened = state.getIn(['parsedFile', ...augmentedIndexPath].concat(['opened']));
+    if (opened) {
+      return state.updateIn(['parsedFile', ...augmentedIndexPath],
+                            header => closeAllSubheaders(header));
+    } else {
+      return state.setIn(['parsedFile', ...augmentedIndexPath].concat(['opened']), true);
+    }
   case 'openHeader':
     return state.updateIn(['parsedFile', ...augmentedIndexPath],
                           header => header.set('opened', true));
