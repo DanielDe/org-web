@@ -17,7 +17,7 @@ class HeaderContent extends Component {
   }
 
   handleAddHeaderClick(parentHeaderId) {
-    this.props.addHeader(parentHeaderId, 'New header!');
+    this.props.addHeader(parentHeaderId);
   }
 
   handleDescriptionChange(event) {

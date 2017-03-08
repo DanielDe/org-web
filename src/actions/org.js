@@ -1,7 +1,6 @@
-export const addHeader = (parentHeaderId, headerText) => {
+export const addHeader = (parentHeaderId) => {
   return {
     type: 'addHeader',
-    headerText,
     parentHeaderId
   };
 };

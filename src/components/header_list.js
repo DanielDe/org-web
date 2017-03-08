@@ -45,8 +45,8 @@ class HeaderList extends Component {
     this.props.todoClick(headerId);
   }
 
-  handleAddHeader(parentHeaderId, headerText) {
-    this.props.addHeader(parentHeaderId, headerText);
+  handleAddHeader(parentHeaderId) {
+    this.props.addHeader(parentHeaderId);
   }
 
   handleRemoveHeader(headerId) {
@@ -125,7 +125,7 @@ class HeaderList extends Component {
 
         const addHeaderButton = (
           <button className="btn btn--circle"
-                  onClick={() => this.handleAddHeader(headerId, 'New header!!')}>+</button>
+                  onClick={() => this.handleAddHeader(headerId)}>+</button>
         );
 
         const editDescriptionButtonIcon = inDescriptionEditMode ? 'check' : 'pencil-square-o';
@@ -183,7 +183,7 @@ class HeaderList extends Component {
                          headerId={headerId}
                          titleClick={(headerId) => this.handleTitleLineClick(headerId)}
                          todoClick={(headerId) => this.handleTodoClick(headerId)}
-                         addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)}
+                         addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
                          openHeader={this.props.openHeader}
                          removeHeader={this.props.removeHeader}
                          titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}

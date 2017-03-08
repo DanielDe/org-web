@@ -25,8 +25,8 @@ class OrgFile extends Component {
     this.props.actions.advanceTodoState(headerId);
   }
 
-  handleAddHeader(parentHeaderId, headerText) {
-    this.props.actions.addHeader(parentHeaderId, headerText);
+  handleAddHeader(parentHeaderId) {
+    this.props.actions.addHeader(parentHeaderId);
     this.props.actions.openHeader(parentHeaderId);
   }
 
@@ -52,7 +52,7 @@ class OrgFile extends Component {
         <HeaderList headers={this.props.parsedFile}
                     titleClick={(headerId) => this.handleTitleLineClick(headerId)}
                     todoClick={(headerId) => this.handleTodoClick(headerId)}
-                    addHeader={(parentHeaderId, headerText) => this.handleAddHeader(parentHeaderId, headerText)}
+                    addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
                     titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}
                     descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId, newDescription)}
                     openHeader={(headerId) => this.handleOpenHeader(headerId)}

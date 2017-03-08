@@ -30,8 +30,7 @@ export default (state = new Immutable.Map(), payload) => {
 
   switch (payload.type) {
   case 'addHeader':
-    const newHeader = Immutable.fromJS(parseOrg.newHeaderWithTitle(payload.headerText,
-                                                                   payload.parentHeaderId));
+    const newHeader = Immutable.fromJS(parseOrg.newHeaderWithTitle('', payload.parentHeaderId));
     return state.updateIn(['parsedFile', ...augmentedIndexPath, 'subheaders'],
                           subheaders => subheaders.push(newHeader));
   case 'removeHeader':
