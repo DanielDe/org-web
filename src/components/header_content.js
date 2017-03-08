@@ -11,7 +11,7 @@ class HeaderContent extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!nextProps.editMode) {
+    if (this.props.editMode && !nextProps.editMode) {
       this.props.descriptionEdit(null, this.state.descriptionValue);
     }
   }

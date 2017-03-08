@@ -83,6 +83,8 @@ export default (state = new Immutable.Map(), payload) => {
 
     return state.setIn(['parsedFile', ...augmentedIndexPath, 'titleLine', 'todoKeyword'],
                        newTodoState);
+  case 'setDirty':
+    return state.set('dirty', payload.dirty);
   default:
     return state;
   }

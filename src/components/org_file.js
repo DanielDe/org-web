@@ -28,6 +28,7 @@ class OrgFile extends Component {
   handleAddHeader(parentHeaderId) {
     this.props.actions.addHeader(parentHeaderId);
     this.props.actions.openHeader(parentHeaderId);
+    this.props.actions.setDirty(true);
   }
 
   handleOpenHeader(headerId) {
@@ -36,27 +37,50 @@ class OrgFile extends Component {
 
   handleRemoveHeader(headerId) {
     this.props.actions.removeHeader(headerId);
+    this.props.actions.setDirty(true);
   }
 
   handleTitleEdit(headerId, newTitle) {
     this.props.actions.editHeaderTitle(headerId, newTitle);
+    this.props.actions.setDirty(true);
   }
 
   handleDescriptionEdit(headerId, newDescription) {
     this.props.actions.editHeaderDescription(headerId, newDescription);
+    this.props.actions.setDirty(true);
   }
 
   render() {
+    let dirtyIndicator = '';
+    if (this.props.dirty) {
+      const style = {
+        padding: 3,
+        backgroundColor: 'gray',
+        opacity: '0.5',
+        color: 'white',
+        position: 'fixed',
+        bottom: 10,
+        right: 10,
+        fontWeight: 'bold'
+      };
+      dirtyIndicator = (
+        <div style={style}>Unpushed changes</div>
+      );
+    }
+
     return (
-      <div style={{whiteSpace: 'pre-wrap'}}>
-        <HeaderList headers={this.props.parsedFile}
-                    titleClick={(headerId) => this.handleTitleLineClick(headerId)}
-                    todoClick={(headerId) => this.handleTodoClick(headerId)}
-                    addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
-                    titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}
-                    descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId, newDescription)}
-                    openHeader={(headerId) => this.handleOpenHeader(headerId)}
-                    removeHeader={(headerId) => this.handleRemoveHeader(headerId)} />
+      <div>
+        {dirtyIndicator}
+        <div style={{whiteSpace: 'pre-wrap'}}>
+          <HeaderList headers={this.props.parsedFile}
+                      titleClick={(headerId) => this.handleTitleLineClick(headerId)}
+                      todoClick={(headerId) => this.handleTodoClick(headerId)}
+                      addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
+                      titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}
+                      descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId, newDescription)}
+                      openHeader={(headerId) => this.handleOpenHeader(headerId)}
+                      removeHeader={(headerId) => this.handleRemoveHeader(headerId)} />
+        </div>
       </div>
     );
   }
@@ -65,7 +89,8 @@ class OrgFile extends Component {
 function mapStateToProps(state, props) {
   return {
     parsedFile: state.org.get('parsedFile'),
-    filePath: state.org.get('filePath')
+    filePath: state.org.get('filePath'),
+    dirty: state.org.get('dirty')
   };
 }
 

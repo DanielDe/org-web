@@ -1,5 +1,5 @@
 /* globals Dropbox, FileReader */
-import { displayFile, stopDisplayingFile, setFileContents } from './org';
+import { displayFile, stopDisplayingFile, setFileContents, setDirty } from './org';
 import exportOrg from '../export_org';
 
 export const downloadFile = (filePath) => {
@@ -89,6 +89,7 @@ export const push = (filePath) => {
         autorename: true
       }).then(response => {
         dispatch(setFileContents(contents));
+        dispatch(setDirty(false));
         console.log('File pushed!');
       }).catch(error => {
         console.error('There was an error pushing the file!');

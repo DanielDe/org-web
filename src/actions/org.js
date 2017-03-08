@@ -95,3 +95,10 @@ export const editHeaderDescription = (headerId, newDescription) => {
     newDescription
   };
 };
+
+export const setDirty = (dirty) => {
+  return {
+    type: 'setDirty',
+    dirty
+  };
+};
