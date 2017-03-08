@@ -12,3 +12,19 @@
     width: 40px;
     height: 40px;
 }
+
+.loading-indicator {
+    color: white;
+    background-color: #064082;
+    font-weight: bold;
+    opacity: 0.9;
+    padding: 18px;
+    display: inline-block;
+    position: fixed;
+    font-size: 20px;
+    left: 50%;
+    top: 40%;
+    width: 80%;
+    text-align: center;
+    transform: translateX(-50%);
+}

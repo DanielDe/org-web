@@ -1,16 +1,19 @@
 /* globals Dropbox, FileReader */
 import { displayFile, stopDisplayingFile, setFileContents, setDirty } from './org';
+import { setLoadingMessage } from './base';
 import exportOrg from '../export_org';
 
 export const downloadFile = (filePath) => {
   return (dispatch, getState) => {
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
 
+    dispatch(setLoadingMessage('Downloading file...'));
     dropbox.filesDownload({ path: filePath }).then(response => {
       const reader = new FileReader();
       reader.addEventListener('loadend', () => {
         const contents = reader.result;
         dispatch(displayFile(contents, filePath));
+        dispatch(setLoadingMessage(null));
       });
       reader.readAsText(response.fileBlob);
     });
@@ -49,6 +52,7 @@ export const getFileList = (path = '') => {
   return (dispatch, getState) => {
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
 
+    dispatch(setLoadingMessage('Getting listing...'));
     dropbox.filesListFolder({ path }).then(response => {
       const directoryListing = response.entries.map(entry => {
         return {
@@ -60,6 +64,7 @@ export const getFileList = (path = '') => {
       });
 
       dispatch(setDirectoryListing(path, directoryListing));
+      dispatch(setLoadingMessage(null));
     }).catch(error => {
       console.error('There was an error retriving files!');
       console.error(error);
@@ -71,6 +76,7 @@ export const push = (filePath) => {
   return (dispatch, getState) => {
     const contents = exportOrg(getState().org.get('parsedFile'));
 
+    dispatch(setLoadingMessage('Pushing...'));
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
     dropbox.filesUpload({
       path: filePath + '.reactorg-bak',
@@ -90,6 +96,7 @@ export const push = (filePath) => {
       }).then(response => {
         dispatch(setFileContents(contents));
         dispatch(setDirty(false));
+        dispatch(setLoadingMessage(null));
         console.log('File pushed!');
       }).catch(error => {
         console.error('There was an error pushing the file!');

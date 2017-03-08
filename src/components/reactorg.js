@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as dropboxActions from '../actions/dropbox';
 import * as orgActions from '../actions/org';
+import * as baseActions from '../actions/base';
 import FileChooser from './file_chooser';
 import OrgFile from './org_file';
 import parseQueryString from '../parse_query_string';
@@ -24,18 +25,18 @@ class Reactorg extends Component {
   componentDidMount() {
     const accessToken = parseQueryString(window.location.hash).access_token;
     if (accessToken) {
-      this.props.actions.authenticate(accessToken);
+      this.props.dropboxActions.authenticate(accessToken);
       window.location.hash = '';
     } else {
       const accessToken = localStorage.getItem('dropboxAccessToken');
       if (accessToken) {
-        this.props.actions.authenticate(accessToken);
+        this.props.dropboxActions.authenticate(accessToken);
       }
     }
 
     const filePath = localStorage.getItem('filePath');
     if (filePath) {
-      this.props.actions.downloadFile(filePath);
+      this.props.dropboxActions.downloadFile(filePath);
     }
   }
 
@@ -46,7 +47,7 @@ class Reactorg extends Component {
   }
 
   handlePushToDropbox() {
-    this.props.actions.push(this.props.filePath);
+    this.props.dropboxActions.push(this.props.filePath);
   }
 
   handleBackToFileChooser() {
@@ -54,7 +55,7 @@ class Reactorg extends Component {
   }
 
   handleSignOut() {
-    this.props.actions.signOut();
+    this.props.dropboxActions.signOut();
   }
 
   viewSampleFile() {
@@ -67,6 +68,13 @@ class Reactorg extends Component {
   }
 
   render() {
+    let loadingIndicator = '';
+    if (this.props.loadingMessage) {
+      loadingIndicator = (
+        <div className="loading-indicator">{this.props.loadingMessage}</div>
+      );
+    }
+
     const signOutButton = (
       <button onClick={() => this.handleSignOut()} className="btn">Sign out</button>
     );
@@ -99,6 +107,7 @@ class Reactorg extends Component {
     if (this.props.fileContents) {
       return (
         <div style={{ margin: 5 }}>
+          {loadingIndicator}
           <OrgFile />
           {trailingContents}
         </div>
@@ -107,6 +116,7 @@ class Reactorg extends Component {
       if (this.props.dropboxAccessToken) {
         return (
           <div>
+            {loadingIndicator}
             <FileChooser />
             {signOutButton}
           </div>
@@ -132,14 +142,16 @@ function mapStateToProps(state, props) {
     dropboxAccessToken: state.dropbox.get('dropboxAccessToken'),
     fileContents: state.org.get('fileContents'),
     filePath: state.org.get('filePath'),
-    sampleMode: state.org.get('sampleMode')
+    sampleMode: state.org.get('sampleMode'),
+    loadingMessage: state.base.get('loadingMessage')
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(dropboxActions, dispatch),
-    orgActions: bindActionCreators(orgActions, dispatch)
+    dropboxActions: bindActionCreators(dropboxActions, dispatch),
+    orgActions: bindActionCreators(orgActions, dispatch),
+    baseActions: bindActionCreators(baseActions, dispatch)
   };
 }
 
