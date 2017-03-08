@@ -19,8 +19,22 @@ class HeaderList extends Component {
     this.state = {
       headersShowingActionDrawer: new Immutable.List(),
       headerInTitleEditMode: null,
-      headerInDescriptionEditMode: null
+      headerInDescriptionEditMode: null,
+      newHeaderJustAdded: false
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.headers.size === this.props.headers.size + 1) {
+      this.setState({ newHeaderJustAdded: true });
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.state.newHeaderJustAdded) {
+      this.setState({ newHeaderJustAdded: false });
+      this.lastHeader.scrollIntoView(true);
+    }
   }
 
   handleTitleLineClick(headerId) {
@@ -148,7 +162,10 @@ class HeaderList extends Component {
         paddingLeft: 20
       };
       return (
-        <div className="org-header" key={index} style={style}>
+        <div className="org-header"
+             key={index}
+             style={style}
+             ref={(newHeader) => { this.lastHeader = newHeader; }}>
           <div style={{marginLeft: -20}}>*</div>
           <TitleLine title={title}
                      todoKeyword={todoKeyword}
