@@ -37,8 +37,10 @@ class HeaderList extends Component {
     }
   }
 
-  handleTitleLineClick(headerId) {
-    this.props.titleClick(headerId);
+  handleTitleLineClick(headerId, hasContent) {
+    if (hasContent) {
+      this.props.titleClick(headerId, true);
+    }
   }
 
   handleTodoClick(headerId) {
@@ -171,7 +173,7 @@ class HeaderList extends Component {
                      todoKeyword={todoKeyword}
                      opened={opened}
                      hasContent={hasContent}
-                     titleClick={() => this.handleTitleLineClick(headerId)}
+                     titleClick={() => this.handleTitleLineClick(headerId, hasContent)}
                      todoClick={() => this.handleTodoClick(headerId)}
                      titleEdit={(newTitle) => this.handleTitleEdit(headerId, newTitle)}
                      editMode={inTitleEditMode}
@@ -181,7 +183,7 @@ class HeaderList extends Component {
                          subheaders={header.get('subheaders')}
                          opened={opened}
                          headerId={headerId}
-                         titleClick={(headerId) => this.handleTitleLineClick(headerId)}
+                         titleClick={(headerId) => this.handleTitleLineClick(headerId, hasContent)}
                          todoClick={(headerId) => this.handleTodoClick(headerId)}
                          addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
                          openHeader={this.props.openHeader}
