@@ -106,7 +106,7 @@ class Reactorg extends Component {
 
     if (this.props.fileContents) {
       return (
-        <div style={{ margin: 5 }}>
+        <div>
           {loadingIndicator}
           <OrgFile />
           {trailingContents}
