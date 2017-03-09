@@ -8,17 +8,12 @@ import HeaderList from './header_list';
 class OrgFile extends Component {
   constructor(props) {
     super(props);
-    this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
     this.handleAddHeader = this.handleAddHeader.bind(this);
     this.handleOpenHeader = this.handleOpenHeader.bind(this);
     this.handleRemoveHeader = this.handleRemoveHeader.bind(this);
     this.handleTitleEdit = this.handleTitleEdit.bind(this);
     this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
-  }
-
-  handleTitleLineClick(headerId) {
-    this.props.actions.toggleHeaderOpened(headerId);
   }
 
   handleTodoClick(headerId) {
@@ -73,7 +68,6 @@ class OrgFile extends Component {
         {dirtyIndicator}
         <div style={{whiteSpace: 'pre-wrap'}}>
           <HeaderList headers={this.props.parsedFile}
-                      titleClick={(headerId) => this.handleTitleLineClick(headerId)}
                       todoClick={(headerId) => this.handleTodoClick(headerId)}
                       addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
                       titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}

@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as orgActions from '../actions/org';
 import TitleLine from './title_line';
 import HeaderContent from './header_content';
 import Immutable from 'immutable';
@@ -38,8 +41,9 @@ class HeaderList extends Component {
   }
 
   handleTitleLineClick(headerId, hasContent) {
+    this.props.actions.selectHeader(headerId);
     if (hasContent) {
-      this.props.titleClick(headerId, true);
+      this.props.actions.toggleHeaderOpened(headerId);
     }
   }
 
@@ -116,6 +120,7 @@ class HeaderList extends Component {
       const hasContent = !!header.get('description') || !!header.get('subheaders').size;
       const inTitleEditMode = this.state.headerInTitleEditMode === headerId;
       const inDescriptionEditMode = this.state.headerInDescriptionEditMode === headerId;
+      const isSelected = headerId === this.props.selectedHeaderId;
 
       let actionDrawer = null;
       if (this.state.headersShowingActionDrawer.includes(headerId)) {
@@ -158,17 +163,22 @@ class HeaderList extends Component {
         );
       }
 
-      const style = {
+      let style = {
         marginBottom: 2,
         marginTop: 25,
-        paddingLeft: 20
+        paddingLeft: 20,
+        paddingTop: 5
       };
+      if (isSelected) {
+        style.backgroundColor = 'rgba(239, 255, 0, 0.28)';
+      }
+
       return (
         <div className="org-header"
              key={index}
              style={style}
              ref={(newHeader) => { this.lastHeader = newHeader; }}>
-          <div style={{marginLeft: -20}}>*</div>
+          <div style={{marginLeft: -16}}>*</div>
           <TitleLine title={title}
                      todoKeyword={todoKeyword}
                      opened={opened}
@@ -183,7 +193,6 @@ class HeaderList extends Component {
                          subheaders={header.get('subheaders')}
                          opened={opened}
                          headerId={headerId}
-                         titleClick={(headerId) => this.handleTitleLineClick(headerId, hasContent)}
                          todoClick={(headerId) => this.handleTodoClick(headerId)}
                          addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
                          openHeader={this.props.openHeader}
@@ -199,4 +208,16 @@ class HeaderList extends Component {
   }
 }
 
-export default HeaderList;
+function mapStateToProps(state, props) {
+  return {
+    selectedHeaderId: state.org.get('selectedHeaderId')
+  };
+};
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(orgActions, dispatch)
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(HeaderList);

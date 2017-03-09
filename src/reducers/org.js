@@ -75,6 +75,8 @@ export default (state = new Immutable.Map(), payload) => {
   case 'openHeader':
     return state.updateIn(['parsedFile', ...augmentedIndexPath],
                           header => header.set('opened', true));
+  case 'selectHeader':
+    return state.set('selectedHeaderId', payload.headerId);
   case 'editHeaderTitle':
     return state.setIn(['parsedFile', ...augmentedIndexPath, 'titleLine', 'title'],
                        payload.newTitle);

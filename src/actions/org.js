@@ -73,6 +73,13 @@ export const openHeader = (headerId) => {
   };
 };
 
+export const selectHeader = (headerId) => {
+  return {
+    type: 'selectHeader',
+    headerId
+  };
+};
+
 export const advanceTodoState = (headerId) => {
   return {
     type: 'advanceTodoState',
