@@ -9,7 +9,7 @@ class OrgFile extends Component {
   constructor(props) {
     super(props);
     this.handleTodoClick = this.handleTodoClick.bind(this);
-    this.handleAddHeader = this.handleAddHeader.bind(this);
+    this.handleAddHeaderClick = this.handleAddHeaderClick.bind(this);
     this.handleRemoveHeader = this.handleRemoveHeader.bind(this);
     this.handleTitleEditModeClick = this.handleTitleEditModeClick.bind(this);
     this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
@@ -19,9 +19,9 @@ class OrgFile extends Component {
     this.props.orgActions.advanceTodoState(headerId);
   }
 
-  handleAddHeader(parentHeaderId) {
-    this.props.orgActions.addHeader(parentHeaderId);
-    this.props.orgActions.openHeader(parentHeaderId);
+  handleAddHeaderClick() {
+    this.props.orgActions.addHeader(this.props.selectedHeaderId);
+    this.props.orgActions.openHeader(this.props.selectedHeaderId);
     this.props.orgActions.setDirty(true);
   }
 
@@ -87,7 +87,8 @@ class OrgFile extends Component {
         <button className={`fa fa-pencil-square-o btn btn--circle ${disabledClass}`}
                 style={buttonStyle}></button>
         <button className={`fa fa-plus btn btn--circle ${disabledClass}`}
-                style={buttonStyle}></button>
+                style={buttonStyle}
+                onClick={() => this.handleAddHeaderClick()}></button>
         <button className={`fa fa-times btn btn--circle ${disabledClass}`}
                 style={buttonStyle}></button>
         <button className={`fa fa-arrow-up btn btn--circle ${disabledClass}`}
@@ -103,7 +104,6 @@ class OrgFile extends Component {
         <div style={{whiteSpace: 'pre-wrap'}}>
           <HeaderList headers={this.props.parsedFile}
                       todoClick={(headerId) => this.handleTodoClick(headerId)}
-                      addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
                       descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId, newDescription)}
                       removeHeader={(headerId) => this.handleRemoveHeader(headerId)} />
         </div>

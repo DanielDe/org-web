@@ -11,7 +11,6 @@ class HeaderList extends Component {
     super(props);
     this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
-    this.handleAddHeader = this.handleAddHeader.bind(this);
     this.handleRemoveHeader = this.handleRemoveHeader.bind(this);
     this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
     this.handleDescriptionEditButton = this.handleDescriptionEditButton.bind(this);
@@ -46,10 +45,6 @@ class HeaderList extends Component {
 
   handleTodoClick(headerId) {
     this.props.todoClick(headerId);
-  }
-
-  handleAddHeader(parentHeaderId) {
-    this.props.addHeader(parentHeaderId);
   }
 
   handleRemoveHeader(headerId) {
@@ -105,11 +100,6 @@ class HeaderList extends Component {
 
       let actionDrawer = null;
       if (this.state.headersShowingActionDrawer.includes(headerId)) {
-        const addHeaderButton = (
-          <button className="btn btn--circle"
-                  onClick={() => this.handleAddHeader(headerId)}>+</button>
-        );
-
         const editDescriptionButtonIcon = inDescriptionEditMode ? 'check' : 'pencil-square-o';
         const editDescriptionButton = (
           <button className={`fa fa-${editDescriptionButtonIcon} btn btn--circle`}
@@ -133,7 +123,7 @@ class HeaderList extends Component {
         };
         actionDrawer = (
           <div style={style}>
-            {addHeaderButton} {editDescriptionButton} {removeHeaderButton}
+            {editDescriptionButton} {removeHeaderButton}
           </div>
         );
       }
@@ -169,7 +159,6 @@ class HeaderList extends Component {
                          opened={opened}
                          headerId={headerId}
                          todoClick={(headerId) => this.handleTodoClick(headerId)}
-                         addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
                          removeHeader={this.props.removeHeader}
                          editMode={inDescriptionEditMode}
                          descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId || header.get('id'), newDescription)} />

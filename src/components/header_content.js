@@ -4,7 +4,6 @@ import HeaderList from './header_list';
 class HeaderContent extends Component {
   constructor(props) {
     super(props);
-    this.handleAddHeaderClick = this.handleAddHeaderClick.bind(this);
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
 
     this.state = { descriptionValue: props.description };
@@ -14,10 +13,6 @@ class HeaderContent extends Component {
     if (this.props.editMode && !nextProps.editMode) {
       this.props.descriptionEdit(null, this.state.descriptionValue);
     }
-  }
-
-  handleAddHeaderClick(parentHeaderId) {
-    this.props.addHeader(parentHeaderId);
   }
 
   handleDescriptionChange(event) {
@@ -40,7 +35,6 @@ class HeaderContent extends Component {
 
           <HeaderList headers={this.props.subheaders}
                       todoClick={this.props.todoClick}
-                      addHeader={this.props.addHeader}
                       removeHeader={this.props.removeHeader}
                       descriptionEdit={(headerId, newDescription) => this.props.descriptionEdit(headerId, newDescription)} />
         </div>
