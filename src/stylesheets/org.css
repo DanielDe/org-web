@@ -21,14 +21,11 @@
 }
 
 .title-line {
-    display: flex;
-    justify-content: space-between;
     margin-top: -18px;
 }
 
 .header-text {
     display: flex;
-    width: 90%;
 }
 
 .drawer-container {

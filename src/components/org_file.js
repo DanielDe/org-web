@@ -10,9 +10,9 @@ class OrgFile extends Component {
     super(props);
     this.handleTodoClick = this.handleTodoClick.bind(this);
     this.handleAddHeaderClick = this.handleAddHeaderClick.bind(this);
-    this.handleRemoveHeader = this.handleRemoveHeader.bind(this);
     this.handleTitleEditModeClick = this.handleTitleEditModeClick.bind(this);
     this.handleDescriptionEditModeClick = this.handleDescriptionEditModeClick.bind(this);
+    this.handleRemoveHeaderClick = this.handleRemoveHeaderClick.bind(this);
   }
 
   handleTodoClick(headerId) {
@@ -25,11 +25,6 @@ class OrgFile extends Component {
     this.props.orgActions.setDirty(true);
   }
 
-  handleRemoveHeader(headerId) {
-    this.props.orgActions.removeHeader(headerId);
-    this.props.orgActions.setDirty(true);
-  }
-
   handleTitleEditModeClick() {
     this.props.orgActions.toggleTitleEditMode();
   }
@@ -37,6 +32,13 @@ class OrgFile extends Component {
   handleDescriptionEditModeClick() {
     this.props.orgActions.toggleDescriptionEditMode();
     this.props.orgActions.openHeader(this.props.selectedHeaderId);
+  }
+
+  handleRemoveHeaderClick() {
+    if (window.confirm('Are you sure you want to delete this header?')) {
+      this.props.orgActions.removeHeader(this.props.selectedHeaderId);
+      this.props.orgActions.setDirty(true);
+    }
   }
 
   render() {
@@ -91,7 +93,8 @@ class OrgFile extends Component {
                 style={buttonStyle}
                 onClick={() => this.handleAddHeaderClick()}></button>
         <button className={`fa fa-times btn btn--circle ${disabledClass}`}
-                style={buttonStyle}></button>
+                style={buttonStyle}
+                onClick={() => this.handleRemoveHeaderClick()}></button>
         <button className={`fa fa-arrow-up btn btn--circle ${disabledClass}`}
                 style={buttonStyle}></button>
         <button className={`fa fa-arrow-down btn btn--circle ${disabledClass}`}
@@ -104,8 +107,7 @@ class OrgFile extends Component {
         {dirtyIndicator}
         <div style={{whiteSpace: 'pre-wrap'}}>
           <HeaderList headers={this.props.parsedFile}
-                      todoClick={(headerId) => this.handleTodoClick(headerId)}
-                      removeHeader={(headerId) => this.handleRemoveHeader(headerId)} />
+                      todoClick={(headerId) => this.handleTodoClick(headerId)} />
         </div>
         {actionDrawer}
       </div>

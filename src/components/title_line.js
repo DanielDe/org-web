@@ -8,7 +8,6 @@ class TitleLine extends Component {
     super(props);
     this.handleTitleClick = this.handleTitleClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
-    this.handleDrawerButtonClick = this.handleDrawerButtonClick.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleTitleFieldClick = this.handleTitleFieldClick.bind(this);
 
@@ -34,11 +33,6 @@ class TitleLine extends Component {
   handleTodoClick(event) {
     event.stopPropagation();
     this.props.todoClick();
-  }
-
-  handleDrawerButtonClick(event) {
-    event.stopPropagation();
-    this.props.actionDrawerToggle();
   }
 
   handleTitleChange(event) {
@@ -73,20 +67,11 @@ class TitleLine extends Component {
                      onClick={(event) => this.handleTitleFieldClick(event)} />;
     }
 
-    const drawerButton = (
-      <div className="drawer-container"
-           style={{borderLeft: '1px solid lightgray'}}
-           onClick={(event) => this.handleDrawerButtonClick(event)}>
-        <i className={`fa fa-bars`}></i>
-      </div>
-    );
-
     return (
       <div className="title-line" onClick={() => this.handleTitleClick()}>
         <div className="header-text">
           {todo} {title}
         </div>
-        {drawerButton}
       </div>
     );
   }
