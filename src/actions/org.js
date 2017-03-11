@@ -101,6 +101,12 @@ export const toggleTitleEditMode = () => {
   };
 };
 
+export const toggleDescriptionEditMode = () => {
+  return {
+    type: 'toggleDescriptionEditMode'
+  };
+};
+
 export const editHeaderDescription = (headerId, newDescription) => {
   return {
     type: 'editHeaderDescription',

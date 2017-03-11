@@ -12,13 +12,10 @@ class HeaderList extends Component {
     this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
     this.handleTodoClick = this.handleTodoClick.bind(this);
     this.handleRemoveHeader = this.handleRemoveHeader.bind(this);
-    this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
-    this.handleDescriptionEditButton = this.handleDescriptionEditButton.bind(this);
     this.handleActionDrawerToggle = this.handleActionDrawerToggle.bind(this);
 
     this.state = {
       headersShowingActionDrawer: new Immutable.List(),
-      headerInDescriptionEditMode: null,
       newHeaderJustAdded: false
     };
   }
@@ -53,23 +50,6 @@ class HeaderList extends Component {
     }
   }
 
-  handleDescriptionEdit(headerId, newDescription) {
-    this.props.descriptionEdit(headerId, newDescription);
-  }
-
-  handleDescriptionEditButton(headerId) {
-    if (this.state.headerInDescriptionEditMode === headerId) {
-      this.setState({
-        headerInDescriptionEditMode: null
-      });
-    } else {
-      this.setState({
-        headerInDescriptionEditMode: headerId
-      });
-      this.props.actions.openHeader(headerId);
-    }
-  }
-
   handleActionDrawerToggle(headerId) {
     const headersShowingActionDrawer = this.state.headersShowingActionDrawer;
     if (headersShowingActionDrawer.includes(headerId)) {
@@ -94,19 +74,12 @@ class HeaderList extends Component {
       let todoKeyword = header.getIn(['titleLine', 'todoKeyword']);
       const opened = header.get('opened');
       const hasContent = !!header.get('description') || !!header.get('subheaders').size;
-      const inDescriptionEditMode = this.state.headerInDescriptionEditMode === headerId;
       const isSelected = headerId === this.props.selectedHeaderId;
       const inTitleEditMode = isSelected && this.props.inTitleEditMode;
+      const inDescriptionEditMode = isSelected && this.props.inDescriptionEditMode;
 
       let actionDrawer = null;
       if (this.state.headersShowingActionDrawer.includes(headerId)) {
-        const editDescriptionButtonIcon = inDescriptionEditMode ? 'check' : 'pencil-square-o';
-        const editDescriptionButton = (
-          <button className={`fa fa-${editDescriptionButtonIcon} btn btn--circle`}
-                  style={{boxSizing: 'border-box', paddingLeft: 3}}
-                  onClick={() => this.handleDescriptionEditButton(headerId)}></button>
-        );
-
         const removeHeaderButton = (
           <button className="fa fa-times btn btn--circle"
                   onClick={() => this.handleRemoveHeader(headerId)}></button>
@@ -123,7 +96,7 @@ class HeaderList extends Component {
         };
         actionDrawer = (
           <div style={style}>
-            {editDescriptionButton} {removeHeaderButton}
+            {removeHeaderButton}
           </div>
         );
       }
@@ -154,14 +127,13 @@ class HeaderList extends Component {
                      editMode={inTitleEditMode}
                      actionDrawerToggle={() => this.handleActionDrawerToggle(headerId)} />
           {actionDrawer}
-          <HeaderContent description={header.get('description')}
+          <HeaderContent headerId={headerId}
                          subheaders={header.get('subheaders')}
                          opened={opened}
-                         headerId={headerId}
+                         description={header.get('description')}
                          todoClick={(headerId) => this.handleTodoClick(headerId)}
                          removeHeader={this.props.removeHeader}
-                         editMode={inDescriptionEditMode}
-                         descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId || header.get('id'), newDescription)} />
+                         editMode={inDescriptionEditMode} />
         </div>
       );
     });

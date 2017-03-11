@@ -12,7 +12,7 @@ class OrgFile extends Component {
     this.handleAddHeaderClick = this.handleAddHeaderClick.bind(this);
     this.handleRemoveHeader = this.handleRemoveHeader.bind(this);
     this.handleTitleEditModeClick = this.handleTitleEditModeClick.bind(this);
-    this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
+    this.handleDescriptionEditModeClick = this.handleDescriptionEditModeClick.bind(this);
   }
 
   handleTodoClick(headerId) {
@@ -30,13 +30,13 @@ class OrgFile extends Component {
     this.props.orgActions.setDirty(true);
   }
 
-  handleDescriptionEdit(headerId, newDescription) {
-    this.props.orgActions.editHeaderDescription(headerId, newDescription);
-    this.props.orgActions.setDirty(true);
-  }
-
   handleTitleEditModeClick() {
     this.props.orgActions.toggleTitleEditMode();
+  }
+
+  handleDescriptionEditModeClick() {
+    this.props.orgActions.toggleDescriptionEditMode();
+    this.props.orgActions.openHeader(this.props.selectedHeaderId);
   }
 
   render() {
@@ -85,7 +85,8 @@ class OrgFile extends Component {
                 style={buttonStyle}
                 onClick={() => this.handleTitleEditModeClick()}></button>
         <button className={`fa fa-pencil-square-o btn btn--circle ${disabledClass}`}
-                style={buttonStyle}></button>
+                style={buttonStyle}
+                onClick={() => this.handleDescriptionEditModeClick()}></button>
         <button className={`fa fa-plus btn btn--circle ${disabledClass}`}
                 style={buttonStyle}
                 onClick={() => this.handleAddHeaderClick()}></button>
@@ -104,7 +105,6 @@ class OrgFile extends Component {
         <div style={{whiteSpace: 'pre-wrap'}}>
           <HeaderList headers={this.props.parsedFile}
                       todoClick={(headerId) => this.handleTodoClick(headerId)}
-                      descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId, newDescription)}
                       removeHeader={(headerId) => this.handleRemoveHeader(headerId)} />
         </div>
         {actionDrawer}

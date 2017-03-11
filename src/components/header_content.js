@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as orgActions from '../actions/org';
 import HeaderList from './header_list';
 
 class HeaderContent extends Component {
@@ -11,7 +14,8 @@ class HeaderContent extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.editMode && !nextProps.editMode) {
-      this.props.descriptionEdit(null, this.state.descriptionValue);
+      this.props.actions.editHeaderDescription(this.props.headerId, this.state.descriptionValue);
+      this.props.actions.setDirty(true);
     }
   }
 
@@ -35,8 +39,7 @@ class HeaderContent extends Component {
 
           <HeaderList headers={this.props.subheaders}
                       todoClick={this.props.todoClick}
-                      removeHeader={this.props.removeHeader}
-                      descriptionEdit={(headerId, newDescription) => this.props.descriptionEdit(headerId, newDescription)} />
+                      removeHeader={this.props.removeHeader} />
         </div>
       );
     }
@@ -49,4 +52,14 @@ class HeaderContent extends Component {
   }
 }
 
-export default HeaderContent;
+function mapStateToProps(state, props) {
+  return {};
+};
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(orgActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(HeaderContent);
