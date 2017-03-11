@@ -105,6 +105,14 @@ export default (state = new Immutable.Map(), payload) => {
     state = state.set('inTitleEditMode', false);
     state = state.set('inDescriptionEditMode', false);
     return state.set('selectedHeaderId', payload.headerId);
+  case 'selectLastHeader':
+    headerList = state.getIn(['parsedFile', ...augmentedIndexPath]);
+    const subheaders = headerList.get('subheaders');
+
+    return state.set('selectedHeaderId',
+                     subheaders.get(subheaders.size - 1).get('id'));
+  case 'enterTitleEditMode':
+    return state.set('inTitleEditMode', true);
   case 'toggleTitleEditMode':
     return state.update('inTitleEditMode', editMode => !editMode);
   case 'toggleDescriptionEditMode':

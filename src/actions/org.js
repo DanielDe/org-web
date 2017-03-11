@@ -5,6 +5,13 @@ export const addHeader = (parentHeaderId) => {
   };
 };
 
+export const selectLastHeader = (parentHeaderId) => {
+  return {
+    type: 'selectLastHeader',
+    parentHeaderId
+  };
+};
+
 export const removeHeader = (headerId) => {
   return {
     type: 'removeHeader',
@@ -112,6 +119,12 @@ export const editHeaderTitle = (headerId, newTitle) => {
 export const toggleTitleEditMode = () => {
   return {
     type: 'toggleTitleEditMode'
+  };
+};
+
+export const enterTitleEditMode = () => {
+  return {
+    type: 'enterTitleEditMode'
   };
 };
 
