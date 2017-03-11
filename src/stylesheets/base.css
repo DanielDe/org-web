@@ -13,6 +13,10 @@
     height: 60px;
 }
 
+.btn--disabled {
+    background-color: lightgray;
+}
+
 .loading-indicator {
     color: white;
     background-color: #064082;

@@ -10,39 +10,33 @@ class OrgFile extends Component {
     super(props);
     this.handleTodoClick = this.handleTodoClick.bind(this);
     this.handleAddHeader = this.handleAddHeader.bind(this);
-    this.handleOpenHeader = this.handleOpenHeader.bind(this);
     this.handleRemoveHeader = this.handleRemoveHeader.bind(this);
-    this.handleTitleEdit = this.handleTitleEdit.bind(this);
+    this.handleTitleEditModeClick = this.handleTitleEditModeClick.bind(this);
     this.handleDescriptionEdit = this.handleDescriptionEdit.bind(this);
   }
 
   handleTodoClick(headerId) {
-    this.props.actions.advanceTodoState(headerId);
+    this.props.orgActions.advanceTodoState(headerId);
   }
 
   handleAddHeader(parentHeaderId) {
-    this.props.actions.addHeader(parentHeaderId);
-    this.props.actions.openHeader(parentHeaderId);
-    this.props.actions.setDirty(true);
-  }
-
-  handleOpenHeader(headerId) {
-    this.props.actions.openHeader(headerId);
+    this.props.orgActions.addHeader(parentHeaderId);
+    this.props.orgActions.openHeader(parentHeaderId);
+    this.props.orgActions.setDirty(true);
   }
 
   handleRemoveHeader(headerId) {
-    this.props.actions.removeHeader(headerId);
-    this.props.actions.setDirty(true);
-  }
-
-  handleTitleEdit(headerId, newTitle) {
-    this.props.actions.editHeaderTitle(headerId, newTitle);
-    this.props.actions.setDirty(true);
+    this.props.orgActions.removeHeader(headerId);
+    this.props.orgActions.setDirty(true);
   }
 
   handleDescriptionEdit(headerId, newDescription) {
-    this.props.actions.editHeaderDescription(headerId, newDescription);
-    this.props.actions.setDirty(true);
+    this.props.orgActions.editHeaderDescription(headerId, newDescription);
+    this.props.orgActions.setDirty(true);
+  }
+
+  handleTitleEditModeClick() {
+    this.props.orgActions.toggleTitleEditMode();
   }
 
   render() {
@@ -54,7 +48,7 @@ class OrgFile extends Component {
         opacity: '0.5',
         color: 'white',
         position: 'fixed',
-        bottom: 10,
+        bottom: 100,
         right: 10,
         fontWeight: 'bold'
       };
@@ -63,7 +57,8 @@ class OrgFile extends Component {
       );
     }
 
-    const drawerStyle = {
+    const disabledClass = this.props.selectedHeaderId ? '' : 'btn--disabled';
+    const actionDrawerStyle = {
       position: 'fixed',
       bottom: 10,
       left: 10,
@@ -72,8 +67,8 @@ class OrgFile extends Component {
       border: '1px solid lightgray',
       backgroundColor: 'white',
       boxShadow: '2px 2px 5px 0px rgba(148,148,148,0.75)',
-      paddingTop: 10,
-      paddingBottom: 10,
+      paddingTop: 9,
+      paddingBottom: 6,
       paddingLeft: 20,
       boxSizing: 'border-box',
       overflowX: 'auto',
@@ -82,14 +77,23 @@ class OrgFile extends Component {
     const buttonStyle = {
       marginRight: 20
     };
-    const drawer = (
-      <div style={drawerStyle}>
-        <button className={`fa fa-pencil btn btn--circle`} style={buttonStyle}></button>
-        <button className={`fa fa-plus btn btn--circle`} style={buttonStyle}></button>
-        <button className={`fa fa-pencil-square-o btn btn--circle`} style={buttonStyle}></button>
-        <button className={`fa fa-times btn btn--circle`} style={buttonStyle}></button>
-        <button className={`fa fa-arrow-up btn btn--circle`} style={buttonStyle}></button>
-        <button className={`fa fa-arrow-down btn btn--circle`} style={buttonStyle}></button>
+    const actionDrawer = (
+      <div style={actionDrawerStyle} className="nice-scroll">
+        <button className={`fa fa-check-square btn btn--circle ${disabledClass}`}
+                style={buttonStyle}></button>
+        <button className={`fa fa-pencil btn btn--circle ${disabledClass}`}
+                style={buttonStyle}
+                onClick={() => this.handleTitleEditModeClick()}></button>
+        <button className={`fa fa-pencil-square-o btn btn--circle ${disabledClass}`}
+                style={buttonStyle}></button>
+        <button className={`fa fa-plus btn btn--circle ${disabledClass}`}
+                style={buttonStyle}></button>
+        <button className={`fa fa-times btn btn--circle ${disabledClass}`}
+                style={buttonStyle}></button>
+        <button className={`fa fa-arrow-up btn btn--circle ${disabledClass}`}
+                style={buttonStyle}></button>
+        <button className={`fa fa-arrow-down btn btn--circle ${disabledClass}`}
+                style={buttonStyle}></button>
       </div>
     );
 
@@ -100,12 +104,10 @@ class OrgFile extends Component {
           <HeaderList headers={this.props.parsedFile}
                       todoClick={(headerId) => this.handleTodoClick(headerId)}
                       addHeader={(parentHeaderId) => this.handleAddHeader(parentHeaderId)}
-                      titleEdit={(headerId, newTitle) => this.handleTitleEdit(headerId, newTitle)}
                       descriptionEdit={(headerId, newDescription) => this.handleDescriptionEdit(headerId, newDescription)}
-                      openHeader={(headerId) => this.handleOpenHeader(headerId)}
                       removeHeader={(headerId) => this.handleRemoveHeader(headerId)} />
         </div>
-        {drawer}
+        {actionDrawer}
       </div>
     );
   }
@@ -115,13 +117,14 @@ function mapStateToProps(state, props) {
   return {
     parsedFile: state.org.get('parsedFile'),
     filePath: state.org.get('filePath'),
-    dirty: state.org.get('dirty')
+    dirty: state.org.get('dirty'),
+    selectedHeaderId: state.org.get('selectedHeaderId')
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators(orgActions, dispatch),
+    orgActions: bindActionCreators(orgActions, dispatch),
     dropboxActions: bindActionCreators(dropboxActions, dispatch)
   };
 }

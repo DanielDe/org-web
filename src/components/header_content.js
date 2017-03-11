@@ -41,9 +41,7 @@ class HeaderContent extends Component {
           <HeaderList headers={this.props.subheaders}
                       todoClick={this.props.todoClick}
                       addHeader={this.props.addHeader}
-                      openHeader={this.props.openHeader}
                       removeHeader={this.props.removeHeader}
-                      titleEdit={(headerId, newTitle) => this.props.titleEdit(headerId, newTitle)}
                       descriptionEdit={(headerId, newDescription) => this.props.descriptionEdit(headerId, newDescription)} />
         </div>
       );

@@ -39,3 +39,7 @@
 .edit-icon {
     flex: 0 0 40px;
 }
+
+.nice-scroll {
+    -webkit-overflow-scrolling: touch;
+}

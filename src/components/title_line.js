@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as orgActions from '../actions/org';
 
 class TitleLine extends Component {
   constructor(props) {
@@ -16,12 +19,16 @@ class TitleLine extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.editMode && !nextProps.editMode) {
-      this.props.titleEdit(this.state.titleValue);
+      this.props.actions.editHeaderTitle(this.props.headerId, this.state.titleValue);
+      this.props.actions.setDirty(true);
     }
   }
 
   handleTitleClick() {
-    this.props.titleClick();
+    this.props.actions.selectHeader(this.props.headerId);
+    if (this.props.hasContent) {
+      this.props.actions.toggleHeaderOpened(this.props.headerId);
+    }
   }
 
   handleTodoClick(event) {
@@ -85,4 +92,14 @@ class TitleLine extends Component {
   }
 }
 
-export default TitleLine;
+function mapStateToProps(state, props) {
+  return {};
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(orgActions, dispatch)
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TitleLine);

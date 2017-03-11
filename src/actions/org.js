@@ -95,6 +95,12 @@ export const editHeaderTitle = (headerId, newTitle) => {
   };
 };
 
+export const toggleTitleEditMode = () => {
+  return {
+    type: 'toggleTitleEditMode'
+  };
+};
+
 export const editHeaderDescription = (headerId, newDescription) => {
   return {
     type: 'editHeaderDescription',
