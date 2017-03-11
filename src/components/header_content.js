@@ -37,8 +37,7 @@ class HeaderContent extends Component {
         <div>
           {description}
 
-          <HeaderList headers={this.props.subheaders}
-                      todoClick={this.props.todoClick} />
+          <HeaderList headers={this.props.subheaders} />
         </div>
       );
     }

@@ -9,7 +9,6 @@ class HeaderList extends Component {
   constructor(props) {
     super(props);
     this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
-    this.handleTodoClick = this.handleTodoClick.bind(this);
 
     this.state = {
       newHeaderJustAdded: false
@@ -34,10 +33,6 @@ class HeaderList extends Component {
     if (hasContent) {
       this.props.actions.toggleHeaderOpened(headerId);
     }
-  }
-
-  handleTodoClick(headerId) {
-    this.props.todoClick(headerId);
   }
 
   render() {
@@ -77,13 +72,11 @@ class HeaderList extends Component {
                      opened={opened}
                      hasContent={hasContent}
                      titleClick={() => this.handleTitleLineClick(headerId, hasContent)}
-                     todoClick={() => this.handleTodoClick(headerId)}
                      editMode={inTitleEditMode} />
           <HeaderContent headerId={headerId}
                          subheaders={header.get('subheaders')}
                          opened={opened}
                          description={header.get('description')}
-                         todoClick={(headerId) => this.handleTodoClick(headerId)}
                          editMode={inDescriptionEditMode} />
         </div>
       );

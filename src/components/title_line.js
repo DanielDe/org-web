@@ -7,7 +7,6 @@ class TitleLine extends Component {
   constructor(props) {
     super(props);
     this.handleTitleClick = this.handleTitleClick.bind(this);
-    this.handleTodoClick = this.handleTodoClick.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleTitleFieldClick = this.handleTitleFieldClick.bind(this);
 
@@ -30,11 +29,6 @@ class TitleLine extends Component {
     }
   }
 
-  handleTodoClick(event) {
-    event.stopPropagation();
-    this.props.todoClick();
-  }
-
   handleTitleChange(event) {
     this.setState({ ...this.state, titleValue: event.target.value });
   }
@@ -45,16 +39,15 @@ class TitleLine extends Component {
 
   render() {
     let todoKeyword = this.props.todoKeyword;
-    if (!todoKeyword) {
-      todoKeyword = 'NONE';
+    let todo = '';
+    if (todoKeyword) {
+      const todoClasses = ['todo-keyword', `todo-keyword--${todoKeyword.toLowerCase()}`];
+      todo = (
+        <span className={todoClasses.join(' ')}>
+          {todoKeyword}
+        </span>
+      );
     }
-
-    const todoClasses = ['todo-keyword', `todo-keyword--${todoKeyword.toLowerCase()}`];
-    const todo = (
-      <span onClick={(event) => this.handleTodoClick(event)} className={todoClasses.join(' ')}>
-        {todoKeyword}
-      </span>
-    );
 
     const tail = (this.props.opened || !this.props.hasContent) ? '' : '...';
 

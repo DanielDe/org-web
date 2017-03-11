@@ -8,15 +8,15 @@ import HeaderList from './header_list';
 class OrgFile extends Component {
   constructor(props) {
     super(props);
-    this.handleTodoClick = this.handleTodoClick.bind(this);
+    this.handleAdvanceTodoClick = this.handleAdvanceTodoClick.bind(this);
     this.handleAddHeaderClick = this.handleAddHeaderClick.bind(this);
     this.handleTitleEditModeClick = this.handleTitleEditModeClick.bind(this);
     this.handleDescriptionEditModeClick = this.handleDescriptionEditModeClick.bind(this);
     this.handleRemoveHeaderClick = this.handleRemoveHeaderClick.bind(this);
   }
 
-  handleTodoClick(headerId) {
-    this.props.orgActions.advanceTodoState(headerId);
+  handleAdvanceTodoClick(headerId) {
+    this.props.orgActions.advanceTodoState(this.props.selectedHeaderId);
   }
 
   handleAddHeaderClick() {
@@ -82,7 +82,8 @@ class OrgFile extends Component {
     const actionDrawer = (
       <div style={actionDrawerStyle} className="nice-scroll">
         <button className={`fa fa-check-square btn btn--circle ${disabledClass}`}
-                style={buttonStyle}></button>
+                style={buttonStyle}
+                onClick={() => this.handleAdvanceTodoClick()}></button>
         <button className={`fa fa-pencil btn btn--circle ${disabledClass}`}
                 style={buttonStyle}
                 onClick={() => this.handleTitleEditModeClick()}></button>
@@ -106,8 +107,7 @@ class OrgFile extends Component {
       <div>
         {dirtyIndicator}
         <div style={{whiteSpace: 'pre-wrap'}}>
-          <HeaderList headers={this.props.parsedFile}
-                      todoClick={(headerId) => this.handleTodoClick(headerId)} />
+          <HeaderList headers={this.props.parsedFile} />
         </div>
         {actionDrawer}
       </div>
