@@ -49,7 +49,7 @@ export default (state = new Immutable.Map(), payload) => {
   case 'moveHeaderUp':
     [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
     parentAugmentedIndexPath.reverse();
-    headerIndex = parseInt(headerIndex);
+    headerIndex = parseInt(headerIndex, 10);
 
     headerList = state.getIn(['parsedFile', ...parentAugmentedIndexPath]);
     if (headerIndex === 0) {
@@ -62,7 +62,7 @@ export default (state = new Immutable.Map(), payload) => {
   case 'moveHeaderDown':
     [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
     parentAugmentedIndexPath.reverse();
-    headerIndex = parseInt(headerIndex);
+    headerIndex = parseInt(headerIndex, 10);
 
     headerList = state.getIn(['parsedFile', ...parentAugmentedIndexPath]);
     if (headerIndex === headerList.size - 1) {
