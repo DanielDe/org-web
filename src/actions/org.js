@@ -80,6 +80,20 @@ export const selectHeader = (headerId) => {
   };
 };
 
+export const moveHeaderUp = (headerId) => {
+  return {
+    type: 'moveHeaderUp',
+    headerId
+  };
+};
+
+export const moveHeaderDown = (headerId) => {
+  return {
+    type: 'moveHeaderDown',
+    headerId
+  };
+};
+
 export const advanceTodoState = (headerId) => {
   return {
     type: 'advanceTodoState',

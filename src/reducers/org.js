@@ -29,7 +29,7 @@ const augmentedIndexPathForHeaderWithId = (headerId, headers) => {
 };
 
 export default (state = new Immutable.Map(), payload) => {
-  let augmentedIndexPath;
+  let augmentedIndexPath, headerIndex, parentAugmentedIndexPath, headerList, header;
   if (payload.headerId || payload.parentHeaderId) {
     augmentedIndexPath = augmentedIndexPathForHeaderWithId(payload.headerId || payload.parentHeaderId,
                                                            state.get('parsedFile'));
@@ -41,11 +41,37 @@ export default (state = new Immutable.Map(), payload) => {
     return state.updateIn(['parsedFile', ...augmentedIndexPath, 'subheaders'],
                           subheaders => subheaders.push(newHeader));
   case 'removeHeader':
-    let [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
+    [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
     parentAugmentedIndexPath.reverse();
 
     return state.updateIn(['parsedFile', ...parentAugmentedIndexPath],
                           subheaders => subheaders.delete(headerIndex));
+  case 'moveHeaderUp':
+    [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
+    parentAugmentedIndexPath.reverse();
+    headerIndex = parseInt(headerIndex);
+
+    headerList = state.getIn(['parsedFile', ...parentAugmentedIndexPath]);
+    if (headerIndex === 0) {
+      return state;
+    }
+
+    header = headerList.get(headerIndex);
+    return state.setIn(['parsedFile', ...parentAugmentedIndexPath],
+                          headerList.splice(headerIndex, 1).splice(headerIndex - 1, 0, header));
+  case 'moveHeaderDown':
+    [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
+    parentAugmentedIndexPath.reverse();
+    headerIndex = parseInt(headerIndex);
+
+    headerList = state.getIn(['parsedFile', ...parentAugmentedIndexPath]);
+    if (headerIndex === headerList.size - 1) {
+      return state;
+    }
+
+    header = headerList.get(headerIndex);
+    return state.setIn(['parsedFile', ...parentAugmentedIndexPath],
+                          headerList.splice(headerIndex, 1).splice(headerIndex + 1, 0, header));
   case 'displayFile':
     localStorage.setItem('filePath', payload.filePath);
     state = state.set('filePath', payload.filePath);

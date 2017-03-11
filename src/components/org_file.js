@@ -13,6 +13,8 @@ class OrgFile extends Component {
     this.handleTitleEditModeClick = this.handleTitleEditModeClick.bind(this);
     this.handleDescriptionEditModeClick = this.handleDescriptionEditModeClick.bind(this);
     this.handleRemoveHeaderClick = this.handleRemoveHeaderClick.bind(this);
+    this.handleMoveHeaderUpClick = this.handleMoveHeaderUpClick.bind(this);
+    this.handleMoveHeaderDownClick = this.handleMoveHeaderDownClick.bind(this);
   }
 
   handleAdvanceTodoClick(headerId) {
@@ -39,6 +41,14 @@ class OrgFile extends Component {
       this.props.orgActions.removeHeader(this.props.selectedHeaderId);
       this.props.orgActions.setDirty(true);
     }
+  }
+
+  handleMoveHeaderUpClick() {
+    this.props.orgActions.moveHeaderUp(this.props.selectedHeaderId);
+  }
+
+  handleMoveHeaderDownClick() {
+    this.props.orgActions.moveHeaderDown(this.props.selectedHeaderId);
   }
 
   render() {
@@ -97,9 +107,11 @@ class OrgFile extends Component {
                 style={buttonStyle}
                 onClick={() => this.handleRemoveHeaderClick()}></button>
         <button className={`fa fa-arrow-up btn btn--circle ${disabledClass}`}
-                style={buttonStyle}></button>
+                style={buttonStyle}
+                onClick={() => this.handleMoveHeaderUpClick()}></button>
         <button className={`fa fa-arrow-down btn btn--circle ${disabledClass}`}
-                style={buttonStyle}></button>
+                style={buttonStyle}
+                onClick={() => this.handleMoveHeaderDownClick()}></button>
       </div>
     );
 

@@ -38,8 +38,8 @@ class TitleLine extends Component {
   }
 
   render() {
-    let todoKeyword = this.props.todoKeyword;
     let todo = '';
+    const todoKeyword = this.props.todoKeyword;
     if (todoKeyword) {
       const todoClasses = ['todo-keyword', `todo-keyword--${todoKeyword.toLowerCase()}`];
       todo = (
