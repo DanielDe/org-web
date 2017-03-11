@@ -56,7 +56,7 @@ class OrgFile extends Component {
 
   render() {
     let dirtyIndicator = '';
-    if (this.props.dirty) {
+    if (this.props.dirty && !this.props.sampleMode) {
       const style = {
         padding: 3,
         backgroundColor: 'gray',
@@ -135,7 +135,8 @@ function mapStateToProps(state, props) {
     parsedFile: state.org.get('parsedFile'),
     filePath: state.org.get('filePath'),
     dirty: state.org.get('dirty'),
-    selectedHeaderId: state.org.get('selectedHeaderId')
+    selectedHeaderId: state.org.get('selectedHeaderId'),
+    sampleMode: state.org.get('sampleMode')
   };
 }
 
