@@ -15,7 +15,6 @@ class Reactorg extends Component {
     this.authenticateWithDropbox = this.authenticateWithDropbox.bind(this);
     this.handlePushToDropbox = this.handlePushToDropbox.bind(this);
     this.handleBackToFileChooser = this.handleBackToFileChooser.bind(this);
-    this.handleSignOut = this.handleSignOut.bind(this);
     this.viewSampleFile = this.viewSampleFile.bind(this);
     this.exitSampleMode = this.exitSampleMode.bind(this);
     this.handlePullClick = this.handlePullClick.bind(this);
@@ -72,10 +71,6 @@ class Reactorg extends Component {
     this.props.orgActions.stopDisplayingFile();
   }
 
-  handleSignOut() {
-    this.props.dropboxActions.signOut();
-  }
-
   viewSampleFile() {
     const sampleFileContents = "\n* This is a top level header\nHere is the contents of the top level header.\n** This is a subheader\n** Todos\n*** TODO Todo item 1\n*** DONE Todo item 2\nCLOSED: [2017-03-06 Mon 21:30]\n*** TODO Todo item 3\n* This is another top level header\n** Tags                                                          :tag1:tag2:\nTags aren't natively supported, but Org mode is text based, so you can still edit tags yourself!\n";
     this.props.orgActions.displaySample(sampleFileContents);
@@ -92,10 +87,6 @@ class Reactorg extends Component {
         <div className="loading-indicator">{this.props.loadingMessage}</div>
       );
     }
-
-    const signOutButton = (
-      <button onClick={() => this.handleSignOut()} className="btn">Sign out</button>
-    );
 
     let pushToDropboxButton = '';
     if (!this.props.liveSync) {
@@ -117,9 +108,6 @@ class Reactorg extends Component {
         <br />
         <button onClick={() => this.handleBackToFileChooser()}
                   className="btn">Back to file chooser</button>
-        <br />
-        <br />
-        {signOutButton}
       </div>
     );
 
@@ -147,7 +135,6 @@ class Reactorg extends Component {
           <div>
             {loadingIndicator}
             <FileChooser />
-            {signOutButton}
           </div>
         );
       } else {

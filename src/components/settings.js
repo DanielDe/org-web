@@ -8,10 +8,16 @@ class Settings extends Component {
     super(props);
 
     this.handleLiveSyncClick = this.handleLiveSyncClick.bind(this);
+    this.handleSignOut = this.handleSignOut.bind(this);
   }
 
   handleLiveSyncClick() {
     this.props.dropboxActions.setLiveSync(!this.props.liveSyncToDropbox);
+  }
+
+  handleSignOut() {
+    this.props.dropboxActions.signOut();
+    this.props.settingsClose();
   }
 
   render() {
@@ -44,6 +50,12 @@ class Settings extends Component {
                   onClick={() => this.handleLiveSyncClick()}>{liveSyncButtonText}</button>
           <div style={textStyle}>{liveSyncText}</div>
         </div>
+
+        <button onClick={() => this.handleSignOut()}
+                style={{margin: 10}}
+          className="btn">Sign out</button>
+
+        <br />
 
         <button style={{margin: 10}}
                 className="btn"
