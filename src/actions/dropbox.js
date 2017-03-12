@@ -13,6 +13,7 @@ export const downloadFile = (filePath) => {
       reader.addEventListener('loadend', () => {
         const contents = reader.result;
         dispatch(displayFile(contents, filePath));
+        dispatch(setDirty(false));
         dispatch(setLoadingMessage(null));
       });
       reader.readAsText(response.fileBlob);

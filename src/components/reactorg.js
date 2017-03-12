@@ -18,6 +18,7 @@ class Reactorg extends Component {
     this.handleSignOut = this.handleSignOut.bind(this);
     this.viewSampleFile = this.viewSampleFile.bind(this);
     this.exitSampleMode = this.exitSampleMode.bind(this);
+    this.handlePullClick = this.handlePullClick.bind(this);
 
     this.state = {};
   }
@@ -51,6 +52,20 @@ class Reactorg extends Component {
 
   handlePushToDropbox() {
     this.props.dropboxActions.push(this.props.filePath);
+  }
+
+  handlePullClick() {
+    const pull = () => {
+      this.props.dropboxActions.downloadFile(this.props.filePath);
+    };
+
+    if (this.props.dirty) {
+      if (window.confirm('You have unpushed changes. Are you sure you want to pull?')) {
+        pull();
+      }
+    } else {
+      pull();
+    }
   }
 
   handleBackToFileChooser() {
@@ -94,6 +109,10 @@ class Reactorg extends Component {
     const nonSampleModeButtons = (
       <div>
         {pushToDropboxButton}
+        <br />
+        <br />
+        <button onClick={() => this.handlePullClick()}
+                  className="btn">Pull from Dropbox</button>
         <br />
         <br />
         <button onClick={() => this.handleBackToFileChooser()}
@@ -154,7 +173,8 @@ function mapStateToProps(state, props) {
     filePath: state.org.get('filePath'),
     sampleMode: state.org.get('sampleMode'),
     loadingMessage: state.base.get('loadingMessage'),
-    liveSync: state.dropbox.get('liveSync')
+    liveSync: state.dropbox.get('liveSync'),
+    dirty: state.org.get('dirty')
   };
 }
 
