@@ -16,6 +16,9 @@ export default (state = new Immutable.Map(), payload) => {
   case 'unauthenticate':
     localStorage.setItem('dropboxAccessToken', '');
     return state.set('dropboxAccessToken', null);
+  case 'setLiveSync':
+    localStorage.setItem('liveSyncToDropbox', payload.liveSync);
+    return state.set('liveSync', payload.liveSync);
   default:
     return state;
   }

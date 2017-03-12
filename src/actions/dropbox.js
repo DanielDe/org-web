@@ -33,6 +33,13 @@ export const unauthenticate = () => {
   };
 };
 
+export const setLiveSync = (liveSync) => {
+  return {
+    type: 'setLiveSync',
+    liveSync
+  };
+};
+
 export const signOut = () => {
   return (dispatch, getState) => {
     dispatch(stopDisplayingFile());
@@ -96,10 +103,8 @@ export const push = (filePath) => {
       }).then(response => {
         dispatch(setDirty(false));
         dispatch(setLoadingMessage(null));
-        console.log('File pushed!');
       }).catch(error => {
-        console.error('There was an error pushing the file!');
-        console.error(error);
+        alert(`There was an error pushing the file: ${error}`);
       });
     });
   };

@@ -3,6 +3,7 @@
     height: 30px;
     padding: 10px;
     display: flex;
+    align-items: center;
 }
 
 .app-header__title {

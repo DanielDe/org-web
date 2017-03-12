@@ -1,4 +1,4 @@
-/* globals Dropbox */
+/* globals Dropbox, localStorage */
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -38,6 +38,9 @@ class Reactorg extends Component {
     if (filePath) {
       this.props.dropboxActions.downloadFile(filePath);
     }
+
+    const liveSyncToDropbox = localStorage.getItem('liveSyncToDropbox') === 'true';
+    this.props.dropboxActions.setLiveSync(liveSyncToDropbox);
   }
 
   authenticateWithDropbox() {
@@ -79,11 +82,18 @@ class Reactorg extends Component {
       <button onClick={() => this.handleSignOut()} className="btn">Sign out</button>
     );
 
-    const nonSampleModeButtons = (
-      <div>
+    let pushToDropboxButton = '';
+    if (!this.props.liveSync) {
+      pushToDropboxButton = (
         <button onClick={() => this.handlePushToDropbox()}
                 style={{marginTop: 20}}
                 className="btn">Push to Dropbox</button>
+      );
+    }
+
+    const nonSampleModeButtons = (
+      <div>
+        {pushToDropboxButton}
         <br />
         <br />
         <button onClick={() => this.handleBackToFileChooser()}
@@ -143,7 +153,8 @@ function mapStateToProps(state, props) {
     fileContents: state.org.get('fileContents'),
     filePath: state.org.get('filePath'),
     sampleMode: state.org.get('sampleMode'),
-    loadingMessage: state.base.get('loadingMessage')
+    loadingMessage: state.base.get('loadingMessage'),
+    liveSync: state.dropbox.get('liveSync')
   };
 }
 

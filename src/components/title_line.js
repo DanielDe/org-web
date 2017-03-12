@@ -18,7 +18,7 @@ class TitleLine extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.editMode && !nextProps.editMode) {
       this.props.actions.editHeaderTitle(this.props.headerId, this.state.titleValue);
-      this.props.actions.setDirty(true);
+      this.props.actions.syncChanges();
     }
   }
 

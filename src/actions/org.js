@@ -1,3 +1,5 @@
+import { push } from './dropbox';
+
 export const addHeader = (parentHeaderId) => {
   return {
     type: 'addHeader',
@@ -139,5 +141,15 @@ export const setDirty = (dirty) => {
   return {
     type: 'setDirty',
     dirty
+  };
+};
+
+export const syncChanges = () => {
+  return (dispatch, getState) => {
+    dispatch(setDirty(true));
+
+    if (getState().dropbox.get('liveSync')) {
+      dispatch(push(getState().org.get('filePath')));
+    }
   };
 };
