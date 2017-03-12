@@ -1,5 +1,5 @@
 /* globals Dropbox, FileReader */
-import { displayFile, stopDisplayingFile, setFileContents, setDirty } from './org';
+import { displayFile, stopDisplayingFile, setDirty } from './org';
 import { setLoadingMessage } from './base';
 import exportOrg from '../export_org';
 
@@ -94,7 +94,6 @@ export const push = (filePath) => {
         },
         autorename: true
       }).then(response => {
-        dispatch(setFileContents(contents));
         dispatch(setDirty(false));
         dispatch(setLoadingMessage(null));
         console.log('File pushed!');

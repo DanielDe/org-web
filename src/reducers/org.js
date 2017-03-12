@@ -81,8 +81,6 @@ export default (state = new Immutable.Map(), payload) => {
   case 'displaySampleFile':
     state = state.set('fileContents', payload.sampleFileContents);
     return state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.sampleFileContents)));
-  case 'setFileContents':
-    return state.set('fileContents', payload.fileContents);
   case 'enterSampleMode':
     return state.set('sampleMode', true);
   case 'exitSampleMode':

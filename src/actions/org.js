@@ -27,13 +27,6 @@ export const displayFile = (fileContents, filePath) => {
   };
 };
 
-export const setFileContents = (fileContents) => {
-  return {
-    type: 'setFileContents',
-    fileContents
-  };
-};
-
 export const enterSampleMode = () => {
   return {
     type: 'enterSampleMode'
