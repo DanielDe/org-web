@@ -27,6 +27,8 @@ class HeaderContent extends Component {
     let description = <div>{this.props.description}</div>;
     if (this.props.editMode) {
       description = <textarea autoFocus
+                              className="textarea"
+                              rows="8"
                               value={this.state.descriptionValue}
                               onChange={this.handleDescriptionChange} />;
     }

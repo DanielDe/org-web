@@ -40,3 +40,7 @@
 .nice-scroll {
     -webkit-overflow-scrolling: touch;
 }
+
+.textarea {
+    width: 95%;
+}

@@ -54,11 +54,12 @@ class TitleLine extends Component {
 
     let title = <span style={{fontWeight: 'bold'}}>{this.props.title} {tail}</span>;
     if (this.props.editMode) {
-      title = <input type="text"
-                     autoFocus
-                     value={this.state.titleValue}
-                     onChange={this.handleTitleChange}
-                     onClick={(event) => this.handleTitleFieldClick(event)} />;
+      title = <textarea autoFocus
+                        className="textarea"
+                        rows="4"
+                        value={this.state.titleValue}
+                        onChange={this.handleTitleChange}
+                        onClick={(event) => this.handleTitleFieldClick(event)} />;
     }
 
     return (
