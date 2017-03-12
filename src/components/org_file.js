@@ -15,6 +15,7 @@ class OrgFile extends Component {
     this.handleRemoveHeaderClick = this.handleRemoveHeaderClick.bind(this);
     this.handleMoveHeaderUpClick = this.handleMoveHeaderUpClick.bind(this);
     this.handleMoveHeaderDownClick = this.handleMoveHeaderDownClick.bind(this);
+    this.handleDoneClick = this.handleDoneClick.bind(this);
   }
 
   handleAdvanceTodoClick(headerId) {
@@ -28,6 +29,15 @@ class OrgFile extends Component {
 
     this.props.orgActions.selectLastHeader(this.props.selectedHeaderId);
     this.props.orgActions.enterTitleEditMode();
+  }
+
+  handleDoneClick() {
+    if (this.props.inTitleEditMode) {
+      this.props.orgActions.toggleTitleEditMode();
+    }
+    if (this.props.inDescriptionEditMode) {
+      this.props.orgActions.toggleDescriptionEditMode();
+    }
   }
 
   handleTitleEditModeClick() {
@@ -92,8 +102,8 @@ class OrgFile extends Component {
     const buttonStyle = {
       marginRight: 20
     };
-    const actionDrawer = (
-      <div style={actionDrawerStyle} className="nice-scroll">
+    let actionDrawerContents = (
+      <div>
         <button className={`fa fa-check-square btn btn--circle ${disabledClass}`}
                 style={buttonStyle}
                 onClick={() => this.handleAdvanceTodoClick()}></button>
@@ -117,6 +127,23 @@ class OrgFile extends Component {
                 onClick={() => this.handleMoveHeaderDownClick()}></button>
       </div>
     );
+    if (this.props.inTitleEditMode || this.props.inDescriptionEditMode) {
+      const doneButtonStyle = {
+        width: '100%',
+        height: '100%',
+        marginLeft: -10
+      };
+      actionDrawerContents = (
+        <button className="btn"
+                style={doneButtonStyle}
+                onClick={() => this.handleDoneClick()}>Done</button>
+      );
+    }
+    const actionDrawer = (
+      <div style={actionDrawerStyle} className="nice-scroll">
+        {actionDrawerContents}
+      </div>
+    );
 
     return (
       <div>
@@ -136,7 +163,9 @@ function mapStateToProps(state, props) {
     filePath: state.org.get('filePath'),
     dirty: state.org.get('dirty'),
     selectedHeaderId: state.org.get('selectedHeaderId'),
-    sampleMode: state.org.get('sampleMode')
+    sampleMode: state.org.get('sampleMode'),
+    inTitleEditMode: state.org.get('inTitleEditMode'),
+    inDescriptionEditMode: state.org.get('inDescriptionEditMode')
   };
 }
 
