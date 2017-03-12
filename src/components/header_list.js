@@ -8,7 +8,6 @@ import HeaderContent from './header_content';
 class HeaderList extends Component {
   constructor(props) {
     super(props);
-    this.handleTitleLineClick = this.handleTitleLineClick.bind(this);
 
     this.state = {
       newHeaderJustAdded: false
@@ -25,13 +24,6 @@ class HeaderList extends Component {
     if (this.state.newHeaderJustAdded) {
       this.setState({ newHeaderJustAdded: false });
       this.lastHeader.scrollIntoView(true);
-    }
-  }
-
-  handleTitleLineClick(headerId, hasContent) {
-    this.props.actions.selectHeader(headerId);
-    if (hasContent) {
-      this.props.actions.toggleHeaderOpened(headerId);
     }
   }
 
@@ -71,7 +63,6 @@ class HeaderList extends Component {
                      todoKeyword={todoKeyword}
                      opened={opened}
                      hasContent={hasContent}
-                     titleClick={() => this.handleTitleLineClick(headerId, hasContent)}
                      editMode={inTitleEditMode} />
           <HeaderContent headerId={headerId}
                          subheaders={header.get('subheaders')}

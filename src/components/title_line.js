@@ -23,10 +23,11 @@ class TitleLine extends Component {
   }
 
   handleTitleClick() {
-    this.props.actions.selectHeader(this.props.headerId);
-    if (this.props.hasContent) {
+    if (this.props.hasContent && this.props.isSelected) {
       this.props.actions.toggleHeaderOpened(this.props.headerId);
     }
+
+    this.props.actions.selectHeader(this.props.headerId);
   }
 
   handleTitleChange(event) {
@@ -71,7 +72,9 @@ class TitleLine extends Component {
 }
 
 function mapStateToProps(state, props) {
-  return {};
+  return {
+    isSelected: state.org.get('selectedHeaderId') === props.headerId
+  };
 }
 
 function mapDispatchToProps(dispatch) {
