@@ -23,7 +23,7 @@ class TitleLine extends Component {
   }
 
   handleTitleClick() {
-    if (this.props.hasContent && this.props.isSelected) {
+    if (this.props.hasContent && (!this.props.opened || this.props.isSelected)) {
       this.props.actions.toggleHeaderOpened(this.props.headerId);
     }
 
