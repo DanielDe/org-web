@@ -1,6 +1,6 @@
 export const TODO_KEYWORDS = ['TODO', 'DONE'];
 
-export const newHeaderWithTitle = (titleLine, parentId = []) => {
+export const newHeaderWithTitle = (titleLine, parentId = [], empty = false) => {
   const todoKeyword = TODO_KEYWORDS.filter(keyword => titleLine.startsWith(keyword))[0];
   let title = titleLine;
   if (todoKeyword) {
@@ -14,7 +14,8 @@ export const newHeaderWithTitle = (titleLine, parentId = []) => {
     subheaders: [],
     description: '',
     opened: false,
-    id: [...parentId, Math.random()]
+    id: [...parentId, Math.random()],
+    empty: empty
   };
 };
 
@@ -35,12 +36,12 @@ const insertHeaderWithNestingLevel = (parentHeader, nestingLevel, title) => {
     parentHeader.subheaders.push(newHeaderWithTitle(title, parentHeader.id));
   } else if (nestingLevel > 2) {
     if (parentHeader.subheaders.length === 0) {
-      parentHeader.subheaders.push(newHeaderWithTitle('', parentHeader.id));
+      parentHeader.subheaders.push(newHeaderWithTitle('', parentHeader.id, true));
     }
     let lastSubheader = parentHeader.subheaders[parentHeader.subheaders.length - 1];
     insertHeaderWithNestingLevel(lastSubheader, nestingLevel - 1, title);
   } else {
-    console.error('Something went wrng inserting a header with nesting level...');
+    console.error('Something went wrong inserting a header with nesting level...');
   }
 };
 
@@ -57,7 +58,7 @@ const parseOrg = (fileContents) => {
       // Subheader.
       const nestingLevel = line.indexOf(' ');
       const title = line.substr(nestingLevel + 1);
-      // TODO: handle case where there is no space in the line.
+      // TODO: handle case where there is no space in the line after the last *.
 
       if (headers.length === 0) {
         headers.push(newHeaderWithTitle(''));

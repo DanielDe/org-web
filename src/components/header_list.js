@@ -34,46 +34,55 @@ class HeaderList extends Component {
 
     const headerListElements = this.props.headers.map((header, index) => {
       const headerId = header.get('id');
+      const isEmpty = header.get('empty');
       const title = header.getIn(['titleLine', 'title']);
       let todoKeyword = header.getIn(['titleLine', 'todoKeyword']);
-      const opened = header.get('opened');
+      const opened = header.get('opened') || isEmpty;
       const hasContent = !!header.get('description') || !!header.get('subheaders').size;
       const isSelected = headerId === this.props.selectedHeaderId;
       const inTitleEditMode = isSelected && this.props.inTitleEditMode;
       const inDescriptionEditMode = isSelected && this.props.inDescriptionEditMode;
 
-      let style = {
-        marginBottom: 2,
-        marginTop: 25,
-        paddingLeft: 20,
-        paddingTop: 5
-      };
+      let style = { paddingLeft: 20 };
+      if (!this.props.parentEmpty) {
+        style.marginBottom = 2;
+        style.marginTop = 25;
+        style.paddingTop = 5;
+      }
       if (isSelected) {
         style.backgroundColor = 'rgba(239, 255, 0, 0.28)';
       }
+
+      const bullet = isEmpty ? '' : <div style={{marginLeft: -16}}>*</div>;
+      const titleLine = isEmpty ? '' : <TitleLine headerId={headerId}
+                                                  title={title}
+                                                  todoKeyword={todoKeyword}
+                                                  opened={opened}
+                                                  hasContent={hasContent}
+                                                  editMode={inTitleEditMode} />;
 
       return (
         <div className="org-header"
              key={index}
              style={style}
              ref={(newHeader) => { this.lastHeader = newHeader; }}>
-          <div style={{marginLeft: -16}}>*</div>
-          <TitleLine headerId={headerId}
-                     title={title}
-                     todoKeyword={todoKeyword}
-                     opened={opened}
-                     hasContent={hasContent}
-                     editMode={inTitleEditMode} />
+          {bullet}
+          {titleLine}
           <HeaderContent headerId={headerId}
                          subheaders={header.get('subheaders')}
                          opened={opened}
                          description={header.get('description')}
-                         editMode={inDescriptionEditMode} />
+                         editMode={inDescriptionEditMode}
+                         parentEmpty={isEmpty} />
         </div>
       );
     });
 
-    return <div className="org-header-list">{headerListElements}</div>;
+    let style = {};
+    if (this.props.parentEmpty) {
+      style = { marginTop: -18 };
+    }
+    return <div className="org-header-list" style={style}>{headerListElements}</div>;
   }
 }
 

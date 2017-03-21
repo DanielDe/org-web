@@ -1,19 +1,21 @@
 const exportHeader = (header, nestingLevel = 0) => {
   let contents = '';
 
-  contents += '*'.repeat(nestingLevel + 1);
+  if (!header.empty) {
+    contents += '*'.repeat(nestingLevel + 1);
 
-  if (header.titleLine.todoKeyword) {
-    contents += ` ${header.titleLine.todoKeyword}`;
-  }
-  contents += ` ${header.titleLine.title}`;
+    if (header.titleLine.todoKeyword) {
+      contents += ` ${header.titleLine.todoKeyword}`;
+    }
+    contents += ` ${header.titleLine.title}`;
 
-  if (header.description) {
-    contents += '\n' + header.description;
+    if (header.description) {
+      contents += '\n' + header.description;
+    }
   }
 
   if (header.subheaders.length > 0) {
-    contents += '\n' + header.subheaders.map(subheader => {
+    contents += (header.empty ? '' : '\n') + header.subheaders.map(subheader => {
       return exportHeader(subheader, nestingLevel + 1);
     }).join('\n');
   }

@@ -39,7 +39,8 @@ class HeaderContent extends Component {
         <div>
           {description}
 
-          <HeaderList headers={this.props.subheaders} />
+          <HeaderList headers={this.props.subheaders}
+                      parentEmpty={this.props.parentEmpty} />
         </div>
       );
     }

@@ -145,13 +145,25 @@ class OrgFile extends Component {
       </div>
     );
 
+    let parsingError = this.props.parsedFile.size === 0;
+    let mainContent = '';
+    if (parsingError) {
+      mainContent = (
+        <div style={{textAlign: 'center', margin: 10}}>
+          Couldn't parse file
+        </div>
+      );
+    } else {
+      mainContent = <HeaderList headers={this.props.parsedFile} parentEmpty={false} />;
+    }
+
     return (
       <div>
         {dirtyIndicator}
         <div style={{whiteSpace: 'pre-wrap'}}>
-          <HeaderList headers={this.props.parsedFile} />
+          {mainContent}
         </div>
-        {actionDrawer}
+        {!parsingError && actionDrawer}
       </div>
     );
   }
