@@ -40,11 +40,12 @@ class HeaderList extends Component {
       const opened = header.get('opened') || isEmpty;
       const hasContent = !!header.get('description') || !!header.get('subheaders').size;
       const isSelected = headerId === this.props.selectedHeaderId;
+      const isFirstChild = index === 0;
       const inTitleEditMode = isSelected && this.props.inTitleEditMode;
       const inDescriptionEditMode = isSelected && this.props.inDescriptionEditMode;
 
       let style = { paddingLeft: 20 };
-      if (!this.props.parentEmpty) {
+      if (!this.props.parentEmpty || !isFirstChild) {
         style.marginBottom = 2;
         style.marginTop = 25;
         style.paddingTop = 5;

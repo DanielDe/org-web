@@ -96,6 +96,20 @@ export const moveHeaderDown = (headerId) => {
   };
 };
 
+export const moveHeaderLeft = (headerId) => {
+  return {
+    type: 'moveHeaderLeft',
+    headerId
+  };
+};
+
+export const moveHeaderRight = (headerId) => {
+  return {
+    type: 'moveHeaderRight',
+    headerId
+  };
+};
+
 export const advanceTodoState = (headerId) => {
   return {
     type: 'advanceTodoState',
