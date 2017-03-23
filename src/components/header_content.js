@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as orgActions from '../actions/org';
-import HeaderList from './header_list';
 
 class HeaderContent extends Component {
   constructor(props) {
@@ -24,6 +23,10 @@ class HeaderContent extends Component {
   }
 
   render() {
+    if (!this.props.opened) {
+      return <div></div>;
+    }
+
     let description = <div>{this.props.description}</div>;
     if (this.props.editMode) {
       description = <textarea autoFocus
@@ -33,21 +36,11 @@ class HeaderContent extends Component {
                               onChange={this.handleDescriptionChange} />;
     }
 
-    let content = '';
-    if (this.props.opened) {
-      content = (
-        <div>
-          {description}
-
-          <HeaderList headers={this.props.subheaders}
-                      parentEmpty={this.props.parentEmpty} />
-        </div>
-      );
-    }
-
     return (
       <div>
-        {content}
+        <div>
+          {description}
+        </div>
       </div>
     );
   }

@@ -16,6 +16,11 @@ const indexPathForHeaderWithId = (headerId, headers, nestingLevel = 0) => {
                                              nestingLevel + 1)];
 };
 
+const augmentedIndexPathForHeaderWithId = (headerId, headers) => {
+  const indexPath = indexPathForHeaderWithId(headerId, headers);
+  return indexPath.join('.subheaders.').split('.');
+};
+
 // Given a header, closes all subheaders, and returns the new state.
 const closeAllSubheaders = (header) => {
   header = header.set('opened', false);
@@ -107,17 +112,12 @@ const moveHeaderLeft = (state, headerId) => {
   return state.setIn(['parsedFile', ...grandparentAugmentedIndexPath], grandparent);
 };
 
-const augmentedIndexPathForHeaderWithId = (headerId, headers) => {
-  const indexPath = indexPathForHeaderWithId(headerId, headers);
-  return indexPath.join('.subheaders.').split('.');
-};
-
 export default (state = new Immutable.Map(), payload) => {
   let augmentedIndexPath, headerIndex, parentAugmentedIndexPath, headerList, header;
-  if (payload.headerId || payload.parentHeaderId) {
-    augmentedIndexPath = augmentedIndexPathForHeaderWithId(payload.headerId || payload.parentHeaderId,
-                                                           state.get('parsedFile'));
-  }
+  // if (payload.headerId || payload.parentHeaderId) {
+  //   augmentedIndexPath = augmentedIndexPathForHeaderWithId(payload.headerId || payload.parentHeaderId,
+  //                                                          state.get('parsedFile'));
+  // }
 
   switch (payload.type) {
   case 'addHeader':
@@ -178,13 +178,11 @@ export default (state = new Immutable.Map(), payload) => {
     localStorage.setItem('filePath', '');
     return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
   case 'toggleHeaderOpened':
-    const opened = state.getIn(['parsedFile', ...augmentedIndexPath].concat(['opened']));
-    if (opened) {
-      return state.updateIn(['parsedFile', ...augmentedIndexPath],
-                            header => closeAllSubheaders(header));
-    } else {
-      return state.setIn(['parsedFile', ...augmentedIndexPath].concat(['opened']), true);
-    }
+    const headers = state.get('parsedFile');
+    headerIndex = headers.findIndex(header => header.get('id') === payload.headerId);
+    // TODO: handle closing all subheaders.
+    const opened = state.getIn(['parsedFile', headerIndex, 'opened']);
+    return state.setIn(['parsedFile', headerIndex, 'opened'], !opened);
   case 'openHeader':
     return state.updateIn(['parsedFile', ...augmentedIndexPath],
                           header => header.set('opened', true));
