@@ -1,9 +1,9 @@
 import { push } from './dropbox';
 
-export const addHeader = (parentHeaderId) => {
+export const addHeader = (headerId) => {
   return {
     type: 'addHeader',
-    parentHeaderId
+    headerId
   };
 };
 
@@ -11,6 +11,13 @@ export const selectLastHeader = (parentHeaderId) => {
   return {
     type: 'selectLastHeader',
     parentHeaderId
+  };
+};
+
+export const selectNextSiblingHeader = (headerId) => {
+  return {
+    type: 'selectNextSiblingHeader',
+    headerId
   };
 };
 

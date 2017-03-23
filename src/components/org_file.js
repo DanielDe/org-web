@@ -25,11 +25,10 @@ class OrgFile extends Component {
   }
 
   handleAddHeaderClick() {
-    this.props.orgActions.openHeader(this.props.selectedHeaderId);
     this.props.orgActions.addHeader(this.props.selectedHeaderId);
     this.props.orgActions.syncChanges();
 
-    this.props.orgActions.selectLastHeader(this.props.selectedHeaderId);
+    this.props.orgActions.selectNextSiblingHeader(this.props.selectedHeaderId);
     this.props.orgActions.enterTitleEditMode();
   }
 

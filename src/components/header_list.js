@@ -84,7 +84,7 @@ class HeaderList extends Component {
 
       return (
         <div className="org-header"
-             key={index}
+             key={header.headerId}
              style={style}
              ref={(newHeader) => { this.lastHeader = newHeader; }}>
           <div style={{marginLeft: -16}}>*</div>
@@ -93,11 +93,11 @@ class HeaderList extends Component {
                      todoKeyword={header.todoKeyword}
                      opened={header.opened}
                      hasContent={header.hasContent}
-                     editMode={header.inTitleEditMode} />
+                     editMode={header.titleEditMode} />
           <HeaderContent headerId={header.headerId}
                          opened={header.opened}
                          description={header.description}
-                         editMode={header.inDescriptionEditMode} />
+                         editMode={header.descriptionEditMode} />
         </div>
       );
     });
