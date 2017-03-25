@@ -26,7 +26,6 @@ class HeaderList extends Component {
         opened: header.opened,
         titleEditMode: inTitleEditMode,
         descriptionEditMode: inDescriptionEditMode,
-        displayed: header.nestingLevel === 1 || index === 0,
         hasContent: !!header.description
       };
     });
