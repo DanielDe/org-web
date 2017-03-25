@@ -129,7 +129,49 @@ const moveHeaderRight = (state, payload) => {
                         nestingLevel => nestingLevel + 1);
 };
 
+const indexOfPreviousSibling = (headers, headerIndex) => {
+  const nestingLevel = headers.getIn([headerIndex, 'nestingLevel']);
+
+  for (let i = headerIndex - 1; i >= 0; --i) {
+    const header = headers.get(i);
+
+    if (header.get('nestingLevel') < nestingLevel) {
+      return null;
+    }
+
+    if (header.get('nestingLevel') === nestingLevel) {
+      return i;
+    }
+  }
+
+  return null;
+};
+
+const moveHeaderUp = (state, payload) => {
+  let headers = state.get('parsedFile');
+  const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
+
+  const previousSiblingIndex = indexOfPreviousSibling(headers, headerIndex);
+  if (previousSiblingIndex === null) {
+    return state;
+  }
+
+  const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
+  Array(1 + subheaders.size).fill().forEach(() => {
+    headers = headers.insert(previousSiblingIndex, headers.get(headerIndex + subheaders.size));
+    headers = headers.delete(headerIndex + subheaders.size + 1);
+  });
+
+  return state.set('parsedFile', headers);
+};
+
+const moveHeaderDown = (state, payload) => {
+  return state;
+};
+
 const selectNextSiblingHeader = (state, payload) => {
+  // TODO: Account for the case where the header doesn't have a next sibling.
+
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
   const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
@@ -152,39 +194,15 @@ const stopDisplayingFile = (state, payload) => {
 };
 
 export default (state = new Immutable.Map(), payload) => {
-  let augmentedIndexPath, headerIndex, parentAugmentedIndexPath, headerList, header;
-
   switch (payload.type) {
   case 'addHeader':
     return addHeader(state, payload);
   case 'removeHeader':
     return removeHeader(state, payload);
   case 'moveHeaderUp':
-    [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
-    parentAugmentedIndexPath.reverse();
-    headerIndex = parseInt(headerIndex, 10);
-
-    headerList = state.getIn(['parsedFile', ...parentAugmentedIndexPath]);
-    if (headerIndex === 0) {
-      return state;
-    }
-
-    header = headerList.get(headerIndex);
-    return state.setIn(['parsedFile', ...parentAugmentedIndexPath],
-                          headerList.splice(headerIndex, 1).splice(headerIndex - 1, 0, header));
+    return moveHeaderUp(state, payload);
   case 'moveHeaderDown':
-    [headerIndex, ...parentAugmentedIndexPath] = augmentedIndexPath.slice().reverse();
-    parentAugmentedIndexPath.reverse();
-    headerIndex = parseInt(headerIndex, 10);
-
-    headerList = state.getIn(['parsedFile', ...parentAugmentedIndexPath]);
-    if (headerIndex === headerList.size - 1) {
-      return state;
-    }
-
-    header = headerList.get(headerIndex);
-    return state.setIn(['parsedFile', ...parentAugmentedIndexPath],
-                       headerList.splice(headerIndex, 1).splice(headerIndex + 1, 0, header));
+    return moveHeaderDown(state, payload);
   case 'moveHeaderLeft':
     return moveHeaderLeft(state, payload);
   case 'moveHeaderRight':
