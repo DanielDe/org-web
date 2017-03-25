@@ -6,27 +6,6 @@ import TitleLine from './title_line';
 import HeaderContent from './header_content';
 
 class HeaderList extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      newHeaderJustAdded: false
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.headers.size === this.props.headers.size + 1) {
-      this.setState({ newHeaderJustAdded: true });
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.state.newHeaderJustAdded) {
-      this.setState({ newHeaderJustAdded: false });
-      this.lastHeader.scrollIntoView(true);
-    }
-  }
-
   render() {
     if (this.props.headers.length === 0) {
       return <div></div>;
@@ -95,8 +74,7 @@ class HeaderList extends Component {
       return (
         <div className="org-header"
              key={header.headerId}
-             style={style}
-             ref={(newHeader) => { this.lastHeader = newHeader; }}>
+             style={style}>
           <div style={{marginLeft: -16}}>*</div>
           <TitleLine headerId={header.headerId}
                      title={header.title}
