@@ -7,13 +7,6 @@ export const addHeader = (headerId) => {
   };
 };
 
-export const selectLastHeader = (parentHeaderId) => {
-  return {
-    type: 'selectLastHeader',
-    parentHeaderId
-  };
-};
-
 export const selectNextSiblingHeader = (headerId) => {
   return {
     type: 'selectNextSiblingHeader',

@@ -29,8 +29,17 @@ const subheadersOfHeaderWithId = (headers, headerId) => {
 const toggleHeaderOpened = (state, payload) => {
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
-  // TODO: handle closing all subheaders.
+
   const opened = headerWithId(headers, payload.headerId).get('opened');
+
+  if (opened) {
+    // Close all subheaders as well.
+    const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
+    subheaders.forEach((subheader, index) => {
+      state = state.setIn(['parsedFile', headerIndex + index + 1, 'opened'], false);
+    });
+  }
+
   return state.setIn(['parsedFile', headerIndex, 'opened'], !opened);
 };
 
@@ -108,6 +117,18 @@ const selectNextSiblingHeader = (state, payload) => {
   return state.set('selectedHeaderId', nextSibling.get('id'));
 };
 
+const displayFile = (state, payload) => {
+  localStorage.setItem('filePath', payload.filePath);
+  return state.set('filePath', payload.filePath)
+    .set('fileContents', payload.fileContents)
+    .set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));
+};
+
+const stopDisplayingFile = (state, payload) => {
+  localStorage.setItem('filePath', '');
+  return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
+};
+
 export default (state = new Immutable.Map(), payload) => {
   let augmentedIndexPath, headerIndex, parentAugmentedIndexPath, headerList, header;
 
@@ -148,37 +169,12 @@ export default (state = new Immutable.Map(), payload) => {
   case 'moveHeaderRight':
     // TODO:
     return state;
-  case 'displayFile':
-    localStorage.setItem('filePath', payload.filePath);
-    state = state.set('filePath', payload.filePath);
-    state = state.set('fileContents', payload.fileContents);
-    state = state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));
-    return state;
-  case 'displaySampleFile':
-    state = state.set('fileContents', payload.sampleFileContents);
-    return state.set('parsedFile', Immutable.fromJS(parseOrg.default(payload.sampleFileContents)));
-  case 'enterSampleMode':
-    return state.set('sampleMode', true);
-  case 'exitSampleMode':
-    return state.set('sampleMode', false).set('fileContents', null);
-  case 'stopDisplayingFile':
-    localStorage.setItem('filePath', '');
-    return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
   case 'toggleHeaderOpened':
     return toggleHeaderOpened(state, payload);
   case 'openHeader':
     return openHeader(state, payload);
   case 'selectHeader':
     return selectHeader(state, payload);
-  case 'selectLastHeader':
-    return state;
-
-    // // TODO:
-    // headerList = state.getIn(['parsedFile', ...augmentedIndexPath]);
-    // const subheaders = headerList.get('subheaders');
-
-    // return state.set('selectedHeaderId',
-    //                  subheaders.get(subheaders.size - 1).get('id'));
   case 'selectNextSiblingHeader':
     return selectNextSiblingHeader(state, payload);
   case 'enterTitleEditMode':
@@ -195,6 +191,17 @@ export default (state = new Immutable.Map(), payload) => {
     return advanceTodoState(state, payload);
   case 'setDirty':
     return state.set('dirty', payload.dirty);
+  case 'displayFile':
+    return displayFile(state, payload);
+  case 'displaySampleFile':
+    return state.set('fileContents', payload.sampleFileContents)
+      .set('parsedFile', Immutable.fromJS(parseOrg.default(payload.sampleFileContents)));
+  case 'enterSampleMode':
+    return state.set('sampleMode', true);
+  case 'exitSampleMode':
+    return state.set('sampleMode', false).set('fileContents', null);
+  case 'stopDisplayingFile':
+    return stopDisplayingFile(state, payload);
   default:
     return state;
   }
