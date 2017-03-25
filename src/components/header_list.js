@@ -32,6 +32,17 @@ class HeaderList extends Component {
     });
 
     headerData.forEach((header, index) => {
+      // Iterate over all previous headers to check for parents of this header. If this header
+      // has no parents, it should be displayed.
+      const previousHeaders = headerData.slice(0, index);
+      const noParents = previousHeaders.every(previousHeader => {
+        return previousHeader.nestingLevel >= header.nestingLevel;
+      });
+      if (noParents) {
+        header.displayed = true;
+      }
+
+      // Iterate over all following headers to check for direct descendants of this one.
       const remainingHeaders = headerData.slice(index + 1);
       for (let i = 0; i < remainingHeaders.length; ++i) {
         let subheader = remainingHeaders[i];
@@ -45,16 +56,6 @@ class HeaderList extends Component {
         // If this header is open and displayed, all of its subheaders are displayed.
         // Otherwise they're all hidden.
         subheader.displayed = header.opened && header.displayed;
-      }
-
-      // Iterate over all previous headers to check for parents of this header. If this header
-      // has no parents, it should be displayed.
-      const previousHeaders = headerData.slice(0, index);
-      const noParents = previousHeaders.every(previousHeader => {
-        return previousHeader.nestingLevel >= header.nestingLevel;
-      });
-      if (noParents) {
-        header.displayed = true;
       }
     });
 
