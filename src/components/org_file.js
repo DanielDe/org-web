@@ -15,6 +15,8 @@ class OrgFile extends Component {
     this.handleRemoveHeaderClick = this.handleRemoveHeaderClick.bind(this);
     this.handleMoveHeaderUpClick = this.handleMoveHeaderUpClick.bind(this);
     this.handleMoveHeaderDownClick = this.handleMoveHeaderDownClick.bind(this);
+    this.handleMoveHeaderLeftClick = this.handleMoveHeaderLeftClick.bind(this);
+    this.handleMoveHeaderRightClick = this.handleMoveHeaderRightClick.bind(this);
     this.handleDoneClick = this.handleDoneClick.bind(this);
   }
 
@@ -23,11 +25,10 @@ class OrgFile extends Component {
   }
 
   handleAddHeaderClick() {
-    this.props.orgActions.openHeader(this.props.selectedHeaderId);
     this.props.orgActions.addHeader(this.props.selectedHeaderId);
     this.props.orgActions.syncChanges();
 
-    this.props.orgActions.selectLastHeader(this.props.selectedHeaderId);
+    this.props.orgActions.selectNextSiblingHeader(this.props.selectedHeaderId);
     this.props.orgActions.enterTitleEditMode();
   }
 
@@ -62,6 +63,14 @@ class OrgFile extends Component {
 
   handleMoveHeaderDownClick() {
     this.props.orgActions.moveHeaderDown(this.props.selectedHeaderId);
+  }
+
+  handleMoveHeaderLeftClick() {
+    this.props.orgActions.moveHeaderLeft(this.props.selectedHeaderId);
+  }
+
+  handleMoveHeaderRightClick() {
+    this.props.orgActions.moveHeaderRight(this.props.selectedHeaderId);
   }
 
   render() {
@@ -125,6 +134,12 @@ class OrgFile extends Component {
         <button className={`fa fa-arrow-down btn btn--circle ${disabledClass}`}
                 style={buttonStyle}
                 onClick={() => this.handleMoveHeaderDownClick()}></button>
+        <button className={`fa fa-arrow-left btn btn--circle ${disabledClass}`}
+                style={buttonStyle}
+                onClick={() => this.handleMoveHeaderLeftClick()}></button>
+        <button className={`fa fa-arrow-right btn btn--circle ${disabledClass}`}
+                style={buttonStyle}
+                onClick={() => this.handleMoveHeaderRightClick()}></button>
       </div>
     );
     if (this.props.inTitleEditMode || this.props.inDescriptionEditMode) {

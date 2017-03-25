@@ -6,83 +6,91 @@ import TitleLine from './title_line';
 import HeaderContent from './header_content';
 
 class HeaderList extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      newHeaderJustAdded: false
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.headers.size === this.props.headers.size + 1) {
-      this.setState({ newHeaderJustAdded: true });
-    }
-  }
-
-  componentDidUpdate() {
-    if (this.state.newHeaderJustAdded) {
-      this.setState({ newHeaderJustAdded: false });
-      this.lastHeader.scrollIntoView(true);
-    }
-  }
-
   render() {
     if (this.props.headers.length === 0) {
       return <div></div>;
     }
 
-    const headerListElements = this.props.headers.map((header, index) => {
-      const headerId = header.get('id');
-      const isEmpty = header.get('empty');
-      const title = header.getIn(['titleLine', 'title']);
-      let todoKeyword = header.getIn(['titleLine', 'todoKeyword']);
-      const opened = header.get('opened') || isEmpty;
-      const hasContent = !!header.get('description') || !!header.get('subheaders').size;
-      const isSelected = headerId === this.props.selectedHeaderId;
+    let headerData = this.props.headers.toJS().map((header, index) => {
+      const isSelected = header.id === this.props.selectedHeaderId;
       const inTitleEditMode = isSelected && this.props.inTitleEditMode;
       const inDescriptionEditMode = isSelected && this.props.inDescriptionEditMode;
 
-      let style = { paddingLeft: 20 };
-      if (!this.props.parentEmpty) {
-        style.marginBottom = 2;
-        style.marginTop = 25;
-        style.paddingTop = 5;
+      return {
+        headerId: header.id,
+        nestingLevel: header.nestingLevel,
+        title: header.titleLine.title,
+        todoKeyword: header.titleLine.todoKeyword,
+        description: header.description,
+        selected: isSelected,
+        opened: header.opened,
+        titleEditMode: inTitleEditMode,
+        descriptionEditMode: inDescriptionEditMode,
+        hasContent: !!header.description
+      };
+    });
+
+    headerData.forEach((header, index) => {
+      // Iterate over all previous headers to check for parents of this header. If this header
+      // has no parents, it should be displayed.
+      const previousHeaders = headerData.slice(0, index);
+      const noParents = previousHeaders.every(previousHeader => {
+        return previousHeader.nestingLevel >= header.nestingLevel;
+      });
+      if (noParents) {
+        header.displayed = true;
       }
-      if (isSelected) {
+
+      // Iterate over all following headers to check for direct descendants of this one.
+      const remainingHeaders = headerData.slice(index + 1);
+      for (let i = 0; i < remainingHeaders.length; ++i) {
+        let subheader = remainingHeaders[i];
+        if (subheader.nestingLevel <= header.nestingLevel) {
+          break;
+        }
+
+        // This header has at least one subheader.
+        header.hasContent = true;
+
+        // If this header is open and displayed, all of its subheaders are displayed.
+        // Otherwise they're all hidden.
+        subheader.displayed = header.opened && header.displayed;
+      }
+    });
+
+    const headerListElements = headerData.filter(header => {
+      return header.displayed;
+    }).map((header, index) => {
+      let style = {
+        paddingLeft: 20 * header.nestingLevel,
+        marginBottom: 2,
+        marginTop: 25,
+        paddingTop: 5
+      };
+      if (header.selected) {
         style.backgroundColor = 'rgba(239, 255, 0, 0.28)';
       }
 
-      const bullet = isEmpty ? '' : <div style={{marginLeft: -16}}>*</div>;
-      const titleLine = isEmpty ? '' : <TitleLine headerId={headerId}
-                                                  title={title}
-                                                  todoKeyword={todoKeyword}
-                                                  opened={opened}
-                                                  hasContent={hasContent}
-                                                  editMode={inTitleEditMode} />;
-
       return (
         <div className="org-header"
-             key={index}
-             style={style}
-             ref={(newHeader) => { this.lastHeader = newHeader; }}>
-          {bullet}
-          {titleLine}
-          <HeaderContent headerId={headerId}
-                         subheaders={header.get('subheaders')}
-                         opened={opened}
-                         description={header.get('description')}
-                         editMode={inDescriptionEditMode}
-                         parentEmpty={isEmpty} />
+             key={header.headerId}
+             style={style}>
+          <div style={{marginLeft: -16}}>*</div>
+          <TitleLine headerId={header.headerId}
+                     title={header.title}
+                     todoKeyword={header.todoKeyword}
+                     opened={header.opened}
+                     hasContent={header.hasContent}
+                     editMode={header.titleEditMode} />
+          <HeaderContent headerId={header.headerId}
+                         opened={header.opened}
+                         description={header.description}
+                         editMode={header.descriptionEditMode} />
         </div>
       );
     });
 
-    let style = {};
-    if (this.props.parentEmpty) {
-      style = { marginTop: -18 };
-    }
-    return <div className="org-header-list" style={style}>{headerListElements}</div>;
+    return <div className="org-header-list">{headerListElements}</div>;
   }
 }
 

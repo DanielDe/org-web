@@ -1,6 +1,6 @@
 export const TODO_KEYWORDS = ['TODO', 'DONE'];
 
-export const newHeaderWithTitle = (titleLine, parentId = [], empty = false) => {
+export const newHeaderWithTitle = (titleLine, nestingLevel) => {
   const todoKeyword = TODO_KEYWORDS.filter(keyword => titleLine.startsWith(keyword))[0];
   let title = titleLine;
   if (todoKeyword) {
@@ -11,67 +11,30 @@ export const newHeaderWithTitle = (titleLine, parentId = [], empty = false) => {
     titleLine: {
       title, todoKeyword
     },
-    subheaders: [],
     description: '',
     opened: false,
-    id: [...parentId, Math.random()],
-    empty: empty
+    id: Math.random(),
+    nestingLevel
   };
-};
-
-const addDescriptionToLastHeader = (header, description) => {
-  if (header.subheaders.length === 0) {
-    // Description belongs to this header.
-    if (header.description) {
-      header.description += '\n';
-    }
-    header.description += description;
-  } else {
-    addDescriptionToLastHeader(header.subheaders[header.subheaders.length - 1], description);
-  }
-};
-
-const insertHeaderWithNestingLevel = (parentHeader, nestingLevel, title) => {
-  if (nestingLevel === 2) {
-    parentHeader.subheaders.push(newHeaderWithTitle(title, parentHeader.id));
-  } else if (nestingLevel > 2) {
-    if (parentHeader.subheaders.length === 0) {
-      parentHeader.subheaders.push(newHeaderWithTitle('', parentHeader.id, true));
-    }
-    let lastSubheader = parentHeader.subheaders[parentHeader.subheaders.length - 1];
-    insertHeaderWithNestingLevel(lastSubheader, nestingLevel - 1, title);
-  } else {
-    console.error('Something went wrong inserting a header with nesting level...');
-  }
 };
 
 const parseOrg = (fileContents) => {
   let headers = [];
-
   const lines = fileContents.split('\n');
 
   lines.forEach(line => {
-    if (line.startsWith('* ')) {
-      // Top level header.
-      headers.push(newHeaderWithTitle(line.substr(2)));
-    } else if (line.startsWith('*')) {
-      // Subheader.
+    if (line.startsWith('*')) {
+      // TODO: handle the case where there's no space at the end of the line
       const nestingLevel = line.indexOf(' ');
       const title = line.substr(nestingLevel + 1);
-      // TODO: handle case where there is no space in the line after the last *.
-
-      if (headers.length === 0) {
-        headers.push(newHeaderWithTitle(''));
-      }
-      let lastHeader = headers[headers.length - 1];
-      insertHeaderWithNestingLevel(lastHeader, nestingLevel, title);
+      headers.push(newHeaderWithTitle(title, nestingLevel));
     } else {
-      if (headers.length > 0) {
-        let lastHeader = headers[headers.length - 1];
-        if (lastHeader) {
-          addDescriptionToLastHeader(lastHeader, line);
-        }
+      if (headers.length === 0) {
+        return;
       }
+
+      const lastHeader = headers[headers.length - 1];
+      lastHeader.description += '\n' + line;
     }
   });
 

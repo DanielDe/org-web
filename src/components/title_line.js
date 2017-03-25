@@ -56,7 +56,7 @@ class TitleLine extends Component {
     if (this.props.editMode) {
       title = <textarea autoFocus
                         className="textarea"
-                        rows="4"
+                        rows="2"
                         value={this.state.titleValue}
                         onChange={this.handleTitleChange}
                         onClick={(event) => this.handleTitleFieldClick(event)} />;

@@ -1,16 +1,16 @@
 import { push } from './dropbox';
 
-export const addHeader = (parentHeaderId) => {
+export const addHeader = (headerId) => {
   return {
     type: 'addHeader',
-    parentHeaderId
+    headerId
   };
 };
 
-export const selectLastHeader = (parentHeaderId) => {
+export const selectNextSiblingHeader = (headerId) => {
   return {
-    type: 'selectLastHeader',
-    parentHeaderId
+    type: 'selectNextSiblingHeader',
+    headerId
   };
 };
 
@@ -92,6 +92,20 @@ export const moveHeaderUp = (headerId) => {
 export const moveHeaderDown = (headerId) => {
   return {
     type: 'moveHeaderDown',
+    headerId
+  };
+};
+
+export const moveHeaderLeft = (headerId) => {
+  return {
+    type: 'moveHeaderLeft',
+    headerId
+  };
+};
+
+export const moveHeaderRight = (headerId) => {
+  return {
+    type: 'moveHeaderRight',
     headerId
   };
 };
