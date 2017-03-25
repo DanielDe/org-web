@@ -166,7 +166,24 @@ const moveHeaderUp = (state, payload) => {
 };
 
 const moveHeaderDown = (state, payload) => {
-  return state;
+  let headers = state.get('parsedFile');
+  const header = headerWithId(headers, payload.headerId);
+  const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
+
+  const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
+  const nextSiblingIndex = headerIndex + subheaders.size + 1;
+  const nextSibling = headers.get(nextSiblingIndex);
+  if (nextSibling.get('nestingLevel') < header.get('nestingLevel')) {
+    return state;
+  }
+
+  const nextSiblingSubheaders = subheadersOfHeaderWithId(headers, nextSibling.get('id'));
+  Array(1 + nextSiblingSubheaders.size).fill().forEach(() => {
+    headers = headers.insert(headerIndex, headers.get(nextSiblingIndex + nextSiblingSubheaders.size));
+    headers = headers.delete(nextSiblingIndex + nextSiblingSubheaders.size + 1);
+  });
+
+  return state.set('parsedFile', headers);
 };
 
 const selectNextSiblingHeader = (state, payload) => {
