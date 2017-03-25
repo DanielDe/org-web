@@ -50,10 +50,16 @@ const selectHeader = (state, payload) => {
 };
 
 const removeHeader = (state, payload) => {
-  // TODO: remove all subheaders too.
-  const headers = state.get('parsedFile');
+  let headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
-  return state.set('parsedFile', headers.delete(headerIndex));
+
+  const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
+  const numHeadersToRemove = 1 + subheaders.size;
+  Array(numHeadersToRemove).fill().forEach(() => {
+    headers = headers.delete(headerIndex);
+  });
+
+  return state.set('parsedFile', headers);
 };
 
 const advanceTodoState = (state, payload) => {
@@ -105,6 +111,22 @@ const addHeader = (state, payload) => {
 
   return state.update('parsedFile',
                       headers => headers.insert(headerIndex + subheaders.size + 1, newHeader));
+};
+
+const moveHeaderLeft = (state, payload) => {
+  const headers = state.get('parsedFile');
+  const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
+
+  return state.updateIn(['parsedFile', headerIndex, 'nestingLevel'],
+                        nestingLevel => Math.max(nestingLevel - 1, 1));
+};
+
+const moveHeaderRight = (state, payload) => {
+  const headers = state.get('parsedFile');
+  const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
+
+  return state.updateIn(['parsedFile', headerIndex, 'nestingLevel'],
+                        nestingLevel => nestingLevel + 1);
 };
 
 const selectNextSiblingHeader = (state, payload) => {
@@ -164,11 +186,9 @@ export default (state = new Immutable.Map(), payload) => {
     return state.setIn(['parsedFile', ...parentAugmentedIndexPath],
                        headerList.splice(headerIndex, 1).splice(headerIndex + 1, 0, header));
   case 'moveHeaderLeft':
-    // return moveHeaderLeft(state, payload.headerId);
-    return state;
+    return moveHeaderLeft(state, payload);
   case 'moveHeaderRight':
-    // TODO:
-    return state;
+    return moveHeaderRight(state, payload);
   case 'toggleHeaderOpened':
     return toggleHeaderOpened(state, payload);
   case 'openHeader':

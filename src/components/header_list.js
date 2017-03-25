@@ -47,7 +47,7 @@ class HeaderList extends Component {
         opened: header.opened,
         titleEditMode: inTitleEditMode,
         descriptionEditMode: inDescriptionEditMode,
-        displayed: header.nestingLevel === 1,
+        displayed: header.nestingLevel === 1 || index === 0,
         hasContent: !!header.description
       };
     });
@@ -66,6 +66,16 @@ class HeaderList extends Component {
         // If this header is open and displayed, all of its subheaders are displayed.
         // Otherwise they're all hidden.
         subheader.displayed = header.opened && header.displayed;
+      }
+
+      // Iterate over all previous headers to check for parents of this header. If this header
+      // has no parents, it should be displayed.
+      const previousHeaders = headerData.slice(0, index);
+      const noParents = previousHeaders.every(previousHeader => {
+        return previousHeader.nestingLevel >= header.nestingLevel;
+      });
+      if (noParents) {
+        header.displayed = true;
       }
     });
 
