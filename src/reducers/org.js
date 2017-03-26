@@ -26,6 +26,25 @@ const subheadersOfHeaderWithId = (headers, headerId) => {
   }
 };
 
+const directParentIdOfHeaderWithId = (headers, headerId) => {
+  const header = headerWithId(headers, headerId);
+  const headerIndex = indexOfHeaderWithId(headers, headerId);
+
+  for (let i = headerIndex - 1; i >= 0; --i) {
+    const previousHeader = headers.get(i);
+
+    if (previousHeader.get('nestingLevel') === header.get('nestingLevel') - 1) {
+      return previousHeader.get('id');
+    }
+
+    if (previousHeader.get('nestingLevel') < header.get('nestingLevel')) {
+      return null;
+    }
+  }
+
+  return null;
+};
+
 const toggleHeaderOpened = (state, payload) => {
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
@@ -125,8 +144,19 @@ const moveHeaderRight = (state, payload) => {
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.updateIn(['parsedFile', headerIndex, 'nestingLevel'],
-                        nestingLevel => nestingLevel + 1);
+  state = state.updateIn(['parsedFile', headerIndex, 'nestingLevel'],
+                         nestingLevel => nestingLevel + 1);
+
+  // If this header has a direct parent, make sure its opened or this header will seem to
+  // disappear.
+  const parentHeaderId = directParentIdOfHeaderWithId(state.get('parsedFile'),
+                                                      payload.headerId);
+  if (parentHeaderId !== null) {
+    const parentHeaderIndex = indexOfHeaderWithId(headers, parentHeaderId);
+    state = state.setIn(['parsedFile', parentHeaderIndex, 'opened'], true);
+  }
+
+  return state;
 };
 
 const indexOfPreviousSibling = (headers, headerIndex) => {
