@@ -45,6 +45,16 @@ const directParentIdOfHeaderWithId = (headers, headerId) => {
   return null;
 };
 
+const openDirectParent = (state, headerId) => {
+  const parentHeaderId = directParentIdOfHeaderWithId(state.get('parsedFile'), headerId);
+  if (parentHeaderId !== null) {
+    const parentHeaderIndex = indexOfHeaderWithId(state.get('parsedFile'), parentHeaderId);
+    state = state.setIn(['parsedFile', parentHeaderIndex, 'opened'], true);
+  }
+
+  return state;
+};
+
 const toggleHeaderOpened = (state, payload) => {
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
@@ -147,14 +157,46 @@ const moveHeaderRight = (state, payload) => {
   state = state.updateIn(['parsedFile', headerIndex, 'nestingLevel'],
                          nestingLevel => nestingLevel + 1);
 
-  // If this header has a direct parent, make sure its opened or this header will seem to
-  // disappear.
-  const parentHeaderId = directParentIdOfHeaderWithId(state.get('parsedFile'),
-                                                      payload.headerId);
-  if (parentHeaderId !== null) {
-    const parentHeaderIndex = indexOfHeaderWithId(headers, parentHeaderId);
-    state = state.setIn(['parsedFile', parentHeaderIndex, 'opened'], true);
+  state = openDirectParent(state, payload.headerId);
+
+  return state;
+};
+
+const moveTreeLeft = (state, payload) => {
+  const headers = state.get('parsedFile');
+  const header = headerWithId(headers, payload.headerId);
+  const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
+
+  if (header.get('nestingLevel') === 1) {
+    return state;
   }
+
+  const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
+
+  state = state.updateIn(['parsedFile', headerIndex],
+                         header => header.set('nestingLevel', header.get('nestingLevel') - 1));
+  subheaders.forEach((_, index) => {
+    state = state.updateIn(['parsedFile', headerIndex + index + 1],
+                           header => header.set('nestingLevel', header.get('nestingLevel') - 1));
+  });
+
+  return state;
+};
+
+const moveTreeRight = (state, payload) => {
+  const headers = state.get('parsedFile');
+  const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
+
+  const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
+
+  state = state.updateIn(['parsedFile', headerIndex],
+                         header => header.set('nestingLevel', header.get('nestingLevel') + 1));
+  subheaders.forEach((_, index) => {
+    state = state.updateIn(['parsedFile', headerIndex + index + 1],
+                           header => header.set('nestingLevel', header.get('nestingLevel') + 1));
+  });
+
+  state = openDirectParent(state, payload.headerId);
 
   return state;
 };
@@ -254,6 +296,10 @@ export default (state = new Immutable.Map(), payload) => {
     return moveHeaderLeft(state, payload);
   case 'moveHeaderRight':
     return moveHeaderRight(state, payload);
+  case 'moveTreeLeft':
+    return moveTreeLeft(state, payload);
+  case 'moveTreeRight':
+    return moveTreeRight(state, payload);
   case 'toggleHeaderOpened':
     return toggleHeaderOpened(state, payload);
   case 'openHeader':

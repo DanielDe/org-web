@@ -17,6 +17,8 @@ class OrgFile extends Component {
     this.handleMoveHeaderDownClick = this.handleMoveHeaderDownClick.bind(this);
     this.handleMoveHeaderLeftClick = this.handleMoveHeaderLeftClick.bind(this);
     this.handleMoveHeaderRightClick = this.handleMoveHeaderRightClick.bind(this);
+    this.handleMoveTreeLeftClick = this.handleMoveTreeLeftClick.bind(this);
+    this.handleMoveTreeRightClick = this.handleMoveTreeRightClick.bind(this);
     this.handleDoneClick = this.handleDoneClick.bind(this);
   }
 
@@ -71,6 +73,14 @@ class OrgFile extends Component {
 
   handleMoveHeaderRightClick() {
     this.props.orgActions.moveHeaderRight(this.props.selectedHeaderId);
+  }
+
+  handleMoveTreeLeftClick() {
+    this.props.orgActions.moveTreeLeft(this.props.selectedHeaderId);
+  }
+
+  handleMoveTreeRightClick() {
+    this.props.orgActions.moveTreeRight(this.props.selectedHeaderId);
   }
 
   render() {
@@ -140,6 +150,12 @@ class OrgFile extends Component {
         <button className={`fa fa-arrow-right btn btn--circle ${disabledClass}`}
                 style={buttonStyle}
                 onClick={() => this.handleMoveHeaderRightClick()}></button>
+        <button className={`fa fa-chevron-left btn btn--circle ${disabledClass}`}
+                style={buttonStyle}
+                onClick={() => this.handleMoveTreeLeftClick()}></button>
+        <button className={`fa fa-chevron-right btn btn--circle ${disabledClass}`}
+                style={buttonStyle}
+                onClick={() => this.handleMoveTreeRightClick()}></button>
       </div>
     );
     if (this.props.inTitleEditMode || this.props.inDescriptionEditMode) {

@@ -110,6 +110,20 @@ export const moveHeaderRight = (headerId) => {
   };
 };
 
+export const moveTreeLeft = (headerId) => {
+  return {
+    type: 'moveTreeLeft',
+    headerId
+  };
+};
+
+export const moveTreeRight = (headerId) => {
+  return {
+    type: 'moveTreeRight',
+    headerId
+  };
+};
+
 export const advanceTodoState = (headerId) => {
   return {
     type: 'advanceTodoState',
