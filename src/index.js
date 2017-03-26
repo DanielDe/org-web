@@ -13,3 +13,14 @@ ReactDOM.render(
     </Provider>,
     document.getElementById('root')
 );
+
+// Disable double tap to zoom.
+window.lastTouchEnd = 0;
+document.documentElement.addEventListener('touchend', event => {
+  const now = (new Date()).getTime();
+  if (now - window.lastTouchEnd <= 350) {
+    event.preventDefault();
+    event.target.click();
+  }
+  window.lastTouchEnd = now;
+}, false);
