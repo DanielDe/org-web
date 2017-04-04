@@ -7,6 +7,7 @@ class HeaderContent extends Component {
   constructor(props) {
     super(props);
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
+    this.handleTextareaBlur = this.handleTextareaBlur.bind(this);
 
     this.state = { descriptionValue: props.description };
   }
@@ -22,6 +23,10 @@ class HeaderContent extends Component {
     this.setState({ ...this.state, descriptionValue: event.target.value });
   }
 
+  handleTextareaBlur() {
+    this.props.actions.toggleDescriptionEditMode();
+  }
+
   render() {
     if (!this.props.opened) {
       return <div></div>;
@@ -33,6 +38,7 @@ class HeaderContent extends Component {
                               className="textarea"
                               rows="8"
                               value={this.state.descriptionValue}
+                              onBlur={() => this.handleTextareaBlur()}
                               onChange={this.handleDescriptionChange} />;
     }
 

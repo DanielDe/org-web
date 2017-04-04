@@ -9,6 +9,7 @@ class TitleLine extends Component {
     this.handleTitleClick = this.handleTitleClick.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleTitleFieldClick = this.handleTitleFieldClick.bind(this);
+    this.handleTextareaBlur = this.handleTextareaBlur.bind(this);
 
     this.state = {
       titleValue: props.title
@@ -38,6 +39,10 @@ class TitleLine extends Component {
     event.stopPropagation();
   }
 
+  handleTextareaBlur() {
+    this.props.actions.toggleTitleEditMode();
+  }
+
   render() {
     let todo = '';
     const todoKeyword = this.props.todoKeyword;
@@ -58,6 +63,7 @@ class TitleLine extends Component {
                         className="textarea"
                         rows="2"
                         value={this.state.titleValue}
+                        onBlur={() => this.handleTextareaBlur()}
                         onChange={this.handleTitleChange}
                         onClick={(event) => this.handleTitleFieldClick(event)} />;
     }
