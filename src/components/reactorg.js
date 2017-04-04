@@ -13,11 +13,9 @@ class Reactorg extends Component {
   constructor(props) {
     super(props);
     this.authenticateWithDropbox = this.authenticateWithDropbox.bind(this);
-    this.handlePushToDropbox = this.handlePushToDropbox.bind(this);
     this.handleBackToFileChooser = this.handleBackToFileChooser.bind(this);
     this.viewSampleFile = this.viewSampleFile.bind(this);
     this.exitSampleMode = this.exitSampleMode.bind(this);
-    this.handlePullClick = this.handlePullClick.bind(this);
 
     this.state = {};
   }
@@ -49,24 +47,6 @@ class Reactorg extends Component {
     window.location = authUrl;
   }
 
-  handlePushToDropbox() {
-    this.props.dropboxActions.push(this.props.filePath);
-  }
-
-  handlePullClick() {
-    const pull = () => {
-      this.props.dropboxActions.downloadFile(this.props.filePath);
-    };
-
-    if (this.props.dirty) {
-      if (window.confirm('You have unpushed changes. Are you sure you want to pull?')) {
-        pull();
-      }
-    } else {
-      pull();
-    }
-  }
-
   handleBackToFileChooser() {
     this.props.orgActions.stopDisplayingFile();
   }
@@ -88,26 +68,18 @@ class Reactorg extends Component {
       );
     }
 
-    let pushToDropboxButton = '';
-    if (!this.props.liveSync) {
-      pushToDropboxButton = (
-        <button onClick={() => this.handlePushToDropbox()}
-                style={{marginTop: 20}}
-                className="btn">Push to Dropbox</button>
-      );
-    }
-
+    const fileChooserButtonStyle = {
+      width: '94%',
+      marginLeft: '3%',
+      marginRight: '3%',
+      marginTop: 20,
+      marginBottom: 120
+    };
     const nonSampleModeButtons = (
       <div>
-        {pushToDropboxButton}
-        <br />
-        <br />
-        <button onClick={() => this.handlePullClick()}
-                  className="btn">Pull from Dropbox</button>
-        <br />
-        <br />
         <button onClick={() => this.handleBackToFileChooser()}
-                  className="btn">Back to file chooser</button>
+                style={fileChooserButtonStyle}
+                className="btn">Back to file chooser</button>
       </div>
     );
 

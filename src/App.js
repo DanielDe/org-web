@@ -37,7 +37,7 @@ class App extends Component {
       <div>
         <div className="app-header">
           <img className="logo" src={logo} alt="Logo" />
-          <h2 className="app-header__title">Reactorg</h2>
+          <h2 className="app-header__title">reactorg</h2>
           <div style={{marginLeft: 'auto', color: 'white'}} onClick={() => this.handleSettingsClick()}>
             <i className="fa fa-cogs"></i>
           </div>

@@ -20,6 +20,8 @@ class OrgFile extends Component {
     this.handleMoveTreeLeftClick = this.handleMoveTreeLeftClick.bind(this);
     this.handleMoveTreeRightClick = this.handleMoveTreeRightClick.bind(this);
     this.handleDoneClick = this.handleDoneClick.bind(this);
+    this.handlePushClick = this.handlePushClick.bind(this);
+    this.handlePullClick = this.handlePullClick.bind(this);
   }
 
   handleAdvanceTodoClick(headerId) {
@@ -41,6 +43,24 @@ class OrgFile extends Component {
     }
     if (this.props.inDescriptionEditMode) {
       this.props.orgActions.toggleDescriptionEditMode();
+    }
+  }
+
+  handlePushClick() {
+    this.props.dropboxActions.push(this.props.filePath);
+  }
+
+  handlePullClick() {
+    const pull = () => {
+      this.props.dropboxActions.downloadFile(this.props.filePath);
+    };
+
+    if (this.props.dirty) {
+      if (window.confirm('You have unpushed changes. Are you sure you want to pull?')) {
+        pull();
+      }
+    } else {
+      pull();
     }
   }
 
@@ -163,6 +183,12 @@ class OrgFile extends Component {
         <button className={`fa fa-chevron-right btn btn--circle ${disabledClass}`}
                 style={buttonStyle}
                 onClick={() => this.handleMoveTreeRightClick()}></button>
+        {!this.props.liveSync && <button className={`fa fa-cloud-upload btn btn--circle`}
+                                         style={buttonStyle}
+                                         onClick={() => this.handlePushClick()}></button>}
+        <button className={`fa fa-cloud-download btn btn--circle`}
+                style={buttonStyle}
+                onClick={() => this.handlePullClick()}></button>
       </div>
     );
     if (this.props.inTitleEditMode || this.props.inDescriptionEditMode) {
@@ -215,7 +241,8 @@ function mapStateToProps(state, props) {
     selectedHeaderId: state.org.get('selectedHeaderId'),
     sampleMode: state.org.get('sampleMode'),
     inTitleEditMode: state.org.get('inTitleEditMode'),
-    inDescriptionEditMode: state.org.get('inDescriptionEditMode')
+    inDescriptionEditMode: state.org.get('inDescriptionEditMode'),
+    liveSync: state.dropbox.get('liveSync')
   };
 }
 
