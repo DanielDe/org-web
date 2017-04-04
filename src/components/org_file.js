@@ -24,6 +24,7 @@ class OrgFile extends Component {
 
   handleAdvanceTodoClick(headerId) {
     this.props.orgActions.advanceTodoState(this.props.selectedHeaderId);
+    this.props.orgActions.syncChanges();
   }
 
   handleAddHeaderClick() {
@@ -61,26 +62,32 @@ class OrgFile extends Component {
 
   handleMoveHeaderUpClick() {
     this.props.orgActions.moveHeaderUp(this.props.selectedHeaderId);
+    this.props.orgActions.syncChanges();
   }
 
   handleMoveHeaderDownClick() {
     this.props.orgActions.moveHeaderDown(this.props.selectedHeaderId);
+    this.props.orgActions.syncChanges();
   }
 
   handleMoveHeaderLeftClick() {
     this.props.orgActions.moveHeaderLeft(this.props.selectedHeaderId);
+    this.props.orgActions.syncChanges();
   }
 
   handleMoveHeaderRightClick() {
     this.props.orgActions.moveHeaderRight(this.props.selectedHeaderId);
+    this.props.orgActions.syncChanges();
   }
 
   handleMoveTreeLeftClick() {
     this.props.orgActions.moveTreeLeft(this.props.selectedHeaderId);
+    this.props.orgActions.syncChanges();
   }
 
   handleMoveTreeRightClick() {
     this.props.orgActions.moveTreeRight(this.props.selectedHeaderId);
+    this.props.orgActions.syncChanges();
   }
 
   render() {
