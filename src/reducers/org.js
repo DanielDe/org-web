@@ -118,7 +118,7 @@ const editDescriptionTitle = (state, payload) => {
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.setIn(['parsedFile', headerIndex, 'description'], payload.newTitle);
+  return state.setIn(['parsedFile', headerIndex, 'description'], payload.newDescription);
 };
 
 const openHeader = (state, payload) => {
