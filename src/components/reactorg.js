@@ -1,4 +1,4 @@
-/* globals Dropbox, localStorage */
+/* globals Dropbox */
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -18,27 +18,6 @@ class Reactorg extends Component {
     this.exitSampleMode = this.exitSampleMode.bind(this);
 
     this.state = {};
-  }
-
-  componentDidMount() {
-    const accessToken = parseQueryString(window.location.hash).access_token;
-    if (accessToken) {
-      this.props.dropboxActions.authenticate(accessToken);
-      window.location.hash = '';
-    } else {
-      const accessToken = localStorage.getItem('dropboxAccessToken');
-      if (accessToken) {
-        this.props.dropboxActions.authenticate(accessToken);
-      }
-    }
-
-    const filePath = localStorage.getItem('filePath');
-    if (filePath) {
-      this.props.dropboxActions.downloadFile(filePath);
-    }
-
-    const liveSyncToDropbox = localStorage.getItem('liveSyncToDropbox') === 'true';
-    this.props.dropboxActions.setLiveSync(liveSyncToDropbox);
   }
 
   authenticateWithDropbox() {

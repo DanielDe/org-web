@@ -1,4 +1,8 @@
+/* globals localStorage */
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as dropboxActions from './actions/dropbox';
 import logo from './logo.svg';
 import './App.css';
 import './stylesheets/normalize.css';
@@ -7,6 +11,7 @@ import './stylesheets/org.css';
 import './stylesheets/dropbox.css';
 import Reactorg from './components/reactorg';
 import Settings from './components/settings';
+import parseQueryString from './parse_query_string';
 
 class App extends Component {
   constructor(props) {
@@ -17,6 +22,27 @@ class App extends Component {
     this.state = {
       showingSettings: false
     };
+  }
+
+  componentDidMount() {
+    const accessToken = parseQueryString(window.location.hash).access_token;
+    if (accessToken) {
+      this.props.dropboxActions.authenticate(accessToken);
+      window.location.hash = '';
+    } else {
+      const accessToken = localStorage.getItem('dropboxAccessToken');
+      if (accessToken) {
+        this.props.dropboxActions.authenticate(accessToken);
+      }
+    }
+
+    const filePath = localStorage.getItem('filePath');
+    if (filePath) {
+      this.props.dropboxActions.downloadFile(filePath);
+    }
+
+    const liveSyncToDropbox = localStorage.getItem('liveSyncToDropbox') === 'true';
+    this.props.dropboxActions.setLiveSync(liveSyncToDropbox);
   }
 
   handleSettingsClick() {
@@ -49,4 +75,14 @@ class App extends Component {
   }
 }
 
-export default App;
+function mapStateToProps(state, props) {
+  return {};
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    dropboxActions: bindActionCreators(dropboxActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
