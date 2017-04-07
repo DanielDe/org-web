@@ -22,6 +22,7 @@ class HeaderList extends Component {
         title: header.titleLine.title,
         todoKeyword: header.titleLine.todoKeyword,
         description: header.description,
+        rawDescription: header.rawDescription,
         selected: isSelected,
         opened: header.opened,
         titleEditMode: inTitleEditMode,
@@ -85,6 +86,7 @@ class HeaderList extends Component {
           <HeaderContent headerId={header.headerId}
                          opened={header.opened}
                          description={header.description}
+                         rawDescription={header.rawDescription}
                          editMode={header.descriptionEditMode} />
         </div>
       );

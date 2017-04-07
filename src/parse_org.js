@@ -11,11 +11,78 @@ export const newHeaderWithTitle = (titleLine, nestingLevel) => {
     titleLine: {
       title, todoKeyword
     },
-    description: '',
+    rawDescription: '',
+    description: [],
     opened: false,
     id: Math.random(),
     nestingLevel
   };
+};
+
+// Accepts a raw string description and returns a list of objects representing it.
+export const parseDescription = (description) => {
+  // Match strings containing either [[uri]] or [[uri][title]].
+  const linkRegex = /(\[\[([^\]]*)\]\]|\[\[([^\]]*)\]\[([^\]]*)\]\])/g;
+  let matches = [];
+  let match = linkRegex.exec(description);
+  while (match) {
+    if (match[2]) {
+      matches.push({
+        rawText: match[0],
+        uri: match[2],
+        index: match.index
+      });
+    } else {
+      matches.push({
+        rawText: match[0],
+        uri: match[3],
+        title: match[4],
+        index: match.index
+      });
+    }
+    match = linkRegex.exec(description);
+  }
+
+  let descriptionParts = [];
+  let startIndex = 0;
+  matches.forEach(match => {
+    let index = match.index;
+
+    // Add the text part before this link if necessary
+    if (index !== startIndex) {
+      const text = description.substring(startIndex, index);
+      descriptionParts.push({
+        type: 'text',
+        contents: text
+      });
+    }
+
+    // Add the link part.
+    let linkPart = {
+      type: 'link',
+      contents: {
+        uri: match.uri
+      }
+    };
+    if (match.title) {
+      linkPart.contents.title = match.title;
+    }
+    descriptionParts.push(linkPart);
+
+    // Adjust the start index.
+    startIndex = match.index + match.rawText.length;
+  });
+
+  // Add on any trailing text if necessary.
+  if (startIndex !== description.length) {
+    const text = description.substring(startIndex, description.length);
+    descriptionParts.push({
+      type: 'text',
+      contents: text
+    });
+  }
+
+  return descriptionParts;
 };
 
 const parseOrg = (fileContents) => {
@@ -34,8 +101,12 @@ const parseOrg = (fileContents) => {
       }
 
       const lastHeader = headers[headers.length - 1];
-      lastHeader.description += '\n' + line;
+      lastHeader.rawDescription += '\n' + line;
     }
+  });
+
+  headers.forEach(header => {
+    header.description = parseDescription(header.rawDescription);
   });
 
   return headers;

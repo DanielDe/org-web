@@ -114,11 +114,14 @@ const editHeaderTitle = (state, payload) => {
   return state.setIn(['parsedFile', headerIndex, 'titleLine', 'title'], payload.newTitle);
 };
 
-const editDescriptionTitle = (state, payload) => {
+const editDescription = (state, payload) => {
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.setIn(['parsedFile', headerIndex, 'description'], payload.newDescription);
+  return state.updateIn(['parsedFile', headerIndex], header => {
+    return header.set('rawDescription', payload.newDescription)
+      .set('description', Immutable.fromJS(parseOrg.parseDescription(payload.newDescription)));
+  });
 };
 
 const openHeader = (state, payload) => {
@@ -317,7 +320,7 @@ export default (state = new Immutable.Map(), payload) => {
   case 'editHeaderTitle':
     return editHeaderTitle(state, payload);
   case 'editHeaderDescription':
-    return editDescriptionTitle(state, payload);
+    return editDescription(state, payload);
   case 'advanceTodoState':
     return advanceTodoState(state, payload);
   case 'setDirty':

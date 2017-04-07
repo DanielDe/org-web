@@ -9,7 +9,7 @@ class HeaderContent extends Component {
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
     this.handleTextareaBlur = this.handleTextareaBlur.bind(this);
 
-    this.state = { descriptionValue: props.description };
+    this.state = { descriptionValue: props.rawDescription };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -32,7 +32,20 @@ class HeaderContent extends Component {
       return <div></div>;
     }
 
-    let description = <div>{this.props.description}</div>;
+    const descriptionParts = this.props.description.map(part => {
+      if (part.type === 'text') {
+        return part.contents;
+      } else if (part.type === 'link') {
+        const uri = part.contents.uri;
+        const title = part.contents.title || uri;
+
+        return <a key={Math.random()} href={uri}>{title}</a>;
+      } else {
+        console.error(`Unrecognized description part type: ${part.type}`);
+        return '';
+      }
+    });
+    let description = <div>{descriptionParts}</div>;
     if (this.props.editMode) {
       description = <textarea autoFocus
                               className="textarea"

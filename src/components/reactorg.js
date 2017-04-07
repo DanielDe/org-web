@@ -7,7 +7,6 @@ import * as orgActions from '../actions/org';
 import * as baseActions from '../actions/base';
 import FileChooser from './file_chooser';
 import OrgFile from './org_file';
-import parseQueryString from '../parse_query_string';
 
 class Reactorg extends Component {
   constructor(props) {
