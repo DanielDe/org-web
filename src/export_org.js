@@ -9,7 +9,7 @@ const exportOrg = (headers) => {
     contents += ` ${header.titleLine.title}`;
 
     if (header.description) {
-      contents += header.description;
+      contents += header.rawDescription;
     }
 
     return contents;
