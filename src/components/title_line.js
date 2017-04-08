@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import AttributedString from './attributed_string';
 import * as orgActions from '../actions/org';
 
 class TitleLine extends Component {
@@ -12,7 +13,7 @@ class TitleLine extends Component {
     this.handleTextareaBlur = this.handleTextareaBlur.bind(this);
 
     this.state = {
-      titleValue: props.title
+      titleValue: props.rawTitle
     };
   }
 
@@ -57,7 +58,11 @@ class TitleLine extends Component {
 
     const tail = (this.props.opened || !this.props.hasContent) ? '' : '...';
 
-    let title = <span style={{fontWeight: 'bold'}}>{this.props.title} {tail}</span>;
+    let title = (
+      <span style={{fontWeight: 'bold'}}>
+        <AttributedString parts={this.props.title} /> {tail}
+      </span>
+    );
     if (this.props.editMode) {
       title = <textarea autoFocus
                         className="textarea"

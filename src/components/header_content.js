@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import AttributedString from './attributed_string';
 import * as orgActions from '../actions/org';
 
 class HeaderContent extends Component {
@@ -32,20 +33,7 @@ class HeaderContent extends Component {
       return <div></div>;
     }
 
-    const descriptionParts = this.props.description.map(part => {
-      if (part.type === 'text') {
-        return part.contents;
-      } else if (part.type === 'link') {
-        const uri = part.contents.uri;
-        const title = part.contents.title || uri;
-
-        return <a key={Math.random()} href={uri}>{title}</a>;
-      } else {
-        console.error(`Unrecognized description part type: ${part.type}`);
-        return '';
-      }
-    });
-    let description = <div>{descriptionParts}</div>;
+    let description = <div><AttributedString parts={this.props.description} /></div>;
     if (this.props.editMode) {
       description = <textarea autoFocus
                               className="textarea"

@@ -6,7 +6,7 @@ const exportOrg = (headers) => {
     if (header.titleLine.todoKeyword) {
       contents += ` ${header.titleLine.todoKeyword}`;
     }
-    contents += ` ${header.titleLine.title}`;
+    contents += ` ${header.titleLine.rawTitle}`;
 
     if (header.description) {
       contents += header.rawDescription;

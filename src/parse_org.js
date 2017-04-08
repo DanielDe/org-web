@@ -1,26 +1,7 @@
 export const TODO_KEYWORDS = ['TODO', 'DONE'];
 
-export const newHeaderWithTitle = (titleLine, nestingLevel) => {
-  const todoKeyword = TODO_KEYWORDS.filter(keyword => titleLine.startsWith(keyword))[0];
-  let title = titleLine;
-  if (todoKeyword) {
-    title = title.substr(todoKeyword.length + 1);
-  }
-
-  return {
-    titleLine: {
-      title, todoKeyword
-    },
-    rawDescription: '',
-    description: [],
-    opened: false,
-    id: Math.random(),
-    nestingLevel
-  };
-};
-
 // Accepts a raw string description and returns a list of objects representing it.
-export const parseDescription = (description) => {
+export const parseLinks = (description) => {
   // Match strings containing either [[uri]] or [[uri][title]].
   const linkRegex = /(\[\[([^\]]*)\]\]|\[\[([^\]]*)\]\[([^\]]*)\]\])/g;
   let matches = [];
@@ -85,6 +66,26 @@ export const parseDescription = (description) => {
   return descriptionParts;
 };
 
+export const newHeaderWithTitle = (titleLine, nestingLevel) => {
+  const todoKeyword = TODO_KEYWORDS.filter(keyword => titleLine.startsWith(keyword))[0];
+  let rawTitle = titleLine;
+  if (todoKeyword) {
+    rawTitle = rawTitle.substr(todoKeyword.length + 1);
+  }
+  const title = parseLinks(rawTitle);
+
+  return {
+    titleLine: {
+      title, rawTitle, todoKeyword
+    },
+    rawDescription: '',
+    description: [],
+    opened: false,
+    id: Math.random(),
+    nestingLevel
+  };
+};
+
 const parseOrg = (fileContents) => {
   let headers = [];
   const lines = fileContents.split('\n');
@@ -106,7 +107,7 @@ const parseOrg = (fileContents) => {
   });
 
   headers.forEach(header => {
-    header.description = parseDescription(header.rawDescription);
+    header.description = parseLinks(header.rawDescription);
   });
 
   return headers;

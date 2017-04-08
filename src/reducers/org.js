@@ -111,7 +111,10 @@ const editHeaderTitle = (state, payload) => {
   const headers = state.get('parsedFile');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.setIn(['parsedFile', headerIndex, 'titleLine', 'title'], payload.newTitle);
+  return state.updateIn(['parsedFile', headerIndex, 'titleLine'], titleLine => {
+    return titleLine.set('rawTitle', payload.newTitle)
+      .set('title', Immutable.fromJS(parseOrg.parseLinks(payload.newTitle)));
+  });
 };
 
 const editDescription = (state, payload) => {
@@ -120,7 +123,7 @@ const editDescription = (state, payload) => {
 
   return state.updateIn(['parsedFile', headerIndex], header => {
     return header.set('rawDescription', payload.newDescription)
-      .set('description', Immutable.fromJS(parseOrg.parseDescription(payload.newDescription)));
+      .set('description', Immutable.fromJS(parseOrg.parseLinks(payload.newDescription)));
   });
 };
 

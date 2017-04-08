@@ -20,6 +20,7 @@ class HeaderList extends Component {
         headerId: header.id,
         nestingLevel: header.nestingLevel,
         title: header.titleLine.title,
+        rawTitle: header.titleLine.rawTitle,
         todoKeyword: header.titleLine.todoKeyword,
         description: header.description,
         rawDescription: header.rawDescription,
@@ -79,6 +80,7 @@ class HeaderList extends Component {
           <div style={{marginLeft: -16}}>*</div>
           <TitleLine headerId={header.headerId}
                      title={header.title}
+                     rawTitle={header.rawTitle}
                      todoKeyword={header.todoKeyword}
                      opened={header.opened}
                      hasContent={header.hasContent}
