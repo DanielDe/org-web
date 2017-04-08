@@ -1,8 +1,21 @@
 /* globals localStorage */
 import Immutable from 'immutable';
 
+const localStorageAvailable = () => {
+  try {
+    localStorage.setItem('test', 'test');
+    return localStorage.getItem('test') === 'test';
+  } catch(e) {
+    return false;
+  }
+};
+
 // Read initial state from localStorage.
 export const readInitialState = () => {
+  if (!localStorageAvailable()) {
+    return undefined;
+  }
+
   let initialState = {
     org: Immutable.fromJS({}),
     dropbox: Immutable.fromJS({})
@@ -40,7 +53,7 @@ export const readInitialState = () => {
     } else if (field.type === 'boolean') {
       value = value === 'true';
     }
-    initialState[field.category] = initialState.org.set(field.name, value);
+    initialState[field.category] = initialState[field.category].set(field.name, value);
   });
 
   return initialState;
@@ -49,6 +62,10 @@ export const readInitialState = () => {
 // Persist some fields to localStorage;
 export const subscribeToChanges = storeInstance => {
   return () => {
+    if (!localStorageAvailable()) {
+      return;
+    }
+
     const state = storeInstance.getState();
 
     ['showingColoredHeaders', 'filePath'].forEach(field => {
