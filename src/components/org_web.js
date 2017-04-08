@@ -46,18 +46,10 @@ class OrgWeb extends Component {
       );
     }
 
-    const fileChooserButtonStyle = {
-      width: '94%',
-      marginLeft: '3%',
-      marginRight: '3%',
-      marginTop: 20,
-      marginBottom: 120
-    };
     const nonSampleModeButtons = (
       <div>
         <button onClick={() => this.handleBackToFileChooser()}
-                style={fileChooserButtonStyle}
-                className="btn">Back to file chooser</button>
+                className="btn btn--wide">Back to file chooser</button>
       </div>
     );
 
@@ -65,7 +57,7 @@ class OrgWeb extends Component {
       <div>
         <br />
         <br />
-        <button onClick={() => this.exitSampleMode()} className="btn">Exit sample</button>
+        <button onClick={() => this.exitSampleMode()} className="btn btn--wide">Exit sample</button>
       </div>
     );
 

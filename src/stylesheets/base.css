@@ -17,6 +17,14 @@
     background-color: lightgray;
 }
 
+.btn--wide {
+    width: 94%;
+    margin-left: 3%;
+    margin-right: 3%;
+    margin-top: 20px;
+    margin-bottom: 120px;
+}
+
 .loading-indicator {
     color: white;
     background-color: #3d696a;
