@@ -8,7 +8,7 @@ import * as baseActions from '../actions/base';
 import FileChooser from './file_chooser';
 import OrgFile from './org_file';
 
-class Reactorg extends Component {
+class OrgWeb extends Component {
   constructor(props) {
     super(props);
     this.authenticateWithDropbox = this.authenticateWithDropbox.bind(this);
@@ -20,7 +20,7 @@ class Reactorg extends Component {
   }
 
   authenticateWithDropbox() {
-    const dropbox = new Dropbox({ clientId: 'hw7j3cwzcg3r5mn' });
+    const dropbox = new Dropbox({ clientId: 'u857m8dfqth1ofi' });
     const authUrl = dropbox.getAuthenticationUrl(window.location.href);
     window.location = authUrl;
   }
@@ -123,4 +123,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Reactorg);
+export default connect(mapStateToProps, mapDispatchToProps)(OrgWeb);

@@ -10,7 +10,7 @@ import './stylesheets/normalize.css';
 import './stylesheets/base.css';
 import './stylesheets/org.css';
 import './stylesheets/dropbox.css';
-import Reactorg from './components/reactorg';
+import OrgWeb from './components/org_web';
 import Settings from './components/settings';
 import parseQueryString from './parse_query_string';
 
@@ -58,7 +58,7 @@ class App extends Component {
   }
 
   render() {
-    let mainComponent = <Reactorg />;
+    let mainComponent = <OrgWeb />;
     if (this.state.showingSettings) {
       mainComponent = <Settings settingsClose={() => this.handleSettingsClose()} />;
     }
@@ -67,7 +67,7 @@ class App extends Component {
       <div>
         <div className="app-header">
           <img className="logo" src={logo} alt="Logo" />
-          <h2 className="app-header__title">reactorg</h2>
+          <h2 className="app-header__title">org-web</h2>
           <div style={{marginLeft: 'auto', color: 'white'}} onClick={() => this.handleSettingsClick()}>
             <i className="fa fa-cogs"></i>
           </div>

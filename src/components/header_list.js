@@ -28,7 +28,7 @@ class HeaderList extends Component {
         opened: header.opened,
         titleEditMode: inTitleEditMode,
         descriptionEditMode: inDescriptionEditMode,
-        hasContent: !!header.description
+        hasContent: !!header.rawDescription
       };
     });
 

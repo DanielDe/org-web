@@ -1,8 +1,8 @@
 {
-  "name": "reactorg",
+  "name": "org-web",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://danieldehaas.com/reactorg",
+  "homepage": "https://danieldehaas.com/org-web",
   "devDependencies": {
     "react-scripts": "0.8.5"
   },

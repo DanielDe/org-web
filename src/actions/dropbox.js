@@ -87,7 +87,7 @@ export const push = (filePath) => {
     dispatch(setLoadingMessage('Pushing...'));
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });
     dropbox.filesUpload({
-      path: filePath + '.reactorg-bak',
+      path: filePath + '.org-web-bak',
       contents: getState().org.get('fileContents'),
       mode: {
         '.tag': 'overwrite'
