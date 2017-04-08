@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as dropboxActions from './actions/dropbox';
+import * as orgActions from './actions/org';
 import logo from './logo.svg';
 import './App.css';
 import './stylesheets/normalize.css';
@@ -43,6 +44,9 @@ class App extends Component {
 
     const liveSyncToDropbox = localStorage.getItem('liveSyncToDropbox') === 'true';
     this.props.dropboxActions.setLiveSync(liveSyncToDropbox);
+
+    const showingColoredHeaders = localStorage.getItem('showingColoredHeaders') === 'true';
+    this.props.orgActions.setColoredHeaders(showingColoredHeaders);
   }
 
   handleSettingsClick() {
@@ -81,7 +85,8 @@ function mapStateToProps(state, props) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    dropboxActions: bindActionCreators(dropboxActions, dispatch)
+    dropboxActions: bindActionCreators(dropboxActions, dispatch),
+    orgActions: bindActionCreators(orgActions, dispatch)
   };
 }
 

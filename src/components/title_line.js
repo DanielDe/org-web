@@ -58,8 +58,14 @@ class TitleLine extends Component {
 
     const tail = (this.props.opened || !this.props.hasContent) ? '' : '...';
 
+    let style = {
+      fontWeight: 'bold'
+    };
+    if (this.props.color) {
+      style.color = this.props.color;
+    }
     let title = (
-      <span style={{fontWeight: 'bold'}}>
+      <span style={style}>
         <AttributedString parts={this.props.title} /> {tail}
       </span>
     );

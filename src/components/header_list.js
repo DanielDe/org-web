@@ -32,6 +32,11 @@ class HeaderList extends Component {
       };
     });
 
+    const headerColors = ['rgba(38, 143, 214, 1)', 'rgba(42, 164, 168, 1)',
+                          'rgba(181, 142, 78, 1)', 'rgba(220, 64, 95, 1)',
+                          'rgba(101, 128, 152, 1)', 'rgba(146, 164, 175, 1)',
+                          'rgba(203, 85, 83, 1)', 'rgba(108, 119, 202, 1)'];
+
     headerData.forEach((header, index) => {
       // Iterate over all previous headers to check for parents of this header. If this header
       // has no parents, it should be displayed.
@@ -72,6 +77,10 @@ class HeaderList extends Component {
       if (header.selected) {
         style.backgroundColor = 'rgba(239, 255, 0, 0.28)';
       }
+      let color = undefined;
+      if (this.props.showingColoredHeaders) {
+        color = headerColors[(header.nestingLevel - 1) % headerColors.length];
+      }
 
       return (
         <div className="org-header"
@@ -84,7 +93,8 @@ class HeaderList extends Component {
                      todoKeyword={header.todoKeyword}
                      opened={header.opened}
                      hasContent={header.hasContent}
-                     editMode={header.titleEditMode} />
+                     editMode={header.titleEditMode}
+                     color={color} />
           <HeaderContent headerId={header.headerId}
                          opened={header.opened}
                          description={header.description}
@@ -102,7 +112,8 @@ function mapStateToProps(state, props) {
   return {
     selectedHeaderId: state.org.get('selectedHeaderId'),
     inTitleEditMode: state.org.get('inTitleEditMode'),
-    inDescriptionEditMode: state.org.get('inDescriptionEditMode')
+    inDescriptionEditMode: state.org.get('inDescriptionEditMode'),
+    showingColoredHeaders: state.org.get('showingColoredHeaders')
   };
 };
 
