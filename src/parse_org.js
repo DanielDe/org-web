@@ -92,8 +92,10 @@ const parseOrg = (fileContents) => {
 
   lines.forEach(line => {
     if (line.startsWith('*')) {
-      // TODO: handle the case where there's no space at the end of the line
-      const nestingLevel = line.indexOf(' ');
+      let nestingLevel = line.indexOf(' ');
+      if (nestingLevel === -1) {
+        nestingLevel = line.length;
+      }
       const title = line.substr(nestingLevel + 1);
       headers.push(newHeaderWithTitle(title, nestingLevel));
     } else {
