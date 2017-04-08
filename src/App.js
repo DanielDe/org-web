@@ -31,22 +31,15 @@ class App extends Component {
       this.props.dropboxActions.authenticate(accessToken);
       window.location.hash = '';
     } else {
-      const accessToken = localStorage.getItem('dropboxAccessToken');
+      const accessToken = this.props.dropboxAccessToken;
       if (accessToken) {
         this.props.dropboxActions.authenticate(accessToken);
       }
     }
 
-    const filePath = localStorage.getItem('filePath');
-    if (filePath) {
-      this.props.dropboxActions.downloadFile(filePath);
+    if (this.props.filePath) {
+      this.props.dropboxActions.downloadFile(this.props.filePath);
     }
-
-    const liveSyncToDropbox = localStorage.getItem('liveSyncToDropbox') === 'true';
-    this.props.dropboxActions.setLiveSync(liveSyncToDropbox);
-
-    const showingColoredHeaders = localStorage.getItem('showingColoredHeaders') === 'true';
-    this.props.orgActions.setColoredHeaders(showingColoredHeaders);
   }
 
   handleSettingsClick() {
@@ -80,7 +73,10 @@ class App extends Component {
 }
 
 function mapStateToProps(state, props) {
-  return {};
+  return {
+    filePath: state.org.get('filePath'),
+    dropboxAccessToken: state.dropbox.get('dropboxAccessToken')
+  };
 }
 
 function mapDispatchToProps(dispatch) {

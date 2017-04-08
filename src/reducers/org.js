@@ -1,4 +1,3 @@
-/* globals localStorage */
 import Immutable from 'immutable';
 import * as parseOrg from '../parse_org';
 
@@ -277,19 +276,16 @@ const selectNextSiblingHeader = (state, payload) => {
 };
 
 const displayFile = (state, payload) => {
-  localStorage.setItem('filePath', payload.filePath);
   return state.set('filePath', payload.filePath)
     .set('fileContents', payload.fileContents)
     .set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));
 };
 
 const stopDisplayingFile = (state, payload) => {
-  localStorage.setItem('filePath', '');
   return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
 };
 
 const setColoredHeaders = (state, payload) => {
-  localStorage.setItem('showingColoredHeaders', payload.showColoredHeaders);
   return state.set('showingColoredHeaders', payload.showColoredHeaders);
 };
 
