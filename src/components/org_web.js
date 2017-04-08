@@ -1,4 +1,4 @@
-/* globals Dropbox */
+/* globals Dropbox, process */
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -20,7 +20,7 @@ class OrgWeb extends Component {
   }
 
   authenticateWithDropbox() {
-    const dropbox = new Dropbox({ clientId: 'u857m8dfqth1ofi' });
+    const dropbox = new Dropbox({ clientId: process.env.REACT_APP_DROPBOX_CLIENT_ID });
     const authUrl = dropbox.getAuthenticationUrl(window.location.href);
     window.location = authUrl;
   }
