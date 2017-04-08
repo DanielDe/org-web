@@ -4,7 +4,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as dropboxActions from './actions/dropbox';
 import * as orgActions from './actions/org';
-import logo from './logo.svg';
+import logo from './org-web.svg';
 import './App.css';
 import './stylesheets/normalize.css';
 import './stylesheets/base.css';

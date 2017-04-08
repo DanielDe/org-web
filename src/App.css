@@ -9,6 +9,7 @@
 .app-header__title {
     color: white;
     margin: 0;
+    margin-left: 5px;
 }
 
 .logo {
