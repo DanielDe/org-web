@@ -24,11 +24,6 @@ export const readInitialState = () => {
   const fields = [
     {
       category: 'org',
-      name: 'showingColoredHeaders',
-      type: 'boolean'
-    },
-    {
-      category: 'org',
       name: 'filePath',
       type: 'nullable'
     },

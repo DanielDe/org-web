@@ -181,10 +181,3 @@ export const syncChanges = () => {
     }
   };
 };
-
-export const setColoredHeaders = showColoredHeaders => {
-  return {
-    type: 'setColoredHeaders',
-    showColoredHeaders
-  };
-};

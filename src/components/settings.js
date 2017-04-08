@@ -9,16 +9,11 @@ class Settings extends Component {
     super(props);
 
     this.handleLiveSyncClick = this.handleLiveSyncClick.bind(this);
-    this.handleShowingColoredHeadersClick = this.handleShowingColoredHeadersClick.bind(this);
     this.handleSignOut = this.handleSignOut.bind(this);
   }
 
   handleLiveSyncClick() {
     this.props.dropboxActions.setLiveSync(!this.props.liveSyncToDropbox);
-  }
-
-  handleShowingColoredHeadersClick() {
-    this.props.orgActions.setColoredHeaders(!this.props.showingColoredHeaders);
   }
 
   handleSignOut() {
@@ -35,16 +30,6 @@ class Settings extends Component {
     } else {
       liveSyncText = 'Not live syncing';
       liveSyncButtonText = 'Enable';
-    }
-
-    let coloredHeadersText = '';
-    let coloredHeadersButtonText = '';
-    if (this.props.showingColoredHeaders) {
-      coloredHeadersText = 'Showing colored headers';
-      coloredHeadersButtonText = 'Disable';
-    } else {
-      coloredHeadersText = 'Not showing colored headers';
-      coloredHeadersButtonText = 'Enable';
     }
 
     const settingStyle = {
@@ -66,12 +51,6 @@ class Settings extends Component {
                   onClick={() => this.handleLiveSyncClick()}>{liveSyncButtonText}</button>
           <div style={textStyle}>{liveSyncText}</div>
         </div>
-        <div style={settingStyle}>
-          <button className="btn"
-                  style={buttonStyle}
-                  onClick={() => this.handleShowingColoredHeadersClick()}>{coloredHeadersButtonText}</button>
-          <div style={textStyle}>{coloredHeadersText}</div>
-        </div>
 
         <button onClick={() => this.handleSignOut()}
                 style={{margin: 10}}
@@ -89,8 +68,7 @@ class Settings extends Component {
 
 function mapStateToProps(state, props) {
   return {
-    liveSyncToDropbox: state.dropbox.get('liveSync'),
-    showingColoredHeaders: state.org.get('showingColoredHeaders')
+    liveSyncToDropbox: state.dropbox.get('liveSync')
   };
 }
 

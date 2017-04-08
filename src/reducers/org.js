@@ -285,10 +285,6 @@ const stopDisplayingFile = (state, payload) => {
   return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
 };
 
-const setColoredHeaders = (state, payload) => {
-  return state.set('showingColoredHeaders', payload.showColoredHeaders);
-};
-
 export default (state = new Immutable.Map(), payload) => {
   switch (payload.type) {
   case 'addHeader':
@@ -340,8 +336,6 @@ export default (state = new Immutable.Map(), payload) => {
     return state.set('sampleMode', false).set('fileContents', null);
   case 'stopDisplayingFile':
     return stopDisplayingFile(state, payload);
-  case 'setColoredHeaders':
-    return setColoredHeaders(state, payload);
   default:
     return state;
   }

@@ -77,10 +77,7 @@ class HeaderList extends Component {
       if (header.selected) {
         style.backgroundColor = 'rgba(239, 255, 0, 0.28)';
       }
-      let color = undefined;
-      if (this.props.showingColoredHeaders) {
-        color = headerColors[(header.nestingLevel - 1) % headerColors.length];
-      }
+      const color = headerColors[(header.nestingLevel - 1) % headerColors.length];
 
       return (
         <div className="org-header"
@@ -112,8 +109,7 @@ function mapStateToProps(state, props) {
   return {
     selectedHeaderId: state.org.get('selectedHeaderId'),
     inTitleEditMode: state.org.get('inTitleEditMode'),
-    inDescriptionEditMode: state.org.get('inDescriptionEditMode'),
-    showingColoredHeaders: state.org.get('showingColoredHeaders')
+    inDescriptionEditMode: state.org.get('inDescriptionEditMode')
   };
 };
 
