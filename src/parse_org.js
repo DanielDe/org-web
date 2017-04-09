@@ -1,5 +1,3 @@
-export const TODO_KEYWORDS = ['TODO', 'DONE'];
-
 // Accepts a raw string description and returns a list of objects representing it.
 export const parseLinks = (description) => {
   // Match strings containing either [[uri]] or [[uri][title]].
@@ -66,8 +64,11 @@ export const parseLinks = (description) => {
   return descriptionParts;
 };
 
-export const newHeaderWithTitle = (titleLine, nestingLevel) => {
-  const todoKeyword = TODO_KEYWORDS.filter(keyword => titleLine.startsWith(keyword))[0];
+export const newHeaderWithTitle = (titleLine, nestingLevel, todoKeywordSets) => {
+  const allKeywords = [].concat.apply([], todoKeywordSets.map(todoKeywordSet => {
+    return todoKeywordSet.keywords;
+  }));
+  const todoKeyword = allKeywords.filter(keyword => titleLine.startsWith(keyword))[0];
   let rawTitle = titleLine;
   if (todoKeyword) {
     rawTitle = rawTitle.substr(todoKeyword.length + 1);
@@ -90,6 +91,8 @@ const parseOrg = (fileContents) => {
   let headers = [];
   const lines = fileContents.split('\n');
 
+  let todoKeywordSets = [];
+
   lines.forEach(line => {
     if (line.startsWith('*')) {
       let nestingLevel = line.indexOf(' ');
@@ -97,22 +100,49 @@ const parseOrg = (fileContents) => {
         nestingLevel = line.length;
       }
       const title = line.substr(nestingLevel + 1);
-      headers.push(newHeaderWithTitle(title, nestingLevel));
+      headers.push(newHeaderWithTitle(title, nestingLevel, todoKeywordSets));
     } else {
       if (headers.length === 0) {
-        return;
-      }
+        if (line.startsWith('#+TODO: ') || line.startsWith('#+TYP_TODO: ')) {
+          const keywordsString = line.substr(line.indexOf(':') + 2);
+          const keywordStrings = keywordsString.split(/\s/).filter(keyword => {
+            return keyword !== '|';
+          });
+          const keywords = keywordStrings.map(keywordString => {
+            const todoRegex = /([^\(]*)(\(.*\))?/g;
+            const match = todoRegex.exec(keywordString);
+            const keyword = match[1];
 
-      const lastHeader = headers[headers.length - 1];
-      lastHeader.rawDescription += '\n' + line;
+            return keyword;
+          });
+          todoKeywordSets.push({
+            keywords,
+            configLine: line,
+            default: false
+          });
+        }
+      } else {
+        const lastHeader = headers[headers.length - 1];
+        lastHeader.rawDescription += '\n' + line;
+      }
     }
   });
+
+  const defaultTodoKeywords = ['TODO', 'DONE'];
+  if (todoKeywordSets.length === 0) {
+    todoKeywordSets = [{
+      keywords: defaultTodoKeywords,
+      default: true
+    }];
+  }
 
   headers.forEach(header => {
     header.description = parseLinks(header.rawDescription);
   });
 
-  return headers;
+  return {
+    headers, todoKeywordSets
+  };
 };
 
 export default parseOrg;

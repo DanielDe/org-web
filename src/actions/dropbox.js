@@ -82,7 +82,8 @@ export const getFileList = (path = '') => {
 
 export const push = (filePath) => {
   return (dispatch, getState) => {
-    const contents = exportOrg(getState().org.get('parsedFile'));
+    const contents = exportOrg(getState().org.get('headers'),
+                               getState().org.get('todoKeywordSets'));
 
     dispatch(setLoadingMessage('Pushing...'));
     const dropbox = new Dropbox({ accessToken: getState().dropbox.get('dropboxAccessToken') });

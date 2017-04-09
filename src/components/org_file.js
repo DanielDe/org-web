@@ -209,7 +209,7 @@ class OrgFile extends Component {
       </div>
     );
 
-    let parsingError = this.props.parsedFile.size === 0;
+    let parsingError = this.props.headers.size === 0;
     let mainContent = '';
     if (parsingError) {
       mainContent = (
@@ -218,7 +218,7 @@ class OrgFile extends Component {
         </div>
       );
     } else {
-      mainContent = <HeaderList headers={this.props.parsedFile} parentEmpty={false} />;
+      mainContent = <HeaderList headers={this.props.headers} parentEmpty={false} />;
     }
 
     return (
@@ -235,7 +235,7 @@ class OrgFile extends Component {
 
 function mapStateToProps(state, props) {
   return {
-    parsedFile: state.org.get('parsedFile'),
+    headers: state.org.get('headers'),
     filePath: state.org.get('filePath'),
     dirty: state.org.get('dirty'),
     selectedHeaderId: state.org.get('selectedHeaderId'),

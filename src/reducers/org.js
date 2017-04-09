@@ -45,17 +45,17 @@ const directParentIdOfHeaderWithId = (headers, headerId) => {
 };
 
 const openDirectParent = (state, headerId) => {
-  const parentHeaderId = directParentIdOfHeaderWithId(state.get('parsedFile'), headerId);
+  const parentHeaderId = directParentIdOfHeaderWithId(state.get('headers'), headerId);
   if (parentHeaderId !== null) {
-    const parentHeaderIndex = indexOfHeaderWithId(state.get('parsedFile'), parentHeaderId);
-    state = state.setIn(['parsedFile', parentHeaderIndex, 'opened'], true);
+    const parentHeaderIndex = indexOfHeaderWithId(state.get('headers'), parentHeaderId);
+    state = state.setIn(['headers', parentHeaderIndex, 'opened'], true);
   }
 
   return state;
 };
 
 const toggleHeaderOpened = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
   const opened = headerWithId(headers, payload.headerId).get('opened');
@@ -64,11 +64,11 @@ const toggleHeaderOpened = (state, payload) => {
     // Close all subheaders as well.
     const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
     subheaders.forEach((subheader, index) => {
-      state = state.setIn(['parsedFile', headerIndex + index + 1, 'opened'], false);
+      state = state.setIn(['headers', headerIndex + index + 1, 'opened'], false);
     });
   }
 
-  return state.setIn(['parsedFile', headerIndex, 'opened'], !opened);
+  return state.setIn(['headers', headerIndex, 'opened'], !opened);
 };
 
 const selectHeader = (state, payload) => {
@@ -78,7 +78,7 @@ const selectHeader = (state, payload) => {
 };
 
 const removeHeader = (state, payload) => {
-  let headers = state.get('parsedFile');
+  let headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
   const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
@@ -87,54 +87,60 @@ const removeHeader = (state, payload) => {
     headers = headers.delete(headerIndex);
   });
 
-  return state.set('parsedFile', headers);
+  return state.set('headers', headers);
 };
 
 const advanceTodoState = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const header = headerWithId(headers, payload.headerId);
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
   const currentTodoState = header.getIn(['titleLine', 'todoKeyword']);
-  const currentStateIndex = parseOrg.TODO_KEYWORDS.indexOf(currentTodoState);
+  let currentTodoSet = state.get('todoKeywordSets').first();
+  if (currentTodoState !== '') {
+    currentTodoSet = state.get('todoKeywordSets').find(todoKeywordSet => {
+      return todoKeywordSet.get('keywords').contains(currentTodoState);
+    });
+  }
+  const currentStateIndex = currentTodoSet.get('keywords').indexOf(currentTodoState);
   const newStateIndex = currentStateIndex + 1;
   let newTodoState = '';
-  if (newStateIndex < parseOrg.TODO_KEYWORDS.length) {
-    newTodoState = parseOrg.TODO_KEYWORDS[newStateIndex];
+  if (newStateIndex < currentTodoSet.size) {
+    newTodoState = currentTodoSet.get('keywords').get(newStateIndex);
   }
 
-  return state.setIn(['parsedFile', headerIndex, 'titleLine', 'todoKeyword'], newTodoState);
+  return state.setIn(['headers', headerIndex, 'titleLine', 'todoKeyword'], newTodoState);
 };
 
 const editHeaderTitle = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.updateIn(['parsedFile', headerIndex, 'titleLine'], titleLine => {
+  return state.updateIn(['headers', headerIndex, 'titleLine'], titleLine => {
     return titleLine.set('rawTitle', payload.newTitle)
       .set('title', Immutable.fromJS(parseOrg.parseLinks(payload.newTitle)));
   });
 };
 
 const editDescription = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.updateIn(['parsedFile', headerIndex], header => {
+  return state.updateIn(['headers', headerIndex], header => {
     return header.set('rawDescription', payload.newDescription)
       .set('description', Immutable.fromJS(parseOrg.parseLinks(payload.newDescription)));
   });
 };
 
 const openHeader = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.set(['parsedFile', headerIndex, 'opened'], true);
+  return state.set(['headers', headerIndex, 'opened'], true);
 };
 
 const addHeader = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const header = headerWithId(headers, payload.headerId);
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
@@ -143,23 +149,23 @@ const addHeader = (state, payload) => {
   const newHeader = Immutable.fromJS(parseOrg.newHeaderWithTitle('',
                                                                  header.get('nestingLevel')));
 
-  return state.update('parsedFile',
+  return state.update('headers',
                       headers => headers.insert(headerIndex + subheaders.size + 1, newHeader));
 };
 
 const moveHeaderLeft = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.updateIn(['parsedFile', headerIndex, 'nestingLevel'],
+  return state.updateIn(['headers', headerIndex, 'nestingLevel'],
                         nestingLevel => Math.max(nestingLevel - 1, 1));
 };
 
 const moveHeaderRight = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  state = state.updateIn(['parsedFile', headerIndex, 'nestingLevel'],
+  state = state.updateIn(['headers', headerIndex, 'nestingLevel'],
                          nestingLevel => nestingLevel + 1);
 
   state = openDirectParent(state, payload.headerId);
@@ -168,7 +174,7 @@ const moveHeaderRight = (state, payload) => {
 };
 
 const moveTreeLeft = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const header = headerWithId(headers, payload.headerId);
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
@@ -178,10 +184,10 @@ const moveTreeLeft = (state, payload) => {
 
   const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
 
-  state = state.updateIn(['parsedFile', headerIndex],
+  state = state.updateIn(['headers', headerIndex],
                          header => header.set('nestingLevel', header.get('nestingLevel') - 1));
   subheaders.forEach((_, index) => {
-    state = state.updateIn(['parsedFile', headerIndex + index + 1],
+    state = state.updateIn(['headers', headerIndex + index + 1],
                            header => header.set('nestingLevel', header.get('nestingLevel') - 1));
   });
 
@@ -189,15 +195,15 @@ const moveTreeLeft = (state, payload) => {
 };
 
 const moveTreeRight = (state, payload) => {
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
   const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
 
-  state = state.updateIn(['parsedFile', headerIndex],
+  state = state.updateIn(['headers', headerIndex],
                          header => header.set('nestingLevel', header.get('nestingLevel') + 1));
   subheaders.forEach((_, index) => {
-    state = state.updateIn(['parsedFile', headerIndex + index + 1],
+    state = state.updateIn(['headers', headerIndex + index + 1],
                            header => header.set('nestingLevel', header.get('nestingLevel') + 1));
   });
 
@@ -225,7 +231,7 @@ const indexOfPreviousSibling = (headers, headerIndex) => {
 };
 
 const moveHeaderUp = (state, payload) => {
-  let headers = state.get('parsedFile');
+  let headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
   const previousSiblingIndex = indexOfPreviousSibling(headers, headerIndex);
@@ -239,11 +245,11 @@ const moveHeaderUp = (state, payload) => {
     headers = headers.delete(headerIndex + subheaders.size + 1);
   });
 
-  return state.set('parsedFile', headers);
+  return state.set('headers', headers);
 };
 
 const moveHeaderDown = (state, payload) => {
-  let headers = state.get('parsedFile');
+  let headers = state.get('headers');
   const header = headerWithId(headers, payload.headerId);
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
@@ -260,13 +266,13 @@ const moveHeaderDown = (state, payload) => {
     headers = headers.delete(nextSiblingIndex + nextSiblingSubheaders.size + 1);
   });
 
-  return state.set('parsedFile', headers);
+  return state.set('headers', headers);
 };
 
 const selectNextSiblingHeader = (state, payload) => {
   // TODO: Account for the case where the header doesn't have a next sibling.
 
-  const headers = state.get('parsedFile');
+  const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
   const subheaders = subheadersOfHeaderWithId(headers, payload.headerId);
 
@@ -276,13 +282,16 @@ const selectNextSiblingHeader = (state, payload) => {
 };
 
 const displayFile = (state, payload) => {
+  const parsedFile = parseOrg.default(payload.fileContents);
+
   return state.set('filePath', payload.filePath)
     .set('fileContents', payload.fileContents)
-    .set('parsedFile', Immutable.fromJS(parseOrg.default(payload.fileContents)));
+    .set('headers', Immutable.fromJS(parsedFile.headers))
+    .set('todoKeywordSets', Immutable.fromJS(parsedFile.todoKeywordSets));
 };
 
 const stopDisplayingFile = (state, payload) => {
-  return state.set('filePath', null).set('fileContents', null).set('parsedFile', null);
+  return state.set('filePath', null).set('fileContents', null).set('headers', null);
 };
 
 export default (state = new Immutable.Map(), payload) => {
@@ -328,8 +337,10 @@ export default (state = new Immutable.Map(), payload) => {
   case 'displayFile':
     return displayFile(state, payload);
   case 'displaySampleFile':
+    const parsedFile = parseOrg.default(payload.sampleFileContents);
     return state.set('fileContents', payload.sampleFileContents)
-      .set('parsedFile', Immutable.fromJS(parseOrg.default(payload.sampleFileContents)));
+      .set('headers', Immutable.fromJS(parsedFile.headers))
+      .set('todoKeywordSets', Immutable.fromJS(parsedFile.todoKeywordSets));
   case 'enterSampleMode':
     return state.set('sampleMode', true);
   case 'exitSampleMode':
