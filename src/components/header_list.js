@@ -6,6 +6,25 @@ import TitleLine from './title_line';
 import HeaderContent from './header_content';
 
 class HeaderList extends Component {
+  constructor() {
+    super();
+
+    this.headerRefs = {};
+  }
+
+  componentWillReceiveProps() {
+    // Ensure that the currently selected header is in view.
+    const selectedHeaderDiv = this.headerRefs[this.props.selectedHeaderId];
+    if (selectedHeaderDiv) {
+      const boundingRectangle = selectedHeaderDiv.getBoundingClientRect();
+      const viewportHeight = document.documentElement.clientHeight;
+
+      if (boundingRectangle.top > viewportHeight * 0.9 || boundingRectangle.bottom < 0) {
+        selectedHeaderDiv.scrollIntoView();
+      }
+    }
+  }
+
   render() {
     if (this.props.headers.length === 0) {
       return <div></div>;
@@ -82,6 +101,7 @@ class HeaderList extends Component {
       return (
         <div className="org-header"
              key={header.headerId}
+             ref={(e) => {this.headerRefs[header.headerId] = e;}}
              style={style}>
           <div style={{marginLeft: -16}}>*</div>
           <TitleLine headerId={header.headerId}
