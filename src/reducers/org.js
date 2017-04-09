@@ -97,7 +97,7 @@ const advanceTodoState = (state, payload) => {
 
   const currentTodoState = header.getIn(['titleLine', 'todoKeyword']);
   let currentTodoSet = state.get('todoKeywordSets').first();
-  if (currentTodoState !== '') {
+  if (currentTodoState) {
     currentTodoSet = state.get('todoKeywordSets').find(todoKeywordSet => {
       return todoKeywordSet.get('keywords').contains(currentTodoState);
     });
@@ -116,10 +116,10 @@ const editHeaderTitle = (state, payload) => {
   const headers = state.get('headers');
   const headerIndex = indexOfHeaderWithId(headers, payload.headerId);
 
-  return state.updateIn(['headers', headerIndex, 'titleLine'], titleLine => {
-    return titleLine.set('rawTitle', payload.newTitle)
-      .set('title', Immutable.fromJS(parseOrg.parseLinks(payload.newTitle)));
-  });
+  const newTitleLine = parseOrg.parseTitleLine(payload.newTitle,
+                                               state.get('todoKeywordSets').toJS());
+  return state.setIn(['headers', headerIndex, 'titleLine'],
+                     Immutable.fromJS(newTitleLine));
 };
 
 const editDescription = (state, payload) => {

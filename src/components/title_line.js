@@ -13,7 +13,7 @@ class TitleLine extends Component {
     this.handleTextareaBlur = this.handleTextareaBlur.bind(this);
 
     this.state = {
-      titleValue: props.rawTitle
+      titleValue: this.getTitleValue()
     };
   }
 
@@ -22,6 +22,17 @@ class TitleLine extends Component {
       this.props.actions.editHeaderTitle(this.props.headerId, this.state.titleValue);
       this.props.actions.syncChanges();
     }
+
+    this.setState({titleValue: this.getTitleValue()});
+  }
+
+  getTitleValue() {
+    let titleValue = this.props.rawTitle;
+    if (this.props.todoKeyword) {
+      titleValue = `${this.props.todoKeyword} ${titleValue}`;
+    }
+
+    return titleValue;
   }
 
   handleTitleClick() {
@@ -47,7 +58,7 @@ class TitleLine extends Component {
   render() {
     let todo = '';
     const todoKeyword = this.props.todoKeyword;
-    if (todoKeyword) {
+    if (todoKeyword && !this.props.editMode) {
       const todoClasses = ['todo-keyword', `todo-keyword--${todoKeyword.toLowerCase()}`];
       todo = (
         <span className={todoClasses.join(' ')}>

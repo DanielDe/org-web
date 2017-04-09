@@ -64,21 +64,24 @@ export const parseLinks = (description) => {
   return descriptionParts;
 };
 
-export const newHeaderWithTitle = (titleLine, nestingLevel, todoKeywordSets) => {
+export const parseTitleLine = (titleLine, todoKeywordSets) => {
   const allKeywords = [].concat.apply([], todoKeywordSets.map(todoKeywordSet => {
     return todoKeywordSet.keywords;
   }));
-  const todoKeyword = allKeywords.filter(keyword => titleLine.startsWith(keyword))[0];
+  const todoKeyword = allKeywords.filter(keyword => titleLine.startsWith(keyword + ' '))[0];
   let rawTitle = titleLine;
   if (todoKeyword) {
     rawTitle = rawTitle.substr(todoKeyword.length + 1);
   }
   const title = parseLinks(rawTitle);
 
+  return { title, rawTitle, todoKeyword };
+};
+
+export const newHeaderWithTitle = (line, nestingLevel, todoKeywordSets) => {
+  const titleLine = parseTitleLine(line, todoKeywordSets);
   return {
-    titleLine: {
-      title, rawTitle, todoKeyword
-    },
+    titleLine,
     rawDescription: '',
     description: [],
     opened: false,
