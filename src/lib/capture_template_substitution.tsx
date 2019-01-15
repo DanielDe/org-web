@@ -2,19 +2,20 @@ import { Map } from 'immutable';
 import moment from 'moment';
 import _ from 'lodash';
 
-export default (templateString, customVariables = Map()) => {
+export default (templateString: string, customVariables = Map()) => {
   if (!templateString) {
     return ['', null];
   }
 
-  const substitutions = {
+  const substitutions: { [key: string]: string } = {
     '%t': `<${moment().format('YYYY-MM-DD ddd')}>`,
     '%T': `<${moment().format('YYYY-MM-DD ddd HH:mm')}>`,
     '%u': `[${moment().format('YYYY-MM-DD ddd')}]`,
     '%U': `[${moment().format('YYYY-MM-DD ddd HH:mm')}]`,
   };
 
-  customVariables.entrySeq().forEach(([key, value]) => {
+  customVariables.entrySeq().forEach(customVariableEntry => {
+    const [key, value] = customVariableEntry as [string, string];
     substitutions[`%${key}`] = value;
   });
 
