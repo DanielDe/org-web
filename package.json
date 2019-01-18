@@ -12,7 +12,7 @@
     "dotenv": "^6.0.0",
     "dropbox": "^4.0.9",
     "enzyme-adapter-react-16": "^1.1.1",
-    "immutable": "^3.8.2",
+    "immutable": "4.0.0-rc.12",
     "lodash": "^4.17.10",
     "react": "16.8.0-alpha.0",
     "react-beautiful-dnd": "10.0.3",
