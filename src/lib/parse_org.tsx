@@ -125,7 +125,6 @@ const timestampFromRegexMatch = (
   };
 };
 
-// TODO: explicitly return an AttributedString here.
 export const parseMarkupAndCookies = (
   rawText: string,
   { shouldAppendNewline = false, excludeCookies = true } = {}
@@ -203,7 +202,6 @@ export const parseMarkupAndCookies = (
     match = markupAndCookieRegex.exec(rawText);
   }
 
-  // TODO: Make this an array of AS parts.
   const lineParts: ASPartProps[] = [];
   let startIndex = 0;
   matches.forEach(match => {
