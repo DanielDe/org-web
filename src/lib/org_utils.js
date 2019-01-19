@@ -212,7 +212,7 @@ export const headerThatContainsTableCellId = (headers, cellId) =>
 export const pathAndPartOfTimestampItemWithIdInAttributedString = (parts, timestampId) =>
   parts
     .map((part, partIndex) => {
-      if (part.get('type') === 'timestamp' && part.get('id') === timestampId) {
+      if (part.get('type') === 'timestamp-range' && part.get('id') === timestampId) {
         return {
           path: [partIndex],
           timestampPart: part,

@@ -7,7 +7,6 @@ import {
   Timestamp,
 } from '../types/timestamps';
 
-// TODO: update references to this to pass in a Timestamp record.
 export const renderAsText = (timestamp: Timestamp) => {
   const {
     isActive,

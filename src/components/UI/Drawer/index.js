@@ -15,7 +15,7 @@ export default ({ children, shouldIncludeCloseButton, onClose }) => {
   const innerContainer = useRef();
 
   const innerContainerHeight = useRef();
-  useLayoutEffect(() => (innerContainerHeight.current = innerContainer.current.offsetHeight));
+  useLayoutEffect(() => void (innerContainerHeight.current = innerContainer.current.offsetHeight));
   const endInnerContainerDrag = () => {
     setIsVisible(dragOffsetY <= innerContainerHeight.current * 0.3);
     setDragOffsetY(null);
@@ -70,7 +70,7 @@ export default ({ children, shouldIncludeCloseButton, onClose }) => {
           innerContainer.current.removeEventListener('touchcancel', handleTouchEndOrCancel);
         };
       } else {
-        return null;
+        return undefined;
       }
     },
     [innerContainer.current, dragOffsetY]
