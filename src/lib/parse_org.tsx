@@ -122,7 +122,6 @@ const timestampFromRegexMatch = (
 };
 
 // TODO: explicitly return an AttributedString here.
-// TODO: update references to this.
 export const parseMarkupAndCookies = (
   rawText: string,
   { shouldAppendNewline = false, excludeCookies = true } = {}

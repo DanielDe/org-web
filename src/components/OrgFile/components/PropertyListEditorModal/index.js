@@ -7,6 +7,7 @@ import Drawer from '../../../UI/Drawer';
 import { attributedStringToRawText } from '../../../../lib/export_org';
 import generateId from '../../../../lib/id_generator';
 import { parseMarkupAndCookies } from '../../../../lib/parse_org';
+import { convertJSToAttributedString } from '../../../../lib/attributed_string';
 
 import { Droppable, Draggable } from 'react-beautiful-dnd';
 import classNames from 'classnames';
@@ -51,7 +52,7 @@ export default class PropertyListEditorModal extends PureComponent {
       onChange(
         propertyListItems.setIn(
           [propertyListItemIndex, 'value'],
-          fromJS(parseMarkupAndCookies(event.target.value))
+          convertJSToAttributedString(parseMarkupAndCookies(event.target.value))
         )
       );
     };

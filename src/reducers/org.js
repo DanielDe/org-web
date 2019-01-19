@@ -725,7 +725,12 @@ const updateTableCellValue = (state, action) => {
       rows.updateIn([rowIndex, 'contents', colIndex], cell =>
         cell
           .set('rawContents', action.newValue)
-          .set('contents', fromJS(parseMarkupAndCookies(action.newValue, { excludeCookies: true })))
+          .set(
+            'contents',
+            convertJSToAttributedString(
+              parseMarkupAndCookies(action.newValue, { excludeCookies: true })
+            )
+          )
       )
     )
   );
