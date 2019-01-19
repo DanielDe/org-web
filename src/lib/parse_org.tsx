@@ -342,8 +342,6 @@ export const parseRawText = (
   const LIST_HEADER_REGEX = /^\s*([-+*]|(\d+(\.|\)))) (.*)/;
 
   let currentListHeaderNestingLevel: number | null = null;
-  // TODO: start here with this error!
-  // TODO: undo this temp nonsense.
   const rawLineParts = _.flatten(lines.map((line, lineIndex) => {
     const numLeadingSpaces = (line.match(/^( *)/) as RegExpExecArray)[0].length;
 
@@ -447,7 +445,8 @@ export const parseRawText = (
 
       const newListItem = {
         id: generateId(),
-        titleLine: parseMarkupAndCookies(line),
+        // TODO: remove this `as any[]`.
+        titleLine: convertJSToAttributedString(parseMarkupAndCookies(line) as any[]),
         contents,
         forceNumber,
         isCheckbox,
@@ -546,7 +545,10 @@ const parsePropertyList = (rawText: string) => {
           return null;
         }
 
-        const value = !!match[2] ? parseMarkupAndCookies(match[2]) : null;
+        // TODO: remove this `as any[]`.
+        const value = !!match[2]
+          ? convertJSToAttributedString(parseMarkupAndCookies(match[2]) as any[])
+          : null;
 
         return {
           property: match[1],

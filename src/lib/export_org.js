@@ -201,7 +201,7 @@ export const attributedStringToRawText = parts => {
         case 'list':
           text = listPartToRawText(part);
           break;
-        case 'timestamp':
+        case 'timestamp-range':
           text = timestampPartToRawText(part);
           break;
         default:
