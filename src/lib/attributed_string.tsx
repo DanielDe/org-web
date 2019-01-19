@@ -16,7 +16,6 @@ import {
 } from '../types/attributed_string';
 import { makeTimestamp } from '../types/timestamps';
 
-// TODO: handle other types of AS part here.
 export const convertJSToAttributedString = (rawParts: ASPartProps[]): AttributedString =>
   List(
     rawParts.map(rawPart => {
