@@ -28,7 +28,7 @@ import {
   ASInlineMarkupPartProps,
   ASTimestampRangePartProps,
   AttributedString,
-} from '../types/attributed-string';
+} from '../types/attributed_string';
 import { TodoKeywordSet } from '../types/org';
 
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
@@ -121,6 +121,7 @@ const timestampFromRegexMatch = (
   };
 };
 
+// TODO: explicitly return an AttributedString here.
 // TODO: update references to this.
 export const parseMarkupAndCookies = (
   rawText: string,
@@ -382,6 +383,8 @@ export const parseRawText = (
     // TODO: fix this usage of `any[]`
   }) as any[]);
 
+  // TODO: this is an `any[]` right now, I think I should be explicit about it being an
+  //       ASPartProps[].
   const processedLineParts = [];
   for (let partIndex = 0; partIndex < rawLineParts.length; ++partIndex) {
     const linePart = rawLineParts[partIndex];
@@ -598,7 +601,8 @@ export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeyw
     }
   }
 
-  const title = parseMarkupAndCookies(rawTitle);
+  // TODO: remove this `as any[]`.
+  const title = convertJSToAttributedString(parseMarkupAndCookies(rawTitle) as any[]);
 
   return fromJS({ title, rawTitle, todoKeyword, tags });
 };

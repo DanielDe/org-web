@@ -1,6 +1,6 @@
 import { List, fromJS } from 'immutable';
 
-import { AttributedString, ASPartProps, makeTimestampRangePart } from '../types/attributed-string';
+import { AttributedString, ASPartProps, makeTimestampRangePart } from '../types/attributed_string';
 import { makeTimestamp } from '../types/timestamps';
 
 export const convertJSToAttributedString = (rawParts: ASPartProps[]): AttributedString =>
