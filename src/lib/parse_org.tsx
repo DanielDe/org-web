@@ -308,10 +308,11 @@ const parseTable = (tableLines: Array<string>): ASTablePartProps => {
     id: generateId(),
     contents: row.map(rawContents => ({
       id: generateId(),
-      // TODO: remove this `as any[]`.
-      contents: convertJSToAttributedString(parseMarkupAndCookies(rawContents, {
-        excludeCookies: true,
-      }) as any[]),
+      contents: convertJSToAttributedString(
+        parseMarkupAndCookies(rawContents, {
+          excludeCookies: true,
+        })
+      ),
       rawContents,
     })),
   }));
@@ -451,8 +452,7 @@ export const parseRawText = (
 
       const newListItem = {
         id: generateId(),
-        // TODO: remove this `as any[]`.
-        titleLine: convertJSToAttributedString(parseMarkupAndCookies(line) as any[]),
+        titleLine: convertJSToAttributedString(parseMarkupAndCookies(line)),
         contents,
         forceNumber,
         isCheckbox,
@@ -551,9 +551,8 @@ const parsePropertyList = (rawText: string) => {
           return null;
         }
 
-        // TODO: remove this `as any[]`.
         const value = !!match[2]
-          ? convertJSToAttributedString(parseMarkupAndCookies(match[2]) as any[])
+          ? convertJSToAttributedString(parseMarkupAndCookies(match[2]))
           : null;
 
         return {
@@ -611,8 +610,7 @@ export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeyw
     }
   }
 
-  // TODO: remove this `as any[]`.
-  const title = convertJSToAttributedString(parseMarkupAndCookies(rawTitle) as any[]);
+  const title = convertJSToAttributedString(parseMarkupAndCookies(rawTitle));
 
   return fromJS({ title, rawTitle, todoKeyword, tags });
 };
