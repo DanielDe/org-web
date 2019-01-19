@@ -244,6 +244,7 @@ export default (headers, todoKeywordSets) => {
 
       if (header.planningItems) {
         header.planningItems.forEach(planningItem => {
+          // TODO: fix this - I don't think I should be calling fromJS on this.
           contents += `\n${planningItem.type}: ${renderAsText(fromJS(planningItem.timestamp))}`;
         });
       }

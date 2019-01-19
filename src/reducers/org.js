@@ -238,6 +238,7 @@ const advanceTodoState = (state, action) => {
         rawDescription = rawDescription.slice(1);
       }
 
+      // TODO: update this usage of renderAsText.
       rawDescription =
         `\n- State "${newTodoState}"       from "${currentTodoState}"       ${renderAsText(
           fromJS(lastRepeatTimestamp)
