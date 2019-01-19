@@ -4,13 +4,18 @@ import RecordOf from '../record_of';
 
 import { AttributedString } from './index';
 
+export enum CheckboxState {
+  Checked = 'X',
+  Unchecked = ' ',
+  Partial = '-',
+}
 export interface ASListPartItemProps {
   id: number;
   titleLine: AttributedString;
   contents: AttributedString;
   forceNumber: number | null;
   isCheckbox: boolean;
-  checkboxState: string; // TODO: make this more strongly typed.
+  checkboxState: CheckboxState;
 }
 export type ASListPartItem = RecordOf<ASListPartItemProps>;
 const listPartItemDefaultValues: ASListPartItemProps = {
@@ -19,7 +24,7 @@ const listPartItemDefaultValues: ASListPartItemProps = {
   contents: List(),
   forceNumber: null,
   isCheckbox: false,
-  checkboxState: 'X',
+  checkboxState: CheckboxState.Unchecked,
 };
 export const makeListPartItem: Record.Factory<ASListPartItemProps> = Record(
   listPartItemDefaultValues

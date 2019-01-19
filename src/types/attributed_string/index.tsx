@@ -20,6 +20,7 @@ import {
   makeTablePart,
 } from './table_part';
 import {
+  CheckboxState,
   ASListPartItemProps,
   ASListPartItem,
   makeListPartItem,
@@ -62,6 +63,7 @@ export type ASTablePartProps = ASTablePartProps;
 export type ASTablePart = ASTablePart;
 export { makeTablePart };
 
+export { CheckboxState };
 export type ASListPartItemProps = ASListPartItemProps;
 export type ASListPartItem = ASListPartItem;
 export { makeListPartItem };
