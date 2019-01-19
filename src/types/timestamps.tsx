@@ -1,3 +1,5 @@
+import { Record } from 'immutable';
+
 import RecordOf from './record_of';
 
 export enum TimestampRepeaterType {
@@ -81,3 +83,21 @@ export type TimestampProps = {
   delayUnit: TimestampRepeaterDelayUnit | null;
 };
 export type Timestamp = RecordOf<TimestampProps>;
+const timestampDefaultValues: TimestampProps = {
+  isActive: true,
+  year: null,
+  month: null,
+  day: null,
+  dayName: null,
+  startHour: null,
+  startMinute: null,
+  endHour: null,
+  endMinute: null,
+  repeaterType: null,
+  repeaterValue: null,
+  repeaterUnit: null,
+  delayType: null,
+  delayValue: null,
+  delayUnit: null,
+};
+export const makeTimestamp: Record.Factory<TimestampProps> = Record(timestampDefaultValues);

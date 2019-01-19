@@ -1,6 +1,8 @@
+import { Record, List } from 'immutable';
+
 import RecordOf from './record_of';
 
-import { Timestamp } from './timestamps';
+import { Timestamp, makeTimestamp } from './timestamps';
 
 export interface ASTextPartProps {
   type: 'text';
@@ -76,11 +78,30 @@ export type ASInlineMarkupPart = RecordOf<ASInlineMarkupPartProps>;
 
 export interface ASTimestampRangePartProps {
   type: 'timestamp-range';
+  id: number;
   firstTimestamp: Timestamp;
-  secondTimestamp?: Timestamp;
+  secondTimestamp: Timestamp | null;
 }
 export type ASTimestampRangePart = RecordOf<ASTimestampRangePartProps>;
+const timestampRangePartDefaultValues: ASTimestampRangePartProps = {
+  type: 'timestamp-range',
+  id: 0,
+  firstTimestamp: makeTimestamp(),
+  secondTimestamp: null,
+};
+export const makeTimestampRangePart: Record.Factory<ASTimestampRangePartProps> = Record(
+  timestampRangePartDefaultValues
+);
 
+export type ASPartProps =
+  | ASTextPartProps
+  | ASLinkPartProps
+  | ASPercentageCookiePartProps
+  | ASFractionCookiePartProps
+  | ASTablePartProps
+  | ASListPartProps
+  | ASInlineMarkupPartProps
+  | ASTimestampRangePartProps;
 export type ASPart =
   | ASTextPart
   | ASLinkPart
@@ -90,4 +111,4 @@ export type ASPart =
   | ASListPart
   | ASInlineMarkupPart
   | ASTimestampRangePart;
-export type AttributedString = ASPart[];
+export type AttributedString = List<ASPart>;

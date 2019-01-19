@@ -1,4 +1,5 @@
 import generateId from './id_generator';
+import { convertJSToAttributedString } from './attributed_string';
 
 import { fromJS, List } from 'immutable';
 import _ from 'lodash';
@@ -464,7 +465,7 @@ export const parseRawText = (
     }
   }
 
-  return fromJS(processedLineParts);
+  return convertJSToAttributedString(processedLineParts);
 };
 
 const parsePlanningItems = (rawText: string) => {
@@ -692,7 +693,7 @@ export const parseOrg = (fileContents: string) => {
     todoKeywordSets = defaultKeywordSets;
   }
 
-  headers = headers.map(header => {
+  headers = headers.map((header, index) => {
     const {
       planningItems,
       propertyListItems,
