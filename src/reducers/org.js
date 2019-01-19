@@ -35,6 +35,9 @@ import {
 import { getCurrentTimestamp, applyRepeater, renderAsText } from '../lib/timestamps';
 import generateId from '../lib/id_generator';
 
+import { makeTimestamp } from '../types/timestamps';
+import { convertJSToAttributedString } from '../lib/attributed_string';
+
 const displayFile = (state, action) => {
   const parsedFile = parseOrg(action.contents);
 
@@ -205,14 +208,15 @@ const advanceTodoState = (state, action) => {
     );
 
     const lastRepeatTimestamp = getCurrentTimestamp({ isActive: false, withStartTime: true });
-    const newLastRepeatValue = [
+    // TODO: be more explicit here - no need to bring in the heavyweight `convertJSToAttributedString`.
+    const newLastRepeatValue = convertJSToAttributedString([
       {
-        type: 'timestamp',
+        type: 'timestamp-range',
         id: generateId(),
         firstTimestamp: lastRepeatTimestamp,
         secondTimestamp: null,
       },
-    ];
+    ]);
     state = state.updateIn(
       ['headers', headerIndex, 'propertyListItems'],
       propertyListItems =>
@@ -220,7 +224,7 @@ const advanceTodoState = (state, action) => {
           ? propertyListItems.map(
               item =>
                 item.get('property') === 'LAST_REPEAT'
-                  ? item.set('value', fromJS(newLastRepeatValue))
+                  ? item.set('value', newLastRepeatValue)
                   : item
             )
           : propertyListItems.push(
@@ -238,10 +242,9 @@ const advanceTodoState = (state, action) => {
         rawDescription = rawDescription.slice(1);
       }
 
-      // TODO: update this usage of renderAsText.
       rawDescription =
         `\n- State "${newTodoState}"       from "${currentTodoState}"       ${renderAsText(
-          fromJS(lastRepeatTimestamp)
+          makeTimestamp(lastRepeatTimestamp)
         )}\n` + rawDescription;
 
       return header
