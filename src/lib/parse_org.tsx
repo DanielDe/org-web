@@ -16,6 +16,7 @@ import {
   TimestampRepeaterDelayUnit,
   TimestampRepeaterDelayUnitString,
   timestampRepeaterDelayUnitForString,
+  makeTimestamp,
 } from '../types/timestamps';
 import {
   ASTextPartProps,
@@ -491,6 +492,7 @@ const parsePlanningItems = (rawText: string) => {
     return { planningItems: [], strippedDescription: rawText };
   }
 
+  // TODO: convert this to not use `fromJS`.
   const planningItems = fromJS(
     [2, 17, 32]
       .map(planningTypeIndex => {
@@ -499,14 +501,15 @@ const parsePlanningItems = (rawText: string) => {
           return null;
         }
 
-        const timestamp = timestampFromRegexMatch(
+        const timestamp = makeTimestamp(timestampFromRegexMatch(
           planningMatch,
           _.range(planningTypeIndex + 1, planningTypeIndex + 1 + 13)
-        );
+        ) as TimestampProps);
 
         return { type, timestamp, id: generateId() };
       })
       .filter(item => !!item)
+      .map(item => fromJS(item))
   );
 
   return { planningItems, strippedDescription: rawText.substring(planningMatch[0].length) };
@@ -565,6 +568,7 @@ export const parseDescriptionPrefixElements = (rawText: string) => {
   };
 };
 
+// TODO: make this a KeywordSet type.
 const defaultKeywordSets = fromJS([
   {
     keywords: ['TODO', 'DONE'],

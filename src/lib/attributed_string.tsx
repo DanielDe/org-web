@@ -3,8 +3,8 @@ import { List, fromJS } from 'immutable';
 import { AttributedString, ASPartProps, makeTimestampRangePart } from '../types/attributed-string';
 import { makeTimestamp } from '../types/timestamps';
 
-export const convertJSToAttributedString = (rawParts: ASPartProps[]): AttributedString => {
-  return List(
+export const convertJSToAttributedString = (rawParts: ASPartProps[]): AttributedString =>
+  List(
     rawParts.map(rawPart => {
       switch (rawPart.type) {
         case 'timestamp-range':
@@ -21,4 +21,3 @@ export const convertJSToAttributedString = (rawParts: ASPartProps[]): Attributed
       }
     })
   );
-};
