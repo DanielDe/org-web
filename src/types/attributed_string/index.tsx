@@ -19,7 +19,14 @@ import {
   ASTablePart,
   makeTablePart,
 } from './table_part';
-import { ASListPartProps, ASListPart, makeListPart } from './list_part';
+import {
+  ASListPartItemProps,
+  ASListPartItem,
+  makeListPartItem,
+  ASListPartProps,
+  ASListPart,
+  makeListPart,
+} from './list_part';
 import {
   MarkupType,
   markupTypeForStringType,
@@ -55,6 +62,9 @@ export type ASTablePartProps = ASTablePartProps;
 export type ASTablePart = ASTablePart;
 export { makeTablePart };
 
+export type ASListPartItemProps = ASListPartItemProps;
+export type ASListPartItem = ASListPartItem;
+export { makeListPartItem };
 export type ASListPartProps = ASListPartProps;
 export type ASListPart = ASListPart;
 export { makeListPart };

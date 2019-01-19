@@ -4,11 +4,13 @@ import {
   AttributedString,
   ASPart,
   ASPartProps,
+  ASListPartProps,
   makeTextPart,
   makeLinkPart,
   makePercentageCookiePart,
   makeFractionCookiePart,
   makeTablePart,
+  makeListPartItem,
   makeListPart,
   makeInlineMarkupPart,
   makeTimestampRangePart,
@@ -41,10 +43,7 @@ export const convertJSToAttributedString = (rawParts: ASPartProps[]): Attributed
           return makeListPart({
             type: 'list',
             id: rawPart.id,
-            // TODO: fix this `any[]` nonsense.
-            items: List(
-              (rawPart.items as any[]).map(item => fromJS(item).set('contents', item.contents))
-            ),
+            items: List((rawPart as ASListPartProps).items).map(makeListPartItem),
             isOrdered: rawPart.isOrdered,
           });
         case 'inline-markup':
