@@ -3,12 +3,41 @@ import generateId from './id_generator';
 import { fromJS, List } from 'immutable';
 import _ from 'lodash';
 
+import {
+  TimestampProps,
+  Timestamp,
+  TimestampRepeaterType,
+  TimestampRepeaterTypeString,
+  timestampRepeaterTypeForString,
+  TimestampDelayType,
+  TimestampDelayTypeString,
+  timestampDelayTypeForString,
+  TimestampRepeaterDelayUnit,
+  TimestampRepeaterDelayUnitString,
+  timestampRepeaterDelayUnitForString,
+} from '../types/timestamps';
+import {
+  ASTextPartProps,
+  ASLinkPartProps,
+  ASPercentageCookiePartProps,
+  ASFractionCookiePartProps,
+  ASTablePartProps,
+  ASListPartProps,
+  ASInlineMarkupPartProps,
+  ASTimestampRangePartProps,
+  AttributedString,
+} from '../types/attributed-string';
+import { TodoKeywordSet } from '../types/org';
+
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
 // But fixing this mess is on my todo list...
 const markupAndCookieRegex = /(\[\[([^\]]*)\]\]|\[\[([^\]]*)\]\[([^\]]*)\]\])|(\[((\d*%)|(\d*\/\d*))\])|(([\s({'"]?)([*/~=_+])([^\s,'](.*)[^\s,'])\11([\s\-.,:!?'")}]?))|(([<[])(\d{4})-(\d{2})-(\d{2})(?: (Mon|Tue|Wed|Thu|Fri|Sat|Sun))?(?: ([012]?\d:[0-5]\d))?(?:-([012]?\d:[0-5]\d))?(?: ((?:\+)|(?:\+\+)|(?:\.\+)|(?:-)|(?:--))(\d+)(h|d|w|m|y))?(?: ((?:\+)|(?:\+\+)|(?:\.\+)|(?:-)|(?:--))(\d+)(h|d|w|m|y))?[>\]](?:--([<[])(\d{4})-(\d{2})-(\d{2})(?: (Mon|Tue|Wed|Thu|Fri|Sat|Sun))?(?: ([012]?\d:[0-5]\d))?(?:-([012]?\d:[0-5]\d))?(?: ((?:\+)|(?:\+\+)|(?:\.\+)|(?:-)|(?:--))(\d+)(h|d|w|m|y))?(?: ((?:\+)|(?:\+\+)|(?:\.\+)|(?:-)|(?:--))(\d+)(h|d|w|m|y))?[>\]])?)/g;
 const timestampRegex = /([<[])(\d{4})-(\d{2})-(\d{2})(?: (Mon|Tue|Wed|Thu|Fri|Sat|Sun))?(?: ([012]?\d:[0-5]\d))?(?:-([012]?\d:[0-5]\d))?(?: ((?:\+)|(?:\+\+)|(?:\.\+)|(?:-)|(?:--))(\d+)(h|d|w|m|y))?(?: ((?:\+)|(?:\+\+)|(?:\.\+)|(?:-)|(?:--))(\d+)(h|d|w|m|y))?[>\]]/;
 
-const timestampFromRegexMatch = (match, partIndices) => {
+const timestampFromRegexMatch = (
+  match: RegExpExecArray | RegExpMatchArray,
+  partIndices: Array<number>
+): TimestampProps | null => {
   const [
     typeBracket,
     year,
@@ -29,29 +58,46 @@ const timestampFromRegexMatch = (match, partIndices) => {
     return null;
   }
 
-  const [startHour, startMinute] = !!timeStart ? timeStart.split(':') : [];
-  const [endHour, endMinute] = !!timeEnd ? timeEnd.split(':') : [];
+  const [startHour, startMinute] = !!timeStart ? timeStart.split(':') : [null, null];
+  const [endHour, endMinute] = !!timeEnd ? timeEnd.split(':') : [null, null];
 
-  let repeaterType, repeaterValue, repeaterUnit;
-  let delayType, delayValue, delayUnit;
+  let repeaterType = null,
+    repeaterValue = null,
+    repeaterUnit = null;
+  let delayType = null,
+    delayValue = null,
+    delayUnit = null;
 
+  // TODO: use the timestamp enums here.
   if (['+', '++', '.+'].includes(firstDelayRepeatType)) {
-    repeaterType = firstDelayRepeatType;
-    repeaterValue = firstDelayRepeatValue;
-    repeaterUnit = firstDelayRepeatUnit;
+    repeaterType = timestampRepeaterTypeForString(
+      firstDelayRepeatType as TimestampRepeaterTypeString
+    );
+    repeaterValue = firstDelayRepeatValue === null ? null : parseInt(firstDelayRepeatValue);
+    repeaterUnit = timestampRepeaterDelayUnitForString(
+      firstDelayRepeatUnit as TimestampRepeaterDelayUnitString
+    );
   } else if (['-', '--'].includes(firstDelayRepeatType)) {
-    delayType = firstDelayRepeatType;
-    delayValue = firstDelayRepeatValue;
-    delayUnit = firstDelayRepeatUnit;
+    delayType = timestampDelayTypeForString(firstDelayRepeatType as TimestampDelayTypeString);
+    delayValue = firstDelayRepeatValue === null ? null : parseInt(firstDelayRepeatValue);
+    delayUnit = timestampRepeaterDelayUnitForString(
+      firstDelayRepeatUnit as TimestampRepeaterDelayUnitString
+    );
   }
   if (['+', '++', '.+'].includes(secondDelayRepeatType)) {
-    repeaterType = secondDelayRepeatType;
-    repeaterValue = secondDelayRepeatValue;
-    repeaterUnit = secondDelayRepeatUnit;
+    repeaterType = timestampRepeaterTypeForString(
+      secondDelayRepeatType as TimestampRepeaterTypeString
+    );
+    repeaterValue = secondDelayRepeatValue === null ? null : parseInt(secondDelayRepeatValue);
+    repeaterUnit = timestampRepeaterDelayUnitForString(
+      secondDelayRepeatUnit as TimestampRepeaterDelayUnitString
+    );
   } else if (['-', '--'].includes(secondDelayRepeatType)) {
-    delayType = secondDelayRepeatType;
-    delayValue = secondDelayRepeatValue;
-    delayUnit = secondDelayRepeatUnit;
+    delayType = timestampDelayTypeForString(secondDelayRepeatType as TimestampDelayTypeString);
+    delayValue = secondDelayRepeatValue === null ? null : parseInt(secondDelayRepeatValue);
+    delayUnit = timestampRepeaterDelayUnitForString(
+      secondDelayRepeatUnit as TimestampRepeaterDelayUnitString
+    );
   }
 
   return {
@@ -73,8 +119,9 @@ const timestampFromRegexMatch = (match, partIndices) => {
   };
 };
 
+// TODO: update references to this.
 export const parseMarkupAndCookies = (
-  rawText,
+  rawText: string,
   { shouldAppendNewline = false, excludeCookies = true } = {}
 ) => {
   const matches = [];
@@ -97,29 +144,34 @@ export const parseMarkupAndCookies = (
       });
     } else if (!!match[7]) {
       const percentCookieMatch = match[7].match(/(\d*)%/);
-      matches.push({
-        type: 'percentage-cookie',
-        rawText: match[0],
-        percentage: percentCookieMatch[1],
-        index: match.index,
-      });
+      if (percentCookieMatch !== null) {
+        matches.push({
+          type: 'percentage-cookie',
+          rawText: match[0],
+          percentage: percentCookieMatch[1],
+          index: match.index,
+        });
+      }
     } else if (!!match[8]) {
       const fractionCookieMatch = match[8].match(/(\d*)\/(\d*)/);
-      matches.push({
-        type: 'fraction-cookie',
-        rawText: match[0],
-        fraction: [fractionCookieMatch[1], fractionCookieMatch[2]],
-        index: match.index,
-      });
+      if (fractionCookieMatch !== null) {
+        matches.push({
+          type: 'fraction-cookie',
+          rawText: match[0],
+          fraction: [fractionCookieMatch[1], fractionCookieMatch[2]],
+          index: match.index,
+        });
+      }
     } else if (!!match[11]) {
-      const markupType = {
+      // TODO: make this an enum type.
+      const markupType = ({
         '~': 'inline-code',
         '*': 'bold',
         '/': 'italic',
         '+': 'strikethrough',
         _: 'underline',
         '=': 'verbatim',
-      }[match[11]];
+      } as { [key: string]: string })[match[11]];
 
       const markupPrefixLength = match[10].length;
 
@@ -145,6 +197,7 @@ export const parseMarkupAndCookies = (
     match = markupAndCookieRegex.exec(rawText);
   }
 
+  // TODO: Make this an array of AS parts.
   const lineParts = [];
   let startIndex = 0;
   matches.forEach(match => {
@@ -159,11 +212,12 @@ export const parseMarkupAndCookies = (
     }
 
     if (match.type === 'link') {
-      const linkPart = {
+      const linkPart: ASLinkPartProps = {
         id: generateId(),
         type: 'link',
         contents: {
-          uri: match.uri,
+          title: null,
+          uri: match.uri || null,
         },
       };
       if (match.title) {
@@ -213,33 +267,35 @@ export const parseMarkupAndCookies = (
   return lineParts;
 };
 
-const parseTable = tableLines => {
-  const table = {
+const parseTable = (tableLines: Array<string>): ASTablePartProps => {
+  const table: ASTablePartProps = {
     id: generateId(),
     type: 'table',
-    contents: [[]],
-    columnProperties: [],
+    rawContents: [[]],
+    contents: [],
   };
 
   tableLines.map(line => line.trim()).forEach(line => {
     if (line.startsWith('|-')) {
-      table.contents.push([]);
+      table.rawContents.push([]);
     } else {
-      const lastRow = _.last(table.contents);
+      const lastRow = _.last(table.rawContents);
       const lineCells = line.substr(1, line.length - 2).split('|');
 
-      if (lastRow.length === 0) {
-        lineCells.forEach(cell => lastRow.push(cell));
-      } else {
-        lineCells.forEach((cellContents, cellIndex) => {
-          lastRow[cellIndex] += `\n${cellContents}`;
-        });
+      if (lastRow) {
+        if (lastRow.length === 0) {
+          lineCells.forEach(cell => lastRow.push(cell));
+        } else {
+          lineCells.forEach((cellContents, cellIndex) => {
+            lastRow[cellIndex] += `\n${cellContents}`;
+          });
+        }
       }
     }
   });
 
   // Parse the contents of each cell.
-  table.contents = table.contents.map(row => ({
+  table.contents = table.rawContents.map(row => ({
     id: generateId(),
     contents: row.map(rawContents => ({
       id: generateId(),
@@ -249,7 +305,8 @@ const parseTable = tableLines => {
   }));
 
   // We sometimes end up with an extra, empty row - remove it if so.
-  if (_.last(table.contents).contents.length === 0) {
+  const lastRow = _.last(table.contents);
+  if (lastRow && lastRow.contents.length === 0) {
     table.contents = table.contents.slice(0, table.contents.length - 1);
   }
 
@@ -270,54 +327,58 @@ const parseTable = tableLines => {
   return table;
 };
 
-export const parseRawText = (rawText, { excludeContentElements = false } = {}) => {
+export const parseRawText = (
+  rawText: string,
+  { excludeContentElements = false } = {}
+): AttributedString => {
   const lines = rawText.split('\n');
 
   const LIST_HEADER_REGEX = /^\s*([-+*]|(\d+(\.|\)))) (.*)/;
 
-  let currentListHeaderNestingLevel = null;
-  const rawLineParts = _.flatten(
-    lines.map((line, lineIndex) => {
-      const numLeadingSpaces = line.match(/^( *)/)[0].length;
+  let currentListHeaderNestingLevel: number | null = null;
+  // TODO: start here with this error!
+  // TODO: undo this temp nonsense.
+  const rawLineParts = _.flatten(lines.map((line, lineIndex) => {
+    const numLeadingSpaces = (line.match(/^( *)/) as RegExpExecArray)[0].length;
 
-      if (
-        currentListHeaderNestingLevel !== null &&
-        (numLeadingSpaces > currentListHeaderNestingLevel || !line.trim())
-      ) {
+    if (
+      currentListHeaderNestingLevel !== null &&
+      (numLeadingSpaces > currentListHeaderNestingLevel || !line.trim())
+    ) {
+      return [
+        {
+          type: 'raw-list-content',
+          line,
+        },
+      ];
+    } else {
+      currentListHeaderNestingLevel = null;
+
+      if (!!line.match(LIST_HEADER_REGEX) && !excludeContentElements) {
+        currentListHeaderNestingLevel = numLeadingSpaces;
+
         return [
           {
-            type: 'raw-list-content',
+            type: 'raw-list-header',
+            line,
+          },
+        ];
+      } else if (line.trim().startsWith('|') && !excludeContentElements) {
+        return [
+          {
+            type: 'raw-table',
             line,
           },
         ];
       } else {
-        currentListHeaderNestingLevel = null;
-
-        if (!!line.match(LIST_HEADER_REGEX) && !excludeContentElements) {
-          currentListHeaderNestingLevel = numLeadingSpaces;
-
-          return [
-            {
-              type: 'raw-list-header',
-              line,
-            },
-          ];
-        } else if (line.trim().startsWith('|') && !excludeContentElements) {
-          return [
-            {
-              type: 'raw-table',
-              line,
-            },
-          ];
-        } else {
-          return parseMarkupAndCookies(line, {
-            shouldAppendNewline: lineIndex !== lines.length - 1,
-            excludeCookies: true,
-          });
-        }
+        return parseMarkupAndCookies(line, {
+          shouldAppendNewline: lineIndex !== lines.length - 1,
+          excludeCookies: true,
+        });
       }
-    })
-  );
+    }
+    // TODO: fix this usage of `any[]`
+  }) as any[]);
 
   const processedLineParts = [];
   for (let partIndex = 0; partIndex < rawLineParts.length; ++partIndex) {
@@ -347,7 +408,7 @@ export const parseRawText = (rawText, { excludeContentElements = false } = {}) =
       if (contentLines[contentLines.length - 1] === '') {
         contentLines[contentLines.length - 1] = ' ';
       }
-      const contents = parseRawText(contentLines.join('\n')).toJS();
+      const contents = parseRawText(contentLines.join('\n'));
 
       partIndex += contentLines.length;
 
@@ -366,11 +427,12 @@ export const parseRawText = (rawText, { excludeContentElements = false } = {}) =
       const isCheckbox = !!line.match(/^\s*\[[ X-]\]/);
       if (isCheckbox) {
         const stateCharacter = line.match(/^\s*\[([ X-])\]/)[1];
-        checkboxState = {
+        // TODO: make this an enum type.
+        checkboxState = ({
           ' ': 'unchecked',
           X: 'checked',
           '-': 'partial',
-        }[stateCharacter];
+        } as { [key: string]: string })[stateCharacter];
 
         line = line.replace(/^\s*\[[ X-]\]\s*/, '');
       }
@@ -405,14 +467,14 @@ export const parseRawText = (rawText, { excludeContentElements = false } = {}) =
   return fromJS(processedLineParts);
 };
 
-const parsePlanningItems = rawText => {
+const parsePlanningItems = (rawText: string) => {
   const singlePlanningItemRegex = concatRegexes(/(DEADLINE|SCHEDULED|CLOSED):\s*/, timestampRegex);
   const optionalSinglePlanningItemRegex = RegExp(
     '(' +
-      singlePlanningItemRegex
-        .toString()
-        .substring(1, singlePlanningItemRegex.toString().length - 1) +
-      ')?'
+    singlePlanningItemRegex
+      .toString()
+      .substring(1, singlePlanningItemRegex.toString().length - 1) +
+    ')?'
   );
   const planningRegex = concatRegexes(
     /^\s*/,
@@ -449,7 +511,7 @@ const parsePlanningItems = rawText => {
   return { planningItems, strippedDescription: rawText.substring(planningMatch[0].length) };
 };
 
-const parsePropertyList = rawText => {
+const parsePropertyList = (rawText: string) => {
   const lines = rawText.split('\n');
   const propertiesLineIndex = lines.findIndex(line => line.trim() === ':PROPERTIES:');
   const endLineIndex = lines.findIndex(line => line.trim() === ':END:');
@@ -491,7 +553,7 @@ const parsePropertyList = rawText => {
   };
 };
 
-export const parseDescriptionPrefixElements = rawText => {
+export const parseDescriptionPrefixElements = (rawText: string) => {
   const planningItemsParse = parsePlanningItems(rawText);
   const propertyListParse = parsePropertyList(planningItemsParse.strippedDescription);
 
@@ -510,18 +572,18 @@ const defaultKeywordSets = fromJS([
   },
 ]);
 
-export const parseTitleLine = (titleLine, todoKeywordSets) => {
-  const allKeywords = todoKeywordSets.flatMap(todoKeywordSet => {
-    return todoKeywordSet.get('keywords');
-  });
-  const todoKeyword = allKeywords.filter(keyword => titleLine.startsWith(keyword + ' ')).first();
+export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeywordSet>) => {
+  const allKeywords = todoKeywordSets.flatMap(todoKeywordSet => todoKeywordSet.keywords);
+  const todoKeyword = allKeywords
+    .filter(keyword => titleLine.startsWith(keyword + ' '))
+    .first() as string;
   let rawTitle = titleLine;
   if (todoKeyword) {
     rawTitle = rawTitle.substr(todoKeyword.length + 1);
   }
 
   // Check for tags.
-  let tags = [];
+  let tags: string[] = [];
   if (rawTitle.trimRight().endsWith(':')) {
     const titleParts = rawTitle.trimRight().split(' ');
     const possibleTags = titleParts[titleParts.length - 1];
@@ -536,7 +598,11 @@ export const parseTitleLine = (titleLine, todoKeywordSets) => {
   return fromJS({ title, rawTitle, todoKeyword, tags });
 };
 
-export const newHeaderWithTitle = (line, nestingLevel, todoKeywordSets) => {
+export const newHeaderWithTitle = (
+  line: string,
+  nestingLevel: number,
+  todoKeywordSets: List<TodoKeywordSet>
+) => {
   if (todoKeywordSets.size === 0) {
     todoKeywordSets = defaultKeywordSets;
   }
@@ -554,15 +620,15 @@ export const newHeaderWithTitle = (line, nestingLevel, todoKeywordSets) => {
   });
 };
 
-const concatRegexes = (...regexes) =>
+const concatRegexes = (...regexes: RegExp[]) =>
   regexes.reduce((prev, curr) =>
     RegExp(
       prev.toString().substring(1, prev.toString().length - 1) +
-        curr.toString().substring(1, curr.toString().length - 1)
+      curr.toString().substring(1, curr.toString().length - 1)
     )
   );
 
-export const newHeaderFromText = (rawText, todoKeywordSets) => {
+export const newHeaderFromText = (rawText: string, todoKeywordSets: List<TodoKeywordSet>) => {
   const titleLine = rawText.split('\n')[0].replace(/^\**\s*/, '');
   const description = rawText
     .split('\n')
@@ -580,11 +646,11 @@ export const newHeaderFromText = (rawText, todoKeywordSets) => {
     .set('propertyListItems', propertyListItems);
 };
 
-export const parseOrg = fileContents => {
-  let headers = new List();
+export const parseOrg = (fileContents: string) => {
+  let headers = List();
   const lines = fileContents.split('\n');
 
-  let todoKeywordSets = new List();
+  let todoKeywordSets = List();
 
   lines.forEach(line => {
     if (line.startsWith('*')) {

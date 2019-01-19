@@ -1,25 +1,67 @@
-import { Record } from 'immutable';
-
-type RecordOf<T> = T & Record<T>;
+import RecordOf from './record_of';
 
 export enum TimestampRepeaterType {
   SingleAdvance = '+',
   AdvanceUntilFuture = '++',
   AdvanceFromNow = '.+',
 }
+export type TimestampRepeaterTypeString = '+' | '++' | '.+';
+
+export const timestampRepeaterTypeForString = (
+  repeaterTypeString: TimestampRepeaterTypeString
+): TimestampRepeaterType => {
+  switch (repeaterTypeString) {
+    case '+':
+      return TimestampRepeaterType.SingleAdvance;
+    case '++':
+      return TimestampRepeaterType.AdvanceUntilFuture;
+    case '.+':
+      return TimestampRepeaterType.AdvanceFromNow;
+  }
+};
 
 export enum TimestampDelayType {
   StandardDelay = '-',
   FirstOnlyDelay = '--',
 }
+export type TimestampDelayTypeString = '-' | '--';
+
+export const timestampDelayTypeForString = (
+  delayTypeString: TimestampDelayTypeString
+): TimestampDelayType => {
+  switch (delayTypeString) {
+    case '-':
+      return TimestampDelayType.StandardDelay;
+    case '--':
+      return TimestampDelayType.FirstOnlyDelay;
+  }
+};
 
 export enum TimestampRepeaterDelayUnit {
-  hour,
-  day,
-  week,
-  month,
-  year,
+  hour = 'h',
+  day = 'd',
+  week = 'w',
+  month = 'm',
+  year = 'y',
 }
+export type TimestampRepeaterDelayUnitString = 'h' | 'd' | 'w' | 'm' | 'y';
+
+export const timestampRepeaterDelayUnitForString = (
+  repeaterTypeString: TimestampRepeaterDelayUnitString
+): TimestampRepeaterDelayUnit => {
+  switch (repeaterTypeString) {
+    case 'h':
+      return TimestampRepeaterDelayUnit.hour;
+    case 'd':
+      return TimestampRepeaterDelayUnit.day;
+    case 'w':
+      return TimestampRepeaterDelayUnit.week;
+    case 'm':
+      return TimestampRepeaterDelayUnit.month;
+    case 'y':
+      return TimestampRepeaterDelayUnit.year;
+  }
+};
 
 export type TimestampProps = {
   isActive: boolean;

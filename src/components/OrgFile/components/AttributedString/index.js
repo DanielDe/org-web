@@ -77,6 +77,7 @@ export default ({ parts, subPartDataAndHandlers }) => {
                 {part.get('content')}
               </span>
             );
+          // TODO: change the type of this to 'timestamp-range'.
           case 'timestamp':
             return (
               <TimestampPart
