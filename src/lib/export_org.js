@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { fromJS } from 'immutable';
 
 import { renderAsText } from './timestamps';
 import { convertJSToAttributedString } from './attributed_string';

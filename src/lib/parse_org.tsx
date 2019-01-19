@@ -33,7 +33,7 @@ import {
   AttributedString,
   ASPartProps,
 } from '../types/attributed_string';
-import { TodoKeywordSet } from '../types/org';
+import { TodoKeywordSet, makeTodoKeywordSet } from '../types/org';
 
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
 // But fixing this mess is on my todo list...
@@ -584,13 +584,12 @@ export const parseDescriptionPrefixElements = (rawText: string) => {
   };
 };
 
-// TODO: make this a KeywordSet type.
-const defaultKeywordSets = fromJS([
-  {
+const defaultKeywordSets: List<TodoKeywordSet> = List([
+  makeTodoKeywordSet({
     keywords: ['TODO', 'DONE'],
     completedKeywords: ['DONE'],
     default: true,
-  },
+  }),
 ]);
 
 export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeywordSet>) => {
@@ -672,7 +671,7 @@ export const parseOrg = (fileContents: string) => {
   let headers = List();
   const lines = fileContents.split('\n');
 
-  let todoKeywordSets = List();
+  let todoKeywordSets: List<TodoKeywordSet> = List();
 
   lines.forEach(line => {
     if (line.startsWith('*')) {
@@ -693,7 +692,7 @@ export const parseOrg = (fileContents: string) => {
           const completedKeywords = pipeIndex >= 0 ? keywords.slice(pipeIndex) : [];
 
           todoKeywordSets = todoKeywordSets.push(
-            fromJS({
+            makeTodoKeywordSet({
               keywords,
               completedKeywords,
               configLine: line,
