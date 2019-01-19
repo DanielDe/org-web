@@ -221,7 +221,7 @@ export const parseMarkupAndCookies = (
         id: generateId(),
         type: 'link',
         title: null,
-        uri: match.uri || null,
+        uri: match.uri || '',
       };
       if (match.title) {
         linkPart.title = match.title;

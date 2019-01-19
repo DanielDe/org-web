@@ -6,7 +6,7 @@ export interface ASLinkPartProps {
   type: 'link';
   id: number;
   title: string | null;
-  uri: string | null; // TODO: this shouldn't be nullable.
+  uri: string;
 }
 export type ASLinkPart = RecordOf<ASLinkPartProps>;
 const linkPartDefaultValues: ASLinkPartProps = {
