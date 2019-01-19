@@ -33,7 +33,7 @@ const ActionDrawer = ({
 
   // Send a no-op action to take care of the bug where redux-undo won't allow the first
   // action to be undone.
-  useEffect(() => org.noOp(), []);
+  useEffect(() => void org.noOp(), []);
 
   useEffect(() => {
     document.querySelector('html').style.paddingBottom = '90px';
