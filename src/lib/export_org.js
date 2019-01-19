@@ -2,6 +2,8 @@ import _ from 'lodash';
 import { fromJS } from 'immutable';
 
 import { renderAsText } from './timestamps';
+import { convertJSToAttributedString } from './attributed_string';
+import { makeTimestamp } from '../types/timestamps';
 
 const linkPartToRawText = linkPart => {
   if (!!linkPart.getIn(['contents', 'title'])) {
@@ -244,8 +246,9 @@ export default (headers, todoKeywordSets) => {
 
       if (header.planningItems) {
         header.planningItems.forEach(planningItem => {
-          // TODO: fix this - I don't think I should be calling fromJS on this.
-          contents += `\n${planningItem.type}: ${renderAsText(fromJS(planningItem.timestamp))}`;
+          contents += `\n${planningItem.type}: ${renderAsText(
+            makeTimestamp(planningItem.timestamp)
+          )}`;
         });
       }
 
@@ -253,7 +256,7 @@ export default (headers, todoKeywordSets) => {
         contents += '\n:PROPERTIES:';
         header.propertyListItems.forEach(propertyListItem => {
           contents += `\n:${propertyListItem.property}: ${attributedStringToRawText(
-            fromJS(propertyListItem.value)
+            propertyListItem.value ? convertJSToAttributedString(propertyListItem.value) : null
           )}`;
         });
         contents += '\n:END:\n';
