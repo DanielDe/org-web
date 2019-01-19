@@ -4,7 +4,7 @@ import './stylesheet.css';
 
 import TablePart from './components/TablePart';
 import ListPart from './components/ListPart';
-import TimestampPart from './components/TimestampPart';
+import TimestampRangePart from './components/TimestampRangePart';
 
 import classNames from 'classnames';
 
@@ -77,10 +77,9 @@ export default ({ parts, subPartDataAndHandlers }) => {
                 {part.get('content')}
               </span>
             );
-          // TODO: change the type of this to 'timestamp-range'.
-          case 'timestamp':
+          case 'timestamp-range':
             return (
-              <TimestampPart
+              <TimestampRangePart
                 key={part.get('id')}
                 part={part}
                 subPartDataAndHandlers={subPartDataAndHandlers}

@@ -187,7 +187,7 @@ export const parseMarkupAndCookies = (
       const secondTimestamp = timestampFromRegexMatch(match, _.range(29, 42));
 
       matches.push({
-        type: 'timestamp',
+        type: 'timestamp-range',
         rawText: match[0],
         index: match.index,
         firstTimestamp,
@@ -243,10 +243,10 @@ export const parseMarkupAndCookies = (
         content: match.content,
         markupType: match.markupType,
       });
-    } else if (match.type === 'timestamp') {
+    } else if (match.type === 'timestamp-range') {
       lineParts.push({
         id: generateId(),
-        type: 'timestamp',
+        type: 'timestamp-range',
         firstTimestamp: match.firstTimestamp,
         secondTimestamp: match.secondTimestamp,
       });

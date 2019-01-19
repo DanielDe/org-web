@@ -75,7 +75,7 @@ export interface ASInlineMarkupPartProps {
 export type ASInlineMarkupPart = RecordOf<ASInlineMarkupPartProps>;
 
 export interface ASTimestampRangePartProps {
-  type: 'timestamp'; // TODO: change this to 'timestamp-range'.
+  type: 'timestamp-range';
   firstTimestamp: Timestamp;
   secondTimestamp?: Timestamp;
 }
