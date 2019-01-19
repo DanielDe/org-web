@@ -18,8 +18,8 @@ export default ({ parts, subPartDataAndHandlers }) => {
           case 'text':
             return part.get('contents');
           case 'link':
-            const uri = part.getIn(['contents', 'uri']);
-            const title = part.getIn(['contents', 'title']) || uri;
+            const uri = part.uri;
+            const title = part.title || uri;
 
             return (
               <a key={part.get('id')} href={uri} target="_blank" rel="noopener noreferrer">

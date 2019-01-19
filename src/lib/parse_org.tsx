@@ -220,13 +220,11 @@ export const parseMarkupAndCookies = (
       const linkPart: ASLinkPartProps = {
         id: generateId(),
         type: 'link',
-        contents: {
-          title: null,
-          uri: match.uri || null,
-        },
+        title: null,
+        uri: match.uri || null,
       };
       if (match.title) {
-        linkPart.contents.title = match.title;
+        linkPart.title = match.title;
       }
       lineParts.push(linkPart);
     } else if (match.type === 'percentage-cookie') {

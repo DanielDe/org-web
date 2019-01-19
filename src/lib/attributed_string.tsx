@@ -6,7 +6,6 @@ import {
   ASPartProps,
   makeTextPart,
   makeLinkPart,
-  makeLinkPartContents,
   makePercentageCookiePart,
   makeFractionCookiePart,
   makeTablePart,
@@ -23,11 +22,7 @@ export const convertJSToAttributedString = (rawParts: ASPartProps[]): Attributed
         case 'text':
           return makeTextPart(rawPart);
         case 'link':
-          return makeLinkPart({
-            type: 'link',
-            id: rawPart.id,
-            contents: makeLinkPartContents(rawPart.contents),
-          });
+          return makeLinkPart(rawPart);
         case 'percentage-cookie':
           return makePercentageCookiePart(rawPart);
         case 'fraction-cookie':

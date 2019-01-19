@@ -1,14 +1,7 @@
 import { List } from 'immutable';
 
 import { ASTextPartProps, ASTextPart, makeTextPart } from './text_part';
-import {
-  ASLinkPartContentsProps,
-  ASLinkPartContents,
-  makeLinkPartContents,
-  ASLinkPartProps,
-  ASLinkPart,
-  makeLinkPart,
-} from './link_part';
+import { ASLinkPartProps, ASLinkPart, makeLinkPart } from './link_part';
 import {
   ASPercentageCookiePartProps,
   ASPercentageCookiePart,
@@ -44,9 +37,6 @@ export type ASTextPartProps = ASTextPartProps;
 export type ASTextPart = ASTextPart;
 export { makeTextPart };
 
-export type ASLinkPartContentsProps = ASLinkPartContentsProps;
-export type ASLinkPartContents = ASLinkPartContents;
-export { makeLinkPartContents };
 export type ASLinkPartProps = ASLinkPartProps;
 export type ASLinkPart = ASLinkPart;
 export { makeLinkPart };

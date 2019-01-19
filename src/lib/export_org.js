@@ -5,10 +5,10 @@ import { convertJSToAttributedString } from './attributed_string';
 import { makeTimestamp } from '../types/timestamps';
 
 const linkPartToRawText = linkPart => {
-  if (!!linkPart.getIn(['contents', 'title'])) {
-    return `[[${linkPart.getIn(['contents', 'uri'])}][${linkPart.getIn(['contents', 'title'])}]]`;
+  if (!!linkPart.get('title')) {
+    return `[[${linkPart.uri}][${linkPart.title}]]`;
   } else {
-    return `[[${linkPart.getIn(['contents', 'uri'])}]]`;
+    return `[[${linkPart.uri}]]`;
   }
 };
 
@@ -19,10 +19,10 @@ const formattedAttributedStringText = parts => {
         case 'text':
           return part.get('contents');
         case 'link':
-          if (part.getIn(['contents', 'title'])) {
-            return part.getIn(['contents', 'title']);
+          if (part.title) {
+            return part.title;
           } else {
-            return part.getIn(['contents', 'uri']);
+            return part.uri;
           }
         case 'table':
           return '';
