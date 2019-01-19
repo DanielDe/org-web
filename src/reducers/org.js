@@ -920,7 +920,7 @@ const addNewPlanningItem = (state, action) => {
   const newPlanningItem = fromJS({
     id: generateId(),
     type: action.planningType,
-    timestamp: getCurrentTimestamp(),
+    timestamp: makeTimestamp(getCurrentTimestamp()),
   });
 
   return state.updateIn(

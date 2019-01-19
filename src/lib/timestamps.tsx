@@ -39,7 +39,6 @@ export const renderAsText = (timestamp: Timestamp) => {
   return timestampText;
 };
 
-// TODO: update references
 export const getCurrentTimestamp = ({ isActive = true, withStartTime = false } = {}) => {
   const time = moment();
 
