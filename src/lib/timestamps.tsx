@@ -68,10 +68,8 @@ export const getCurrentTimestamp = ({ isActive = true, withStartTime = false } =
   return timestamp;
 };
 
-// TODO: update references.
 export const getCurrentTimestampAsText = () => `<${moment().format('YYYY-MM-DD ddd')}>`;
 
-// TODO: update references to this to pass in a Timestamp record.
 export const momentDateForTimestamp = (timestamp: Timestamp) => {
   const { year, month, day, startHour, startMinute } = timestamp;
 
@@ -83,7 +81,6 @@ export const momentDateForTimestamp = (timestamp: Timestamp) => {
   return moment(timestampString);
 };
 
-// TODO: update references
 export const momentUnitForTimestampUnit = (timestampUnit: TimestampRepeaterDelayUnit): string => {
   switch (timestampUnit) {
     case TimestampRepeaterDelayUnit.hour:
@@ -99,7 +96,6 @@ export const momentUnitForTimestampUnit = (timestampUnit: TimestampRepeaterDelay
   }
 };
 
-// TODO: update references
 export const applyRepeater = (timestamp: Timestamp, currentDate: Moment): Timestamp => {
   if (
     timestamp.repeaterType === null ||
