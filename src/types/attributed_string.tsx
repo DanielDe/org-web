@@ -37,7 +37,7 @@ export type ASFractionCookiePart = RecordOf<ASFractionCookiePartProps>;
 
 export interface ASTablePartCellProps {
   id: number;
-  contents: Array<any>; // TODO: make this not `any`.
+  contents: List<any>; // TODO: make this not `any`.
   rawContents: string;
 }
 export interface ASTablePartRowProps {

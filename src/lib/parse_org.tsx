@@ -302,7 +302,10 @@ const parseTable = (tableLines: Array<string>): ASTablePartProps => {
     id: generateId(),
     contents: row.map(rawContents => ({
       id: generateId(),
-      contents: parseMarkupAndCookies(rawContents, { excludeCookies: true }),
+      // TODO: remove this `as any[]`.
+      contents: convertJSToAttributedString(parseMarkupAndCookies(rawContents, {
+        excludeCookies: true,
+      }) as any[]),
       rawContents,
     })),
   }));
@@ -320,7 +323,7 @@ const parseTable = (tableLines: Array<string>): ASTablePartProps => {
       _.times(maxNumColumns - row.contents.length, () => {
         row.contents.push({
           id: generateId(),
-          contents: [],
+          contents: List(),
           rawContents: '',
         });
       });
