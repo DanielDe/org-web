@@ -17,6 +17,7 @@ import {
   TimestampRepeaterDelayUnitString,
   timestampRepeaterDelayUnitForString,
   makeTimestamp,
+  timestampDefaultValues,
 } from '../types/timestamps';
 import {
   ASTextPartProps,
@@ -25,9 +26,12 @@ import {
   ASFractionCookiePartProps,
   ASTablePartProps,
   ASListPartProps,
+  MarkupType,
+  markupTypeForStringType,
   ASInlineMarkupPartProps,
   ASTimestampRangePartProps,
   AttributedString,
+  ASPartProps,
 } from '../types/attributed_string';
 import { TodoKeywordSet } from '../types/org';
 
@@ -125,7 +129,7 @@ const timestampFromRegexMatch = (
 export const parseMarkupAndCookies = (
   rawText: string,
   { shouldAppendNewline = false, excludeCookies = true } = {}
-) => {
+): ASPartProps[] => {
   const matches = [];
   let match = markupAndCookieRegex.exec(rawText);
   while (match) {
@@ -200,7 +204,7 @@ export const parseMarkupAndCookies = (
   }
 
   // TODO: Make this an array of AS parts.
-  const lineParts = [];
+  const lineParts: ASPartProps[] = [];
   let startIndex = 0;
   matches.forEach(match => {
     let index = match.index;
@@ -208,6 +212,7 @@ export const parseMarkupAndCookies = (
     if (index !== startIndex) {
       const text = rawText.substring(startIndex, index);
       lineParts.push({
+        id: generateId(),
         type: 'text',
         contents: text,
       });
@@ -230,27 +235,30 @@ export const parseMarkupAndCookies = (
       lineParts.push({
         id: generateId(),
         type: 'percentage-cookie',
-        percentage: match.percentage,
+        percentage: parseInt(match.percentage || '0'), // TODO: find a better way to ensure match.percentage exists.
       });
     } else if (match.type === 'fraction-cookie') {
       lineParts.push({
         id: generateId(),
         type: 'fraction-cookie',
-        fraction: match.fraction,
+        fraction:
+          match && match.fraction
+            ? [parseInt(match.fraction[0] || '0'), parseInt(match.fraction[1] || '0')]
+            : [0, 0],
       });
     } else if (match.type === 'inline-markup') {
       lineParts.push({
         id: generateId(),
         type: 'inline-markup',
-        content: match.content,
-        markupType: match.markupType,
+        content: match.content || '',
+        markupType: markupTypeForStringType(match.markupType) || MarkupType.InlineCode,
       });
     } else if (match.type === 'timestamp-range') {
       lineParts.push({
         id: generateId(),
         type: 'timestamp-range',
-        firstTimestamp: match.firstTimestamp,
-        secondTimestamp: match.secondTimestamp,
+        firstTimestamp: match.firstTimestamp || timestampDefaultValues,
+        secondTimestamp: match.secondTimestamp || null,
       });
     }
 
@@ -261,6 +269,7 @@ export const parseMarkupAndCookies = (
     const trailingText =
       rawText.substring(startIndex, rawText.length) + (shouldAppendNewline ? '\n' : '');
     lineParts.push({
+      id: generateId(),
       type: 'text',
       contents: trailingText,
     });

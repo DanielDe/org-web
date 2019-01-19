@@ -2,7 +2,7 @@ import { Record, List } from 'immutable';
 
 import RecordOf from './record_of';
 
-import { Timestamp, makeTimestamp } from './timestamps';
+import { Timestamp, TimestampProps, makeTimestamp } from './timestamps';
 
 export interface ASTextPartProps {
   type: 'text';
@@ -122,6 +122,24 @@ export enum MarkupType {
   Underline = '_',
   Verbatim = '=',
 }
+export const markupTypeForStringType = (type?: string): MarkupType => {
+  switch (type) {
+    case '~':
+      return MarkupType.InlineCode;
+    case '*':
+      return MarkupType.Bold;
+    case '/':
+      return MarkupType.Italic;
+    case '+':
+      return MarkupType.Strikethrough;
+    case '_':
+      return MarkupType.Underline;
+    case '=':
+      return MarkupType.Verbatim;
+    default:
+      return MarkupType.InlineCode;
+  }
+};
 export interface ASInlineMarkupPartProps {
   type: 'inline-markup';
   id: number;
@@ -142,8 +160,8 @@ export const makeInlineMarkupPart: Record.Factory<ASInlineMarkupPartProps> = Rec
 export interface ASTimestampRangePartProps {
   type: 'timestamp-range';
   id: number;
-  firstTimestamp: Timestamp;
-  secondTimestamp: Timestamp | null;
+  firstTimestamp: Timestamp | TimestampProps; // TODO: find a way to get rid of this union.
+  secondTimestamp: Timestamp | TimestampProps | null; // TODO: find a way to get rid of this union.
 }
 export type ASTimestampRangePart = RecordOf<ASTimestampRangePartProps>;
 const timestampRangePartDefaultValues: ASTimestampRangePartProps = {

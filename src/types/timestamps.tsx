@@ -83,7 +83,7 @@ export type TimestampProps = {
   delayUnit: TimestampRepeaterDelayUnit | null;
 };
 export type Timestamp = RecordOf<TimestampProps>;
-const timestampDefaultValues: TimestampProps = {
+export const timestampDefaultValues: TimestampProps = {
   isActive: true,
   year: null,
   month: null,
