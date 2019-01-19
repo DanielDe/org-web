@@ -208,7 +208,6 @@ const advanceTodoState = (state, action) => {
     );
 
     const lastRepeatTimestamp = getCurrentTimestamp({ isActive: false, withStartTime: true });
-    // TODO: be more explicit here - no need to bring in the heavyweight `convertJSToAttributedString`.
     const newLastRepeatValue = convertJSToAttributedString([
       {
         type: 'timestamp-range',
