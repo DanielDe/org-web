@@ -581,8 +581,8 @@ export const parseDescriptionPrefixElements = (rawText: string) => {
 
 const defaultKeywordSets: List<TodoKeywordSet> = List([
   makeTodoKeywordSet({
-    keywords: ['TODO', 'DONE'],
-    completedKeywords: ['DONE'],
+    keywords: List(['TODO', 'DONE']),
+    completedKeywords: List(['DONE']),
     default: true,
   }),
 ]);
@@ -687,8 +687,8 @@ export const parseOrg = (fileContents: string) => {
 
           todoKeywordSets = todoKeywordSets.push(
             makeTodoKeywordSet({
-              keywords,
-              completedKeywords,
+              keywords: List(keywords),
+              completedKeywords: List(completedKeywords),
               configLine: line,
               default: false,
             })
