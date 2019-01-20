@@ -25,6 +25,9 @@ import {
   ASPercentageCookiePartProps,
   ASFractionCookiePartProps,
   ASTablePartProps,
+  ASTablePartRow,
+  ASTablePartCell,
+  ASTablePartCellProps,
   ASListPartProps,
   MarkupType,
   markupTypeForStringType,
@@ -313,20 +316,22 @@ const parseTable = (tableLines: Array<string>): ASTablePartProps => {
       ),
       rawContents,
     })),
-  }));
+  })) as ASTablePartRow[];
 
   // We sometimes end up with an extra, empty row - remove it if so.
   const lastRow = _.last(table.contents);
-  if (lastRow && lastRow.contents.length === 0) {
+  if (lastRow && (lastRow.contents as ASTablePartCell[]).length === 0) {
     table.contents = table.contents.slice(0, table.contents.length - 1);
   }
 
   // Make sure each row has the same number of columns.
-  const maxNumColumns = Math.max(...table.contents.map(row => row.contents.length));
+  const maxNumColumns = Math.max(
+    ...table.contents.map(row => (row.contents as ASTablePartCell[]).length)
+  );
   table.contents.forEach(row => {
-    if (row.contents.length < maxNumColumns) {
-      _.times(maxNumColumns - row.contents.length, () => {
-        row.contents.push({
+    if ((row.contents as ASTablePartCell[]).length < maxNumColumns) {
+      _.times(maxNumColumns - (row.contents as ASTablePartCell[]).length, () => {
+        (row.contents as ASTablePartCellProps[]).push({
           id: generateId(),
           contents: List(),
           rawContents: '',

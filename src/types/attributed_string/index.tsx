@@ -14,7 +14,11 @@ import {
 } from './fraction_cookie_part';
 import {
   ASTablePartCellProps,
+  ASTablePartCell,
+  makeTablePartCell,
   ASTablePartRowProps,
+  ASTablePartRow,
+  makeTablePartRow,
   ASTablePartProps,
   ASTablePart,
   makeTablePart,
@@ -58,7 +62,11 @@ export type ASFractionCookiePart = ASFractionCookiePart;
 export { makeFractionCookiePart };
 
 export type ASTablePartCellProps = ASTablePartCellProps;
+export type ASTablePartCell = ASTablePartCell;
+export { makeTablePartCell };
 export type ASTablePartRowProps = ASTablePartRowProps;
+export type ASTablePartRow = ASTablePartRow;
+export { makeTablePartRow };
 export type ASTablePartProps = ASTablePartProps;
 export type ASTablePart = ASTablePart;
 export { makeTablePart };
@@ -81,6 +89,15 @@ export type ASTimestampRangePartProps = ASTimestampRangePartProps;
 export type ASTimestampRangePart = ASTimestampRangePart;
 export { makeTimestampRangePart };
 
+export type ASPartType =
+  | 'text'
+  | 'link'
+  | 'percentage-cookie'
+  | 'fraction-cookie'
+  | 'table'
+  | 'list'
+  | 'inline-markup'
+  | 'timestamp-range';
 export type ASPartProps =
   | ASTextPartProps
   | ASLinkPartProps

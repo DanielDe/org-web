@@ -2,20 +2,40 @@ import { Record, List } from 'immutable';
 
 import RecordOf from '../record_of';
 
-// TODO: fix this table nonsense.
+import { AttributedString } from './index';
+
 export interface ASTablePartCellProps {
   id: number;
-  contents: List<any>; // TODO: make this not `any`.
+  contents: AttributedString; // TODO: make this not `any`.
   rawContents: string;
 }
+export type ASTablePartCell = RecordOf<ASTablePartCellProps>;
+const tablePartCellDefaultValues: ASTablePartCellProps = {
+  id: 0,
+  contents: List(),
+  rawContents: '',
+};
+export const makeTablePartCell: Record.Factory<ASTablePartCellProps> = Record(
+  tablePartCellDefaultValues
+);
+
 export interface ASTablePartRowProps {
   id: number;
-  contents: ASTablePartCellProps[];
+  contents: ASTablePartCell[] | List<ASTablePartCell> | ASTablePartCellProps[];
 }
+export type ASTablePartRow = RecordOf<ASTablePartRowProps>;
+const tablePartRowDefaultValues: ASTablePartRowProps = {
+  id: 0,
+  contents: List(),
+};
+export const makeTablePartRow: Record.Factory<ASTablePartRowProps> = Record(
+  tablePartRowDefaultValues
+);
+
 export interface ASTablePartProps {
   type: 'table';
   id: number;
-  contents: ASTablePartRowProps[] | List<ASTablePartRowProps>; // TODO: make this an array of AS parts.
+  contents: ASTablePartRow[] | List<ASTablePartRow>; // TODO: make this an array of AS parts.
   rawContents: Array<Array<string>>;
 }
 export type ASTablePart = RecordOf<ASTablePartProps>;

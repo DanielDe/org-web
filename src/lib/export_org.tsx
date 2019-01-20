@@ -1,44 +1,58 @@
 import _ from 'lodash';
+import { List } from 'immutable';
 
 import { renderAsText } from './timestamps';
 import { convertJSToAttributedString } from './attributed_string';
-import { makeTimestamp } from '../types/timestamps';
+import {
+  AttributedString,
+  ASPart,
+  ASPartType,
+  ASLinkPart,
+  ASTablePartCell,
+  ASTablePartRow,
+  ASTablePart,
+  ASListPart,
+  ASListPartItem,
+  ASTimestampRangePart,
+} from '../types/attributed_string';
+import { makeTimestamp, Timestamp } from '../types/timestamps';
+import { TodoKeywordSet } from '../types/org';
 
-const linkPartToRawText = linkPart => {
-  if (!!linkPart.get('title')) {
-    return `[[${linkPart.uri}][${linkPart.title}]]`;
-  } else {
-    return `[[${linkPart.uri}]]`;
-  }
-};
+const linkPartToRawText = (linkPart: ASLinkPart) =>
+  !!linkPart.title ? `[[${linkPart.uri}][${linkPart.title}]]` : `[[${linkPart.uri}]]`;
 
-const formattedAttributedStringText = parts => {
-  return parts
-    .map(part => {
-      switch (part.get('type')) {
-        case 'text':
-          return part.get('contents');
-        case 'link':
-          if (part.title) {
-            return part.title;
-          } else {
-            return part.uri;
-          }
-        case 'table':
-          return '';
-        default:
-          return '';
+const formattedAttributedStringText = (attributedString: AttributedString) =>
+  attributedString
+    .map(
+      (part): string => {
+        switch (part.type) {
+          case 'text':
+            return part.contents;
+          case 'link':
+            if (part.title) {
+              return part.title;
+            } else {
+              return part.uri;
+            }
+          case 'percentage-cookie':
+          case 'fraction-cookie':
+          case 'table':
+          case 'list':
+          case 'inline-markup':
+          case 'timestamp-range':
+            return '';
+        }
       }
-    })
+    )
     .join('');
-};
 
-const tablePartToRawText = tablePart => {
-  const rowHeights = tablePart
-    .get('contents')
+const tablePartToRawText = (tablePart: ASTablePart) => {
+  const rowHeights = (tablePart.contents as List<ASTablePartRow>)
     .map(row =>
       Math.max(
-        ...row.get('contents').map(cell => (_.countBy(cell.get('rawContents'))['\n'] || 0) + 1)
+        ...(row.contents as List<ASTablePartCell>)
+          .map(cell => (_.countBy(cell.rawContents)['\n'] || 0) + 1)
+          .toJS()
       )
     )
     .toJS();
@@ -46,26 +60,26 @@ const tablePartToRawText = tablePart => {
   const numColumns = tablePart.getIn(['contents', 0, 'contents']).size;
   const columnWidths = _.times(numColumns).map(columnIndex =>
     Math.max(
-      ...tablePart.get('contents').map(row => {
-        const content = row.getIn(['contents', columnIndex, 'contents']);
-        const formattedText = formattedAttributedStringText(content);
-        const lineLengths = formattedText.split('\n').map(line => line.trim().length);
-        return Math.max(...lineLengths);
-      })
+      ...(tablePart.contents as List<ASTablePartRow>)
+        .map(row => {
+          const content = row.getIn(['contents', columnIndex, 'contents']);
+          const formattedText = formattedAttributedStringText(content);
+          const lineLengths = formattedText.split('\n').map(line => line.trim().length);
+          return Math.max(...lineLengths);
+        })
+        .toJS()
     )
   );
 
   const rowStrings = _.dropRight(
     _.flatten(
-      tablePart
-        .get('contents')
+      (tablePart.contents as List<ASTablePartRow>)
         .map((row, rowIndex) => {
           const rowHeight = rowHeights[rowIndex];
 
           const contentRows = _.times(rowHeight)
             .map(lineIndex =>
-              row
-                .get('contents')
+              (row.contents as List<ASTablePartCell>)
                 .map((cell, columnIndex) => {
                   const content = cell.get('contents');
                   const formattedText = formattedAttributedStringText(content);
@@ -95,18 +109,17 @@ const tablePartToRawText = tablePart => {
   return rowStrings.join('\n');
 };
 
-const listPartToRawText = listPart => {
-  const bulletCharacter = listPart.get('bulletCharacter');
+const listPartToRawText = (listPart: ASListPart) => {
+  const bulletCharacter = listPart.bulletCharacter;
 
   let previousNumber = 0;
-  return listPart
-    .get('items')
+  return (listPart.items as List<ASListPartItem>)
     .map(item => {
-      const optionalLeadingSpace = !listPart.get('isOrdered') && bulletCharacter === '*' ? ' ' : '';
+      const optionalLeadingSpace = !listPart.isOrdered && bulletCharacter === '*' ? ' ' : '';
 
-      const titleText = attributedStringToRawText(item.get('titleLine'));
+      const titleText = attributedStringToRawText(item.titleLine);
 
-      const contentText = attributedStringToRawText(item.get('contents'));
+      const contentText = attributedStringToRawText(item.contents);
       const indentedContentText = contentText
         .split('\n')
         .map(line => (!!line.trim() ? `${optionalLeadingSpace}  ${line}` : ''))
@@ -115,7 +128,7 @@ const listPartToRawText = listPart => {
       let listItemText = null;
       if (listPart.get('isOrdered')) {
         let number = ++previousNumber;
-        let forceNumber = item.get('forceNumber');
+        let forceNumber = item.forceNumber;
         if (!!forceNumber) {
           number = forceNumber;
           previousNumber = number;
@@ -127,12 +140,12 @@ const listPartToRawText = listPart => {
           listItemText += ` [@${forceNumber}]`;
         }
 
-        if (item.get('isCheckbox')) {
-          const stateCharacter = {
+        if (item.isCheckbox) {
+          const stateCharacter = ({
             checked: 'X',
             unchecked: ' ',
             partial: '-',
-          }[item.get('checkboxState')];
+          } as { [key: string]: string })[item.checkboxState];
 
           listItemText += ` [${stateCharacter}]`;
         }
@@ -141,12 +154,12 @@ const listPartToRawText = listPart => {
       } else {
         listItemText = `${optionalLeadingSpace}${bulletCharacter}`;
 
-        if (item.get('isCheckbox')) {
-          const stateCharacter = {
+        if (item.isCheckbox) {
+          const stateCharacter = ({
             checked: 'X',
             unchecked: ' ',
             partial: '-',
-          }[item.get('checkboxState')];
+          } as { [key: string]: string })[item.checkboxState];
 
           listItemText += ` [${stateCharacter}]`;
         }
@@ -163,29 +176,29 @@ const listPartToRawText = listPart => {
     .join('\n');
 };
 
-const timestampPartToRawText = part => {
-  let text = renderAsText(part.get('firstTimestamp'));
-  if (part.get('secondTimestamp')) {
-    text += `--${renderAsText(part.get('secondTimestamp'))}`;
+const timestampRangePartToRawText = (part: ASTimestampRangePart) => {
+  let text = renderAsText(part.firstTimestamp as Timestamp);
+  if (part.secondTimestamp) {
+    text += `--${renderAsText(part.secondTimestamp as Timestamp)}`;
   }
 
   return text;
 };
 
-export const attributedStringToRawText = parts => {
+export const attributedStringToRawText = (parts: AttributedString): string => {
   if (!parts) {
     return '';
   }
 
-  const prevPartTypes = parts.map(part => part.get('type')).unshift(null);
+  const prevPartTypes = (parts.map(part => part.type) as List<ASPartType | null>).unshift(null);
 
   return parts
     .zip(prevPartTypes)
     .map(([part, prevPartType]) => {
       let text = '';
-      switch (part.get('type')) {
+      switch (part.type) {
         case 'text':
-          text = part.get('contents');
+          text = part.contents;
           break;
         case 'link':
           text = linkPartToRawText(part);
@@ -194,7 +207,7 @@ export const attributedStringToRawText = parts => {
           text = `[${part.getIn(['fraction', 0]) || ''}/${part.getIn(['fraction', 1]) || ''}]`;
           break;
         case 'percentage-cookie':
-          text = `[${part.get('percentage') || ''}%]`;
+          text = `[${part.percentage || ''}%]`;
           break;
         case 'table':
           text = tablePartToRawText(part);
@@ -203,23 +216,24 @@ export const attributedStringToRawText = parts => {
           text = listPartToRawText(part);
           break;
         case 'timestamp-range':
-          text = timestampPartToRawText(part);
+          text = timestampRangePartToRawText(part);
           break;
         default:
           console.error(
-            `Unknown attributed string part type in attributedStringToRawText: ${part.get('type')}`
+            `Unknown attributed string part type in attributedStringToRawText: ${part.type}`
           );
       }
 
-      const optionalNewlinePrefix = ['list', 'table'].includes(prevPartType) ? '\n' : '';
+      const optionalNewlinePrefix = ['list', 'table'].includes(prevPartType || '') ? '\n' : '';
       return optionalNewlinePrefix + text;
     })
     .join('');
 };
 
-export default (headers, todoKeywordSets) => {
+export default (headers: List<any>, todoKeywordSets: List<TodoKeywordSet>) => {
   let configContent = '';
-  if (!todoKeywordSets.get(0).get('default')) {
+  const firstTodoKeywordSet = todoKeywordSets.first(null);
+  if (firstTodoKeywordSet && !firstTodoKeywordSet.default) {
     configContent =
       todoKeywordSets
         .map(todoKeywordSet => {
@@ -240,11 +254,12 @@ export default (headers, todoKeywordSets) => {
       contents += ` ${header.titleLine.rawTitle}`;
 
       if (header.titleLine.tags.length > 0) {
-        contents += ` :${header.titleLine.tags.filter(tag => !!tag).join(':')}:`;
+        contents += ` :${header.titleLine.tags.filter((tag: string | null) => !!tag).join(':')}:`;
       }
 
       if (header.planningItems) {
-        header.planningItems.forEach(planningItem => {
+        // fix this `any`.
+        header.planningItems.forEach((planningItem: any) => {
           contents += `\n${planningItem.type}: ${renderAsText(
             makeTimestamp(planningItem.timestamp)
           )}`;
@@ -253,10 +268,13 @@ export default (headers, todoKeywordSets) => {
 
       if (header.propertyListItems.length > 0) {
         contents += '\n:PROPERTIES:';
-        header.propertyListItems.forEach(propertyListItem => {
-          contents += `\n:${propertyListItem.property}: ${attributedStringToRawText(
-            propertyListItem.value ? convertJSToAttributedString(propertyListItem.value) : null
-          )}`;
+        // TODO: fix this `any`.
+        header.propertyListItems.forEach((propertyListItem: any) => {
+          contents += `\n:${propertyListItem.property}: ${
+            propertyListItem.value
+              ? attributedStringToRawText(convertJSToAttributedString(propertyListItem.value))
+              : null
+            }`;
         });
         contents += '\n:END:\n';
       }

@@ -35,6 +35,8 @@ export interface ASListPartProps {
   id: number;
   items: ASListPartItemProps[] | List<ASListPartItem>; // TODO: find a way to get rid of this union.
   isOrdered: boolean;
+  bulletCharacter?: string;
+  numberTerminatorCharacter?: string;
 }
 export type ASListPart = RecordOf<ASListPartProps>;
 const listPartDefaultValues: ASListPartProps = {
