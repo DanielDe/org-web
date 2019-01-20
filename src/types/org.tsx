@@ -10,6 +10,7 @@ export interface TodoKeywordSetProps {
   configLine?: string;
 }
 export type TodoKeywordSet = RecordOf<TodoKeywordSetProps>;
+
 const defaultTodoKeywordSetProps: TodoKeywordSetProps = {
   keywords: [],
   completedKeywords: [],
