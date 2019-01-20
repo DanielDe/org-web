@@ -5,7 +5,7 @@ import moment from 'moment';
 import {
   parseOrg,
   parseTitleLine,
-  parseRawText,
+  parseRawTextAsAttributedString,
   parseDescriptionPrefixElements,
   parseMarkupAndCookies,
   newHeaderWithTitle,
@@ -36,7 +36,7 @@ import { getCurrentTimestamp, applyRepeater, renderAsText } from '../lib/timesta
 import generateId from '../lib/id_generator';
 
 import { makeTimestamp } from '../types/timestamps';
-import { convertJSToAttributedString } from '../lib/attributed_string';
+import { convertRawAttributedStringToAttributedString } from '../lib/attributed_string';
 
 const displayFile = (state, action) => {
   const parsedFile = parseOrg(action.contents);
@@ -208,7 +208,7 @@ const advanceTodoState = (state, action) => {
     );
 
     const lastRepeatTimestamp = getCurrentTimestamp({ isActive: false, withStartTime: true });
-    const newLastRepeatValue = convertJSToAttributedString([
+    const newLastRepeatValue = convertRawAttributedStringToAttributedString([
       {
         type: 'timestamp-range',
         id: generateId(),
@@ -248,7 +248,7 @@ const advanceTodoState = (state, action) => {
 
       return header
         .set('rawDescription', rawDescription)
-        .set('description', parseRawText(rawDescription));
+        .set('description', parseRawTextAsAttributedString(rawDescription));
     });
   } else {
     state = state.setIn(['headers', headerIndex, 'titleLine', 'todoKeyword'], newTodoState);
@@ -287,7 +287,7 @@ const updateHeaderDescription = (state, action) => {
 
     return header
       .set('rawDescription', strippedDescription)
-      .set('description', parseRawText(strippedDescription))
+      .set('description', parseRawTextAsAttributedString(strippedDescription))
       .set('planningItems', planningItems)
       .set('propertyListItems', propertyListItems);
   });
@@ -726,7 +726,7 @@ const updateTableCellValue = (state, action) => {
           .set('rawContents', action.newValue)
           .set(
             'contents',
-            convertJSToAttributedString(
+            convertRawAttributedStringToAttributedString(
               parseMarkupAndCookies(action.newValue, { excludeCookies: true })
             )
           )

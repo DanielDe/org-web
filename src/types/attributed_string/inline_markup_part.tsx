@@ -10,6 +10,7 @@ export enum MarkupType {
   Underline = '_',
   Verbatim = '=',
 }
+
 export const markupTypeForStringType = (type?: string): MarkupType => {
   switch (type) {
     case '~':
@@ -28,13 +29,16 @@ export const markupTypeForStringType = (type?: string): MarkupType => {
       return MarkupType.InlineCode;
   }
 };
+
 export interface ASInlineMarkupPartProps {
   type: 'inline-markup';
   id: number;
   markupType: MarkupType;
   content: string;
 }
+export type RawASInlineMarkupPart = ASInlineMarkupPartProps;
 export type ASInlineMarkupPart = RecordOf<ASInlineMarkupPartProps>;
+
 const inlineMarkupPartDefaultValues: ASInlineMarkupPartProps = {
   type: 'inline-markup',
   id: 0,

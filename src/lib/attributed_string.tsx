@@ -2,7 +2,10 @@ import { List, fromJS } from 'immutable';
 
 import {
   AttributedString,
+  RawAttributedString,
   ASPart,
+  RawASPart,
+  RawASTablePart,
   ASPartProps,
   ASListPartProps,
   makeTextPart,
@@ -10,6 +13,8 @@ import {
   makePercentageCookiePart,
   makeFractionCookiePart,
   makeTablePart,
+  makeTablePartRow,
+  makeTablePartCell,
   makeListPartItem,
   makeListPart,
   makeInlineMarkupPart,
@@ -17,7 +22,9 @@ import {
 } from '../types/attributed_string';
 import { makeTimestamp } from '../types/timestamps';
 
-export const convertJSToAttributedString = (rawParts: ASPartProps[]): AttributedString =>
+export const convertRawAttributedStringToAttributedString = (
+  rawParts: RawAttributedString
+): AttributedString =>
   List(
     rawParts.map(rawPart => {
       switch (rawPart.type) {
@@ -30,21 +37,36 @@ export const convertJSToAttributedString = (rawParts: ASPartProps[]): Attributed
         case 'fraction-cookie':
           return makeFractionCookiePart(rawPart);
         case 'table':
-          // TODO: fix this table creation nonsense.
           return makeTablePart({
             ...rawPart,
             contents: List(
-              (rawPart.contents as any[]).map(row =>
-                fromJS({ ...row, contents: fromJS(row.contents) })
+              rawPart.contents.map(row =>
+                makeTablePartRow({
+                  ...row,
+                  contents: List(
+                    row.contents.map(cell =>
+                      makeTablePartCell({
+                        ...cell,
+                        contents: convertRawAttributedStringToAttributedString(cell.contents),
+                      })
+                    )
+                  ),
+                })
               )
             ),
           });
         case 'list':
           return makeListPart({
-            type: 'list',
-            id: rawPart.id,
-            items: List((rawPart as ASListPartProps).items).map(makeListPartItem),
-            isOrdered: rawPart.isOrdered,
+            ...rawPart,
+            items: List(
+              rawPart.items.map(item =>
+                makeListPartItem({
+                  ...item,
+                  titleLine: convertRawAttributedStringToAttributedString(item.titleLine),
+                  contents: convertRawAttributedStringToAttributedString(item.contents),
+                })
+              )
+            ),
           });
         case 'inline-markup':
           return makeInlineMarkupPart(rawPart);

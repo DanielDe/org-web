@@ -2,13 +2,11 @@ import generateId from './id_generator';
 
 import { List, fromJS } from 'immutable';
 
-export const indexOfHeaderWithId = (headers, headerId) => {
-  return headers.findIndex(header => header.get('id') === headerId);
-};
+export const indexOfHeaderWithId = (headers, headerId) =>
+  headers.findIndex(header => header.get('id') === headerId);
 
-export const headerWithId = (headers, headerId) => {
-  return headers.get(indexOfHeaderWithId(headers, headerId));
-};
+export const headerWithId = (headers, headerId) =>
+  headers.get(indexOfHeaderWithId(headers, headerId));
 
 export const subheadersOfHeaderWithId = (headers, headerId) => {
   const header = headerWithId(headers, headerId);

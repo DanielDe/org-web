@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { List } from 'immutable';
 
 import { renderAsText } from './timestamps';
-import { convertJSToAttributedString } from './attributed_string';
+import { convertRawAttributedStringToAttributedString } from './attributed_string';
 import {
   AttributedString,
   ASPart,
@@ -272,7 +272,9 @@ export default (headers: List<any>, todoKeywordSets: List<TodoKeywordSet>) => {
         header.propertyListItems.forEach((propertyListItem: any) => {
           contents += `\n:${propertyListItem.property}: ${
             propertyListItem.value
-              ? attributedStringToRawText(convertJSToAttributedString(propertyListItem.value))
+              ? attributedStringToRawText(
+                convertRawAttributedStringToAttributedString(propertyListItem.value)
+              )
               : null
             }`;
         });

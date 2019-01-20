@@ -7,7 +7,9 @@ export interface ASPercentageCookiePartProps {
   id: number;
   percentage: number;
 }
+export type RawASPercentageCookiePart = ASPercentageCookiePartProps;
 export type ASPercentageCookiePart = RecordOf<ASPercentageCookiePartProps>;
+
 const percentageCookiePartDefaultValues: ASPercentageCookiePartProps = {
   type: 'percentage-cookie',
   id: 0,

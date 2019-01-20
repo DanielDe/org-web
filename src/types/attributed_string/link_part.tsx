@@ -8,7 +8,9 @@ export interface ASLinkPartProps {
   title: string | null;
   uri: string;
 }
+export type RawASLinkPart = ASLinkPartProps;
 export type ASLinkPart = RecordOf<ASLinkPartProps>;
+
 const linkPartDefaultValues: ASLinkPartProps = {
   type: 'link',
   id: 0,

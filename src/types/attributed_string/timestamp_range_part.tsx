@@ -7,10 +7,17 @@ import { Timestamp, TimestampProps, makeTimestamp } from '../timestamps';
 export interface ASTimestampRangePartProps {
   type: 'timestamp-range';
   id: number;
-  firstTimestamp: Timestamp | TimestampProps; // TODO: find a way to get rid of this union.
-  secondTimestamp: Timestamp | TimestampProps | null; // TODO: find a way to get rid of this union.
+  firstTimestamp: Timestamp;
+  secondTimestamp: Timestamp | null;
+}
+export interface RawASTimestampRangePart {
+  type: 'timestamp-range';
+  id: number;
+  firstTimestamp: TimestampProps;
+  secondTimestamp: TimestampProps | null;
 }
 export type ASTimestampRangePart = RecordOf<ASTimestampRangePartProps>;
+
 const timestampRangePartDefaultValues: ASTimestampRangePartProps = {
   type: 'timestamp-range',
   id: 0,

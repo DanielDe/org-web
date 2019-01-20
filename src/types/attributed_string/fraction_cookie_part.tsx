@@ -7,7 +7,9 @@ export interface ASFractionCookiePartProps {
   id: number;
   fraction: [number, number];
 }
+export type RawASFractionCookiePart = ASFractionCookiePartProps;
 export type ASFractionCookiePart = RecordOf<ASFractionCookiePartProps>;
+
 const fractionCookiePartDefaultValues: ASFractionCookiePartProps = {
   type: 'fraction-cookie',
   id: 0,

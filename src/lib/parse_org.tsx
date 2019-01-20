@@ -1,5 +1,5 @@
 import generateId from './id_generator';
-import { convertJSToAttributedString } from './attributed_string';
+import { convertRawAttributedStringToAttributedString } from './attributed_string';
 
 import { fromJS, List } from 'immutable';
 import _ from 'lodash';
@@ -20,21 +20,17 @@ import {
   timestampDefaultValues,
 } from '../types/timestamps';
 import {
-  ASTextPartProps,
-  ASLinkPartProps,
-  ASPercentageCookiePartProps,
-  ASFractionCookiePartProps,
-  ASTablePartProps,
-  ASTablePartRow,
-  ASTablePartCell,
-  ASTablePartCellProps,
-  ASListPartProps,
+  RawASLinkPart,
+  RawASPart,
+  RawASTablePart,
+  RawASListPart,
+  RawASListPartItem,
   MarkupType,
   markupTypeForStringType,
-  ASInlineMarkupPartProps,
-  ASTimestampRangePartProps,
   AttributedString,
-  ASPartProps,
+  RawAttributedString,
+  CheckboxState,
+  checkboxStateForString,
 } from '../types/attributed_string';
 import { TodoKeywordSet, makeTodoKeywordSet } from '../types/org';
 
@@ -131,7 +127,7 @@ const timestampFromRegexMatch = (
 export const parseMarkupAndCookies = (
   rawText: string,
   { shouldAppendNewline = false, excludeCookies = true } = {}
-): ASPartProps[] => {
+): RawAttributedString => {
   const matches = [];
   let match = markupAndCookieRegex.exec(rawText);
   while (match) {
@@ -205,7 +201,7 @@ export const parseMarkupAndCookies = (
     match = markupAndCookieRegex.exec(rawText);
   }
 
-  const lineParts: ASPartProps[] = [];
+  const lineParts: RawAttributedString = [];
   let startIndex = 0;
   matches.forEach(match => {
     let index = match.index;
@@ -220,7 +216,7 @@ export const parseMarkupAndCookies = (
     }
 
     if (match.type === 'link') {
-      const linkPart: ASLinkPartProps = {
+      const linkPart: RawASLinkPart = {
         id: generateId(),
         type: 'link',
         title: null,
@@ -277,8 +273,8 @@ export const parseMarkupAndCookies = (
   return lineParts;
 };
 
-const parseTable = (tableLines: Array<string>): ASTablePartProps => {
-  const table: ASTablePartProps = {
+const parseTable = (tableLines: string[]): RawASTablePart => {
+  const table: RawASTablePart = {
     id: generateId(),
     type: 'table',
     rawContents: [[]],
@@ -309,31 +305,27 @@ const parseTable = (tableLines: Array<string>): ASTablePartProps => {
     id: generateId(),
     contents: row.map(rawContents => ({
       id: generateId(),
-      contents: convertJSToAttributedString(
-        parseMarkupAndCookies(rawContents, {
-          excludeCookies: true,
-        })
-      ),
+      contents: parseMarkupAndCookies(rawContents, {
+        excludeCookies: true,
+      }),
       rawContents,
     })),
-  })) as ASTablePartRow[];
+  }));
 
   // We sometimes end up with an extra, empty row - remove it if so.
   const lastRow = _.last(table.contents);
-  if (lastRow && (lastRow.contents as ASTablePartCell[]).length === 0) {
+  if (lastRow && lastRow.contents.length === 0) {
     table.contents = table.contents.slice(0, table.contents.length - 1);
   }
 
   // Make sure each row has the same number of columns.
-  const maxNumColumns = Math.max(
-    ...table.contents.map(row => (row.contents as ASTablePartCell[]).length)
-  );
+  const maxNumColumns = Math.max(...table.contents.map(row => row.contents.length));
   table.contents.forEach(row => {
-    if ((row.contents as ASTablePartCell[]).length < maxNumColumns) {
-      _.times(maxNumColumns - (row.contents as ASTablePartCell[]).length, () => {
-        (row.contents as ASTablePartCellProps[]).push({
+    if (row.contents.length < maxNumColumns) {
+      _.times(maxNumColumns - row.contents.length, () => {
+        row.contents.push({
           id: generateId(),
-          contents: List(),
+          contents: [],
           rawContents: '',
         });
       });
@@ -343,78 +335,85 @@ const parseTable = (tableLines: Array<string>): ASTablePartProps => {
   return table;
 };
 
-export const parseRawText = (
+export const parseRawTextAsRawAttributedString = (
   rawText: string,
   { excludeContentElements = false } = {}
-): AttributedString => {
+): RawAttributedString => {
   const lines = rawText.split('\n');
 
   const LIST_HEADER_REGEX = /^\s*([-+*]|(\d+(\.|\)))) (.*)/;
 
+  interface RawLine {
+    type: 'raw-list-content' | 'raw-list-header' | 'raw-table';
+    line: string;
+  }
+  type RawLineOrASPart = RawASPart | RawLine;
+
   let currentListHeaderNestingLevel: number | null = null;
-  const rawLineParts = _.flatten(lines.map((line, lineIndex) => {
-    const numLeadingSpaces = (line.match(/^( *)/) as RegExpExecArray)[0].length;
+  const rawLineParts = _.flatten(
+    lines.map(
+      (line, lineIndex): RawLineOrASPart[] => {
+        const numLeadingSpaces = (line.match(/^( *)/) as RegExpExecArray)[0].length;
 
-    if (
-      currentListHeaderNestingLevel !== null &&
-      (numLeadingSpaces > currentListHeaderNestingLevel || !line.trim())
-    ) {
-      return [
-        {
-          type: 'raw-list-content',
-          line,
-        },
-      ];
-    } else {
-      currentListHeaderNestingLevel = null;
+        if (
+          currentListHeaderNestingLevel !== null &&
+          (numLeadingSpaces > currentListHeaderNestingLevel || !line.trim())
+        ) {
+          return [
+            {
+              type: 'raw-list-content',
+              line,
+            },
+          ];
+        } else {
+          currentListHeaderNestingLevel = null;
 
-      if (!!line.match(LIST_HEADER_REGEX) && !excludeContentElements) {
-        currentListHeaderNestingLevel = numLeadingSpaces;
+          if (!!line.match(LIST_HEADER_REGEX) && !excludeContentElements) {
+            currentListHeaderNestingLevel = numLeadingSpaces;
 
-        return [
-          {
-            type: 'raw-list-header',
-            line,
-          },
-        ];
-      } else if (line.trim().startsWith('|') && !excludeContentElements) {
-        return [
-          {
-            type: 'raw-table',
-            line,
-          },
-        ];
-      } else {
-        return parseMarkupAndCookies(line, {
-          shouldAppendNewline: lineIndex !== lines.length - 1,
-          excludeCookies: true,
-        });
+            return [
+              {
+                type: 'raw-list-header',
+                line,
+              },
+            ];
+          } else if (line.trim().startsWith('|') && !excludeContentElements) {
+            return [
+              {
+                type: 'raw-table',
+                line,
+              },
+            ];
+          } else {
+            return parseMarkupAndCookies(line, {
+              shouldAppendNewline: lineIndex !== lines.length - 1,
+              excludeCookies: true,
+            });
+          }
+        }
       }
-    }
-    // TODO: fix this usage of `any[]`
-  }) as any[]);
+    )
+  );
 
-  // TODO: this is an `any[]` right now, I think I should be explicit about it being an
-  //       ASPartProps[].
-  const processedLineParts = [];
+  const processedLineParts: RawAttributedString = [];
   for (let partIndex = 0; partIndex < rawLineParts.length; ++partIndex) {
     const linePart = rawLineParts[partIndex];
     if (linePart.type === 'raw-table') {
       const tableLines = _.takeWhile(
         rawLineParts.slice(partIndex),
         part => part.type === 'raw-table'
-      ).map(part => part.line);
+      ).map(part => (part as RawLine).line);
 
       processedLineParts.push(parseTable(tableLines));
 
       partIndex += tableLines.length - 1;
     } else if (linePart.type === 'raw-list-header') {
-      const numLeadingSpaces = linePart.line.match(/^( *)/)[0].length;
+      const numLeadingSpaces = (linePart.line.match(/^( *)/) as RegExpExecArray)[0].length;
       const contentLines = _.takeWhile(
         rawLineParts.slice(partIndex + 1),
         part => part.type === 'raw-list-content'
       )
-        .map(part => part.line)
+        .map(part => (part as RawLine).line)
         .map(
           line =>
             line.startsWith(' '.repeat(numLeadingSpaces + 2))
@@ -424,38 +423,36 @@ export const parseRawText = (
       if (contentLines[contentLines.length - 1] === '') {
         contentLines[contentLines.length - 1] = ' ';
       }
-      const contents = parseRawText(contentLines.join('\n'));
+      const contents = parseRawTextAsRawAttributedString(contentLines.join('\n'));
 
       partIndex += contentLines.length;
 
       const isOrdered = !!linePart.line.match(/^\s*\d+[.)]/);
 
       // Remove the leading -, +, *, or number characters.
-      let line = linePart.line.match(LIST_HEADER_REGEX)[4];
+      let line = (linePart.line.match(LIST_HEADER_REGEX) as RegExpExecArray)[4];
 
       let forceNumber = null;
       if (line.match(/^\s*\[@\d+\]/)) {
-        forceNumber = line.match(/^\s*\[@(\d+)\]/)[1];
+        const match = line.match(/^\s*\[@(\d+)\]/);
+        forceNumber = !!match ? parseInt(match[1]) : null;
         line = line.replace(/^\s*\[@\d+\]\s*/, '');
       }
 
-      let checkboxState = null;
+      let checkboxState: CheckboxState | undefined = undefined;
       const isCheckbox = !!line.match(/^\s*\[[ X-]\]/);
       if (isCheckbox) {
-        const stateCharacter = line.match(/^\s*\[([ X-])\]/)[1];
-        // TODO: make this an enum type.
-        checkboxState = ({
-          ' ': 'unchecked',
-          X: 'checked',
-          '-': 'partial',
-        } as { [key: string]: string })[stateCharacter];
+        const match = line.match(/^\s*\[([ X-])\]/);
+        const stateCharacter = !!match ? match[1] : null;
+
+        checkboxState = checkboxStateForString(stateCharacter);
 
         line = line.replace(/^\s*\[[ X-]\]\s*/, '');
       }
 
-      const newListItem = {
+      const newListItem: RawASListPartItem = {
         id: generateId(),
-        titleLine: convertJSToAttributedString(parseMarkupAndCookies(line)),
+        titleLine: parseMarkupAndCookies(line),
         contents,
         forceNumber,
         isCheckbox,
@@ -464,24 +461,31 @@ export const parseRawText = (
 
       const lastIndex = processedLineParts.length - 1;
       if (lastIndex >= 0 && processedLineParts[lastIndex].type === 'list') {
-        processedLineParts[lastIndex].items.push(newListItem);
+        (processedLineParts[lastIndex] as RawASListPart).items.push(newListItem);
       } else {
+        const numberTerminatorCharacterMatch = linePart.line.match(/\s*\d+([.)])/);
         processedLineParts.push({
           type: 'list',
           id: generateId(),
           items: [newListItem],
           bulletCharacter: linePart.line.trim()[0],
-          numberTerminatorCharacter: isOrdered ? linePart.line.match(/\s*\d+([.)])/)[1] : null,
+          numberTerminatorCharacter:
+            isOrdered && !!numberTerminatorCharacterMatch
+              ? numberTerminatorCharacterMatch[1]
+              : undefined,
           isOrdered,
         });
       }
     } else {
-      processedLineParts.push(linePart);
+      processedLineParts.push(linePart as RawASPart);
     }
   }
 
-  return convertJSToAttributedString(processedLineParts);
+  return processedLineParts;
 };
+
+export const parseRawTextAsAttributedString = (rawText: string, options = {}) =>
+  convertRawAttributedStringToAttributedString(parseRawTextAsRawAttributedString(rawText, options));
 
 const parsePlanningItems = (rawText: string) => {
   const singlePlanningItemRegex = concatRegexes(/(DEADLINE|SCHEDULED|CLOSED):\s*/, timestampRegex);
@@ -555,7 +559,7 @@ const parsePropertyList = (rawText: string) => {
         }
 
         const value = !!match[2]
-          ? convertJSToAttributedString(parseMarkupAndCookies(match[2]))
+          ? convertRawAttributedStringToAttributedString(parseMarkupAndCookies(match[2]))
           : null;
 
         return {
@@ -613,7 +617,7 @@ export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeyw
     }
   }
 
-  const title = convertJSToAttributedString(parseMarkupAndCookies(rawTitle));
+  const title = convertRawAttributedStringToAttributedString(parseMarkupAndCookies(rawTitle));
 
   return fromJS({ title, rawTitle, todoKeyword, tags });
 };
@@ -661,7 +665,7 @@ export const newHeaderFromText = (rawText: string, todoKeywordSets: List<TodoKey
 
   return newHeaderWithTitle(titleLine, 1, todoKeywordSets)
     .set('rawDescription', strippedDescription)
-    .set('description', parseRawText(strippedDescription))
+    .set('description', parseRawTextAsAttributedString(strippedDescription))
     .set('planningItems', planningItems)
     .set('propertyListItems', propertyListItems);
 };
@@ -721,7 +725,7 @@ export const parseOrg = (fileContents: string) => {
 
     return header
       .set('rawDescription', strippedDescription)
-      .set('description', parseRawText(strippedDescription))
+      .set('description', parseRawTextAsAttributedString(strippedDescription))
       .set('planningItems', planningItems)
       .set('propertyListItems', propertyListItems);
   });
