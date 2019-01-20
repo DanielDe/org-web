@@ -32,7 +32,7 @@ import {
   CheckboxState,
   checkboxStateForString,
 } from '../types/attributed_string';
-import { TodoKeywordSet, makeTodoKeywordSet } from '../types/org';
+import { TodoKeywordSet, makeTodoKeywordSet } from '../types/todo_keyword_set';
 
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
 // But fixing this mess is on my todo list...

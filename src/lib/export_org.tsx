@@ -16,7 +16,7 @@ import {
   ASTimestampRangePart,
 } from '../types/attributed_string';
 import { makeTimestamp, Timestamp } from '../types/timestamps';
-import { TodoKeywordSet } from '../types/org';
+import { TodoKeywordSet } from '../types/todo_keyword_set';
 
 const linkPartToRawText = (linkPart: ASLinkPart) =>
   !!linkPart.title ? `[[${linkPart.uri}][${linkPart.title}]]` : `[[${linkPart.uri}]]`;
