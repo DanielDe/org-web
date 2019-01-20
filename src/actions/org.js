@@ -62,13 +62,6 @@ export const sync = ({
 
       if (lastSyncAt.isAfter(lastServerModifiedAt, 'second') || forceAction === 'push') {
         if (isDirty) {
-          console.log(
-            exportOrg(
-              getState().org.present.get('headers'),
-              getState().org.present.get('todoKeywordSets')
-            )
-          );
-          return;
           client
             .updateFile(
               path,
