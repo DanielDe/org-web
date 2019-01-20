@@ -47,20 +47,16 @@ const formattedAttributedStringText = (attributedString: AttributedString) =>
     .join('');
 
 const tablePartToRawText = (tablePart: ASTablePart) => {
-  const rowHeights = (tablePart.contents as List<ASTablePartRow>)
+  const rowHeights = tablePart.contents
     .map(row =>
-      Math.max(
-        ...(row.contents as List<ASTablePartCell>)
-          .map(cell => (_.countBy(cell.rawContents)['\n'] || 0) + 1)
-          .toJS()
-      )
+      Math.max(...row.contents.map(cell => (_.countBy(cell.rawContents)['\n'] || 0) + 1).toJS())
     )
     .toJS();
 
   const numColumns = tablePart.getIn(['contents', 0, 'contents']).size;
   const columnWidths = _.times(numColumns).map(columnIndex =>
     Math.max(
-      ...(tablePart.contents as List<ASTablePartRow>)
+      ...tablePart.contents
         .map(row => {
           const content = row.getIn(['contents', columnIndex, 'contents']);
           const formattedText = formattedAttributedStringText(content);
@@ -73,13 +69,13 @@ const tablePartToRawText = (tablePart: ASTablePart) => {
 
   const rowStrings = _.dropRight(
     _.flatten(
-      (tablePart.contents as List<ASTablePartRow>)
+      tablePart.contents
         .map((row, rowIndex) => {
           const rowHeight = rowHeights[rowIndex];
 
           const contentRows = _.times(rowHeight)
             .map(lineIndex =>
-              (row.contents as List<ASTablePartCell>)
+              row.contents
                 .map((cell, columnIndex) => {
                   const content = cell.get('contents');
                   const formattedText = formattedAttributedStringText(content);
@@ -113,7 +109,7 @@ const listPartToRawText = (listPart: ASListPart) => {
   const bulletCharacter = listPart.bulletCharacter;
 
   let previousNumber = 0;
-  return (listPart.items as List<ASListPartItem>)
+  return listPart.items
     .map(item => {
       const optionalLeadingSpace = !listPart.isOrdered && bulletCharacter === '*' ? ' ' : '';
 
@@ -177,9 +173,9 @@ const listPartToRawText = (listPart: ASListPart) => {
 };
 
 const timestampRangePartToRawText = (part: ASTimestampRangePart) => {
-  let text = renderAsText(part.firstTimestamp as Timestamp);
+  let text = renderAsText(part.firstTimestamp);
   if (part.secondTimestamp) {
-    text += `--${renderAsText(part.secondTimestamp as Timestamp)}`;
+    text += `--${renderAsText(part.secondTimestamp)}`;
   }
 
   return text;
