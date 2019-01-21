@@ -33,6 +33,11 @@ import {
   checkboxStateForString,
 } from '../types/attributed_string';
 import { TodoKeywordSet, makeTodoKeywordSet } from '../types/todo_keyword_set';
+import {
+  PlanningItem,
+  makePlanningItem,
+  planningItemTypeForStringType,
+} from '../types/planning_item';
 
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
 // But fixing this mess is on my todo list...
@@ -487,7 +492,9 @@ export const parseRawTextAsRawAttributedString = (
 export const parseRawTextAsAttributedString = (rawText: string, options = {}) =>
   convertRawAttributedStringToAttributedString(parseRawTextAsRawAttributedString(rawText, options));
 
-const parsePlanningItems = (rawText: string) => {
+const parsePlanningItems = (
+  rawText: string
+): { planningItems: List<PlanningItem>; strippedDescription: string } => {
   const singlePlanningItemRegex = concatRegexes(/(DEADLINE|SCHEDULED|CLOSED):\s*/, timestampRegex);
   const optionalSinglePlanningItemRegex = RegExp(
     '(' +
@@ -507,32 +514,29 @@ const parsePlanningItems = (rawText: string) => {
   );
   const planningMatch = rawText.match(planningRegex);
   if (!planningMatch) {
-    return { planningItems: [], strippedDescription: rawText };
+    return { planningItems: List(), strippedDescription: rawText };
   }
 
-  // TODO: convert this to not use `fromJS`.
-  const planningItems = fromJS(
-    [2, 17, 32]
-      .map(planningTypeIndex => {
-        const type = planningMatch[planningTypeIndex];
-        if (!type) {
-          return null;
-        }
+  const planningItems = List([2, 17, 32]
+    .map(planningTypeIndex => {
+      const type = planningItemTypeForStringType(planningMatch[planningTypeIndex]);
+      if (!type) {
+        return null;
+      }
 
-        const timestamp = makeTimestamp(timestampFromRegexMatch(
-          planningMatch,
-          _.range(planningTypeIndex + 1, planningTypeIndex + 1 + 13)
-        ) as TimestampProps);
+      const timestamp = makeTimestamp(timestampFromRegexMatch(
+        planningMatch,
+        _.range(planningTypeIndex + 1, planningTypeIndex + 1 + 13)
+      ) as TimestampProps);
 
-        return { type, timestamp, id: generateId() };
-      })
-      .filter(item => !!item)
-      .map(item => fromJS(item))
-  );
+      return makePlanningItem({ type, timestamp, id: generateId() });
+    })
+    .filter(item => !!item) as PlanningItem[]);
 
   return { planningItems, strippedDescription: rawText.substring(planningMatch[0].length) };
 };
 
+// TODO: strongly type this function.
 const parsePropertyList = (rawText: string) => {
   const lines = rawText.split('\n');
   const propertiesLineIndex = lines.findIndex(line => line.trim() === ':PROPERTIES:');
@@ -577,6 +581,7 @@ const parsePropertyList = (rawText: string) => {
   };
 };
 
+// TODO: strongly type this function.
 export const parseDescriptionPrefixElements = (rawText: string) => {
   const planningItemsParse = parsePlanningItems(rawText);
   const propertyListParse = parsePropertyList(planningItemsParse.strippedDescription);
@@ -596,6 +601,7 @@ const defaultKeywordSets: List<TodoKeywordSet> = List([
   }),
 ]);
 
+// TODO: strongly type this function.
 export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeywordSet>) => {
   const allKeywords = todoKeywordSets.flatMap(todoKeywordSet => todoKeywordSet.keywords);
   const todoKeyword = allKeywords
@@ -622,6 +628,7 @@ export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeyw
   return fromJS({ title, rawTitle, todoKeyword, tags });
 };
 
+// TODO: strongly type this function.
 export const newHeaderWithTitle = (
   line: string,
   nestingLevel: number,
