@@ -17,6 +17,7 @@ import {
 } from '../types/attributed_string';
 import { makeTimestamp, Timestamp } from '../types/timestamps';
 import { TodoKeywordSet } from '../types/todo_keyword_set';
+import { Header } from '../types/header';
 
 const linkPartToRawText = (linkPart: ASLinkPart) =>
   !!linkPart.title ? `[[${linkPart.uri}][${linkPart.title}]]` : `[[${linkPart.uri}]]`;
@@ -226,7 +227,7 @@ export const attributedStringToRawText = (parts: AttributedString): string => {
     .join('');
 };
 
-export default (headers: List<any>, todoKeywordSets: List<TodoKeywordSet>) => {
+export default (headers: List<Header>, todoKeywordSets: List<TodoKeywordSet>) => {
   let configContent = '';
   const firstTodoKeywordSet = todoKeywordSets.first(null);
   if (firstTodoKeywordSet && !firstTodoKeywordSet.default) {
@@ -239,7 +240,6 @@ export default (headers: List<any>, todoKeywordSets: List<TodoKeywordSet>) => {
   }
 
   const headerContent = headers
-    .toJS()
     .map(header => {
       let contents = '';
       contents += '*'.repeat(header.nestingLevel);
@@ -249,7 +249,7 @@ export default (headers: List<any>, todoKeywordSets: List<TodoKeywordSet>) => {
       }
       contents += ` ${header.titleLine.rawTitle}`;
 
-      if (header.titleLine.tags.length > 0) {
+      if (header.titleLine.tags.size > 0) {
         contents += ` :${header.titleLine.tags.filter((tag: string | null) => !!tag).join(':')}:`;
       }
 
@@ -262,16 +262,11 @@ export default (headers: List<any>, todoKeywordSets: List<TodoKeywordSet>) => {
         });
       }
 
-      if (header.propertyListItems.length > 0) {
+      if (header.propertyListItems.size > 0) {
         contents += '\n:PROPERTIES:';
-        // TODO: fix this `any`.
-        header.propertyListItems.forEach((propertyListItem: any) => {
+        header.propertyListItems.forEach(propertyListItem => {
           contents += `\n:${propertyListItem.property}: ${
-            propertyListItem.value
-              ? attributedStringToRawText(
-                convertRawAttributedStringToAttributedString(propertyListItem.value)
-              )
-              : null
+            propertyListItem.value ? attributedStringToRawText(propertyListItem.value) : null
             }`;
         });
         contents += '\n:END:\n';
