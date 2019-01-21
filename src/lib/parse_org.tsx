@@ -687,7 +687,6 @@ export const newHeaderFromText = (rawText: string, todoKeywordSets: List<TodoKey
     .set('propertyListItems', propertyListItems);
 };
 
-// TODO: strongly type this file.
 export const parseOrg = (fileContents: string) => {
   let headers: List<Header> = List();
   const lines = fileContents.split('\n');
