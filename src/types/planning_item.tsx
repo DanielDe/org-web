@@ -9,7 +9,7 @@ export enum PlanningItemType {
   SCHEDULED = 'SCHEDULED',
   CLOSED = 'CLOSED',
 }
-export const planningItemTypeForStringType = (stringType?: string) => {
+export const planningItemTypeForStringType = (stringType?: string): PlanningItemType | null => {
   switch (stringType) {
     case 'DEADLINE':
       return PlanningItemType.DEADLINE;
@@ -18,7 +18,7 @@ export const planningItemTypeForStringType = (stringType?: string) => {
     case 'CLOSED':
       return PlanningItemType.CLOSED;
     default:
-      return PlanningItemType.DEADLINE;
+      return null;
   }
 };
 
