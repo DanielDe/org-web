@@ -38,6 +38,7 @@ import {
   makePlanningItem,
   planningItemTypeForStringType,
 } from '../types/planning_item';
+import { PropertyListItem, makePropertyListItem } from '../types/property_list_item';
 
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
 // But fixing this mess is on my todo list...
@@ -492,6 +493,10 @@ export const parseRawTextAsRawAttributedString = (
 export const parseRawTextAsAttributedString = (rawText: string, options = {}) =>
   convertRawAttributedStringToAttributedString(parseRawTextAsRawAttributedString(rawText, options));
 
+function notEmpty<TValue>(value: TValue | null): value is TValue {
+  return value !== null;
+}
+
 const parsePlanningItems = (
   rawText: string
 ): { planningItems: List<PlanningItem>; strippedDescription: string } => {
@@ -517,27 +522,30 @@ const parsePlanningItems = (
     return { planningItems: List(), strippedDescription: rawText };
   }
 
-  const planningItems = List([2, 17, 32]
-    .map(planningTypeIndex => {
-      const type = planningItemTypeForStringType(planningMatch[planningTypeIndex]);
-      if (!type) {
-        return null;
-      }
+  const planningItems = List(
+    [2, 17, 32]
+      .map(planningTypeIndex => {
+        const type = planningItemTypeForStringType(planningMatch[planningTypeIndex]);
+        if (!type) {
+          return null;
+        }
 
-      const timestamp = makeTimestamp(timestampFromRegexMatch(
-        planningMatch,
-        _.range(planningTypeIndex + 1, planningTypeIndex + 1 + 13)
-      ) as TimestampProps);
+        const timestamp = makeTimestamp(timestampFromRegexMatch(
+          planningMatch,
+          _.range(planningTypeIndex + 1, planningTypeIndex + 1 + 13)
+        ) as TimestampProps);
 
-      return makePlanningItem({ type, timestamp, id: generateId() });
-    })
-    .filter(item => !!item) as PlanningItem[]);
+        return makePlanningItem({ type, timestamp, id: generateId() });
+      })
+      .filter(notEmpty)
+  );
 
   return { planningItems, strippedDescription: rawText.substring(planningMatch[0].length) };
 };
 
-// TODO: strongly type this function.
-const parsePropertyList = (rawText: string) => {
+const parsePropertyList = (
+  rawText: string
+): { propertyListItems: List<PropertyListItem>; strippedDescription: string } => {
   const lines = rawText.split('\n');
   const propertiesLineIndex = lines.findIndex(line => line.trim() === ':PROPERTIES:');
   const endLineIndex = lines.findIndex(line => line.trim() === ':END:');
@@ -553,7 +561,7 @@ const parsePropertyList = (rawText: string) => {
     };
   }
 
-  const propertyListItems = fromJS(
+  const propertyListItems = List(
     lines
       .slice(propertiesLineIndex + 1, endLineIndex)
       .map(line => {
@@ -564,15 +572,15 @@ const parsePropertyList = (rawText: string) => {
 
         const value = !!match[2]
           ? convertRawAttributedStringToAttributedString(parseMarkupAndCookies(match[2]))
-          : null;
+          : List();
 
-        return {
+        return makePropertyListItem({
+          id: generateId(),
           property: match[1],
           value,
-          id: generateId(),
-        };
+        });
       })
-      .filter(result => !!result)
+      .filter(notEmpty)
   );
 
   return {
