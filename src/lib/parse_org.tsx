@@ -39,6 +39,8 @@ import {
   planningItemTypeForStringType,
 } from '../types/planning_item';
 import { PropertyListItem, makePropertyListItem } from '../types/property_list_item';
+import { TitleLine, makeTitleLine } from '../types/title_line';
+import { Header, makeHeader } from '../types/header';
 
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
 // But fixing this mess is on my todo list...
@@ -589,7 +591,6 @@ const parsePropertyList = (
   };
 };
 
-// TODO: strongly type this function.
 export const parseDescriptionPrefixElements = (rawText: string) => {
   const planningItemsParse = parsePlanningItems(rawText);
   const propertyListParse = parsePropertyList(planningItemsParse.strippedDescription);
@@ -609,8 +610,10 @@ const defaultKeywordSets: List<TodoKeywordSet> = List([
   }),
 ]);
 
-// TODO: strongly type this function.
-export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeywordSet>) => {
+export const parseTitleLine = (
+  titleLine: string,
+  todoKeywordSets: List<TodoKeywordSet>
+): TitleLine => {
   const allKeywords = todoKeywordSets.flatMap(todoKeywordSet => todoKeywordSet.keywords);
   const todoKeyword = allKeywords
     .filter(keyword => titleLine.startsWith(keyword + ' '))
@@ -620,7 +623,6 @@ export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeyw
     rawTitle = rawTitle.substr(todoKeyword.length + 1);
   }
 
-  // Check for tags.
   let tags: string[] = [];
   if (rawTitle.trimRight().endsWith(':')) {
     const titleParts = rawTitle.trimRight().split(' ');
@@ -633,29 +635,28 @@ export const parseTitleLine = (titleLine: string, todoKeywordSets: List<TodoKeyw
 
   const title = convertRawAttributedStringToAttributedString(parseMarkupAndCookies(rawTitle));
 
-  return fromJS({ title, rawTitle, todoKeyword, tags });
+  return makeTitleLine({ title, rawTitle, todoKeyword, tags: List(tags) });
 };
 
-// TODO: strongly type this function.
 export const newHeaderWithTitle = (
   line: string,
   nestingLevel: number,
   todoKeywordSets: List<TodoKeywordSet>
-) => {
+): Header => {
   if (todoKeywordSets.size === 0) {
     todoKeywordSets = defaultKeywordSets;
   }
 
   const titleLine = parseTitleLine(line, todoKeywordSets);
-  return fromJS({
+  return makeHeader({
     titleLine,
     rawDescription: '',
-    description: [],
+    description: List(),
     opened: false,
     id: generateId(),
     nestingLevel,
-    planningItems: [],
-    propertyListItems: [],
+    planningItems: List(),
+    propertyListItems: List(),
   });
 };
 
