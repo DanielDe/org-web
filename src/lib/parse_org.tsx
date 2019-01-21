@@ -1,7 +1,7 @@
 import generateId from './id_generator';
 import { convertRawAttributedStringToAttributedString } from './attributed_string';
 
-import { fromJS, List } from 'immutable';
+import { List } from 'immutable';
 import _ from 'lodash';
 
 import {
@@ -41,6 +41,7 @@ import {
 import { PropertyListItem, makePropertyListItem } from '../types/property_list_item';
 import { TitleLine, makeTitleLine } from '../types/title_line';
 import { Header, makeHeader } from '../types/header';
+import { makeOrgFile } from '../types/org_file';
 
 // Yeah, this thing is pretty wild. I use https://www.debuggex.com/ to edit it, then paste the results in here.
 // But fixing this mess is on my todo list...
@@ -686,8 +687,9 @@ export const newHeaderFromText = (rawText: string, todoKeywordSets: List<TodoKey
     .set('propertyListItems', propertyListItems);
 };
 
+// TODO: strongly type this file.
 export const parseOrg = (fileContents: string) => {
-  let headers = List();
+  let headers: List<Header> = List();
   const lines = fileContents.split('\n');
 
   let todoKeywordSets: List<TodoKeywordSet> = List();
@@ -737,7 +739,7 @@ export const parseOrg = (fileContents: string) => {
       planningItems,
       propertyListItems,
       strippedDescription,
-    } = parseDescriptionPrefixElements(header.get('rawDescription'));
+    } = parseDescriptionPrefixElements(header.rawDescription);
 
     return header
       .set('rawDescription', strippedDescription)
@@ -746,7 +748,7 @@ export const parseOrg = (fileContents: string) => {
       .set('propertyListItems', propertyListItems);
   });
 
-  return fromJS({
+  return makeOrgFile({
     headers,
     todoKeywordSets,
   });
