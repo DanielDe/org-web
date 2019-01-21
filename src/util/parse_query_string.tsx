@@ -1,4 +1,4 @@
-const parseQueryString = str => {
+const parseQueryString = (str: string | undefined) => {
   var ret = Object.create(null);
 
   if (typeof str !== 'string') {
@@ -16,7 +16,11 @@ const parseQueryString = str => {
     // Firefox (pre 40) decodes `%3D` to `=`
     // https://github.com/sindresorhus/query-string/pull/37
     var key = parts.shift();
-    var val = parts.length > 0 ? parts.join('=') : undefined;
+    if (!key) {
+      return;
+    }
+
+    var val: string | null | undefined = parts.length > 0 ? parts.join('=') : undefined;
 
     key = decodeURIComponent(key);
 
