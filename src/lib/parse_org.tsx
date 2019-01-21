@@ -82,7 +82,6 @@ const timestampFromRegexMatch = (
     delayValue = null,
     delayUnit = null;
 
-  // TODO: use the timestamp enums here.
   if (['+', '++', '.+'].includes(firstDelayRepeatType)) {
     repeaterType = timestampRepeaterTypeForString(
       firstDelayRepeatType as TimestampRepeaterTypeString
@@ -176,7 +175,6 @@ export const parseMarkupAndCookies = (
         });
       }
     } else if (!!match[11]) {
-      // TODO: make this an enum type.
       const markupType = ({
         '~': 'inline-code',
         '*': 'bold',
@@ -239,7 +237,7 @@ export const parseMarkupAndCookies = (
       lineParts.push({
         id: generateId(),
         type: 'percentage-cookie',
-        percentage: parseInt(match.percentage || '0'), // TODO: find a better way to ensure match.percentage exists.
+        percentage: parseInt(match.percentage || '0'),
       });
     } else if (match.type === 'fraction-cookie') {
       lineParts.push({
