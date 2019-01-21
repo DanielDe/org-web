@@ -2,20 +2,37 @@ import generateId from './id_generator';
 
 import { List, fromJS } from 'immutable';
 
-export const indexOfHeaderWithId = (headers, headerId) =>
-  headers.findIndex(header => header.get('id') === headerId);
+import {
+  AttributedString,
+  ASTablePart,
+  ASTablePartRow,
+  makeTablePartCell,
+  ASListPart,
+  ASListPartItem,
+  ASTimestampRangePart,
+} from '../types/attributed_string';
+import { Header } from '../types/header';
+import { OrgState } from '../types/org_state';
+import { TodoKeywordSet } from '../types/todo_keyword_set';
 
-export const headerWithId = (headers, headerId) =>
+export const indexOfHeaderWithId = (headers: List<Header>, headerId: number) =>
+  headers.findIndex(header => header.id === headerId);
+
+export const headerWithId = (headers: List<Header>, headerId: number) =>
   headers.get(indexOfHeaderWithId(headers, headerId));
 
-export const subheadersOfHeaderWithId = (headers, headerId) => {
+export const subheadersOfHeaderWithId = (headers: List<Header>, headerId: number): List<Header> => {
   const header = headerWithId(headers, headerId);
+  if (!header) {
+    return List();
+  }
+
   const headerIndex = indexOfHeaderWithId(headers, headerId);
 
   const afterHeaders = headers.slice(headerIndex + 1);
-  const nextSiblingHeaderIndex = afterHeaders.findIndex(siblingHeader => {
-    return siblingHeader.get('nestingLevel') <= header.get('nestingLevel');
-  });
+  const nextSiblingHeaderIndex = afterHeaders.findIndex(
+    siblingHeader => siblingHeader.nestingLevel <= header.nestingLevel
+  );
 
   if (nextSiblingHeaderIndex === -1) {
     return afterHeaders;
@@ -24,21 +41,28 @@ export const subheadersOfHeaderWithId = (headers, headerId) => {
   }
 };
 
-export const numSubheadersOfHeaderWithId = (headers, headerId) =>
+export const numSubheadersOfHeaderWithId = (headers: List<Header>, headerId: number) =>
   subheadersOfHeaderWithId(headers, headerId).size;
 
-export const directParentIdOfHeaderWithId = (headers, headerId) => {
+export const directParentIdOfHeaderWithId = (headers: List<Header>, headerId: number) => {
   const header = headerWithId(headers, headerId);
+  if (!header) {
+    return null;
+  }
+
   const headerIndex = indexOfHeaderWithId(headers, headerId);
 
   for (let i = headerIndex - 1; i >= 0; --i) {
     const previousHeader = headers.get(i);
-
-    if (previousHeader.get('nestingLevel') === header.get('nestingLevel') - 1) {
-      return previousHeader.get('id');
+    if (!previousHeader) {
+      return null;
     }
 
-    if (previousHeader.get('nestingLevel') < header.get('nestingLevel')) {
+    if (previousHeader.nestingLevel === header.nestingLevel - 1) {
+      return previousHeader.id;
+    }
+
+    if (previousHeader.nestingLevel < header.nestingLevel) {
       return null;
     }
   }
@@ -46,33 +70,40 @@ export const directParentIdOfHeaderWithId = (headers, headerId) => {
   return null;
 };
 
-export const parentIdOfHeaderWithId = (headers, headerId) => {
+export const parentIdOfHeaderWithId = (headers: List<Header>, headerId: number) => {
   const header = headerWithId(headers, headerId);
+  if (!header) {
+    return null;
+  }
+
   const headerIndex = indexOfHeaderWithId(headers, headerId);
 
   const previousHeaders = headers.slice(0, headerIndex).reverse();
   const parentHeader = previousHeaders.find(
-    previousHeader => previousHeader.get('nestingLevel') < header.get('nestingLevel')
+    previousHeader => previousHeader.nestingLevel < header.nestingLevel
   );
 
   if (!parentHeader) {
     return null;
   }
 
-  return parentHeader.get('id');
+  return parentHeader.id;
 };
 
-export const indexOfPreviousSibling = (headers, headerIndex) => {
+export const indexOfPreviousSibling = (headers: List<Header>, headerIndex: number) => {
   const nestingLevel = headers.getIn([headerIndex, 'nestingLevel']);
 
   for (let i = headerIndex - 1; i >= 0; --i) {
     const header = headers.get(i);
-
-    if (header.get('nestingLevel') < nestingLevel) {
+    if (!header) {
       return null;
     }
 
-    if (header.get('nestingLevel') === nestingLevel) {
+    if (header.nestingLevel < nestingLevel) {
+      return null;
+    }
+
+    if (header.nestingLevel === nestingLevel) {
       return i;
     }
   }
@@ -80,27 +111,36 @@ export const indexOfPreviousSibling = (headers, headerIndex) => {
   return null;
 };
 
-const isHeaderVisible = (headers, headerId) => {
+const isHeaderVisible = (headers: List<Header>, headerId: number): boolean => {
   const parentHeaderId = parentIdOfHeaderWithId(headers, headerId);
   if (!parentHeaderId) {
     return true;
   }
 
   const parentHeader = headerWithId(headers, parentHeaderId);
-  return parentHeader.get('opened') && isHeaderVisible(headers, parentHeader.get('id'));
+  if (!parentHeader) {
+    return false;
+  }
+
+  return parentHeader.opened && isHeaderVisible(headers, parentHeader.id);
 };
 
-export const nextVisibleHeaderAfterIndex = (headers, headerIndex) => {
-  const followingHeaders = headers.slice(headerIndex + 1);
-  return followingHeaders.find(header => isHeaderVisible(headers, header.get('id')));
-};
+export const nextVisibleHeaderAfterIndex = (
+  headers: List<Header>,
+  headerIndex: number
+): Header | null =>
+  headers.slice(headerIndex + 1).find(header => isHeaderVisible(headers, header.id)) || null;
 
-export const previousVisibleHeaderAfterIndex = (headers, headerIndex) => {
-  const previousHeaders = headers.slice(0, headerIndex).reverse();
-  return previousHeaders.find(header => isHeaderVisible(headers, header.get('id')));
-};
+export const previousVisibleHeaderAfterIndex = (
+  headers: List<Header>,
+  headerIndex: number
+): Header | null =>
+  headers
+    .slice(0, headerIndex)
+    .reverse()
+    .find(header => isHeaderVisible(headers, header.id)) || null;
 
-export const openDirectParent = (state, headerId) => {
+export const openDirectParent = (state: OrgState, headerId: number) => {
   const parentHeaderId = directParentIdOfHeaderWithId(state.get('headers'), headerId);
   if (parentHeaderId !== null) {
     const parentHeaderIndex = indexOfHeaderWithId(state.get('headers'), parentHeaderId);
@@ -110,17 +150,17 @@ export const openDirectParent = (state, headerId) => {
   return state;
 };
 
-export const getOpenHeaderPaths = headers => {
+export const getOpenHeaderPaths = (headers: List<Header>) => {
   let openedHeaders = [];
   for (let i = 0; i < headers.size; ++i) {
     const header = headers.get(i);
-    if (!header.get('opened')) {
+    if (!header || !header.opened) {
       continue;
     }
 
-    const title = header.getIn(['titleLine', 'rawTitle']);
+    const title = header.titleLine.rawTitle;
 
-    const subheaders = subheadersOfHeaderWithId(headers, header.get('id'));
+    const subheaders = subheadersOfHeaderWithId(headers, header.id);
     const openSubheaderPaths = getOpenHeaderPaths(subheaders);
 
     if (openSubheaderPaths.length > 0) {
@@ -137,15 +177,15 @@ export const getOpenHeaderPaths = headers => {
   return openedHeaders;
 };
 
-export const headerWithPath = (headers, headerPath) => {
+export const headerWithPath = (headers: List<Header>, headerPath: List<string>): Header | null => {
   if (headerPath.size === 0) {
     return null;
   }
 
   const firstHeader = headers.find(
     header =>
-      parentIdOfHeaderWithId(headers, header.get('id')) === null &&
-      header.getIn(['titleLine', 'rawTitle']).trim() === headerPath.first().trim()
+      parentIdOfHeaderWithId(headers, header.id) === null &&
+      header.titleLine.rawTitle.trim() === headerPath.first('').trim()
   );
   if (!firstHeader) {
     return null;
@@ -155,19 +195,23 @@ export const headerWithPath = (headers, headerPath) => {
     return firstHeader;
   }
 
-  const subheaders = subheadersOfHeaderWithId(headers, firstHeader.get('id'));
+  const subheaders = subheadersOfHeaderWithId(headers, firstHeader.id);
   return headerWithPath(subheaders, headerPath.skip(1));
 };
 
-export const openHeaderWithPath = (headers, headerPath, maxNestingLevel = 1) => {
+export const openHeaderWithPath = (
+  headers: List<Header>,
+  headerPath: List<string>,
+  maxNestingLevel = 1
+) => {
   if (headerPath.size === 0) {
     return headers;
   }
 
-  const firstTitle = headerPath.first();
+  const firstTitle = headerPath.first(null);
   const headerIndex = headers.findIndex(header => {
-    const rawTitle = header.getIn(['titleLine', 'rawTitle']);
-    const nestingLevel = header.get('nestingLevel');
+    const rawTitle = header.titleLine.rawTitle;
+    const nestingLevel = header.nestingLevel;
     return rawTitle === firstTitle && nestingLevel <= maxNestingLevel;
   });
   if (headerIndex === -1) {
@@ -187,40 +231,44 @@ export const openHeaderWithPath = (headers, headerPath, maxNestingLevel = 1) => 
   return headers;
 };
 
-const tablePartContainsCellId = (tablePart, cellId) =>
-  tablePart
-    .get('contents')
-    .some(row => row.get('contents').some(cell => cell.get('id') === cellId));
+const tablePartContainsCellId = (tablePart: ASTablePart, cellId: number) =>
+  tablePart.contents.some(row => row.contents.some(cell => cell.id === cellId));
 
-const doesAttributedStringContainTableCellId = (parts, cellId) =>
-  parts
-    .filter(part => ['table', 'list'].includes(part.get('type')))
+const doesAttributedStringContainTableCellId = (
+  attributedString: AttributedString,
+  cellId: number
+): boolean =>
+  attributedString
+    .filter(part => ['table', 'list'].includes(part.type))
     .some(
       part =>
-        part.get('type') === 'table'
+        part.type === 'table'
           ? tablePartContainsCellId(part, cellId)
-          : part
-              .get('items')
-              .some(item => doesAttributedStringContainTableCellId(item.get('contents'), cellId))
+          : (part as ASListPart).items.some(item =>
+            doesAttributedStringContainTableCellId(item.contents, cellId)
+          )
     );
 
-export const headerThatContainsTableCellId = (headers, cellId) =>
-  headers.find(header => doesAttributedStringContainTableCellId(header.get('description'), cellId));
+export const headerThatContainsTableCellId = (headers: List<Header>, cellId: number) =>
+  headers.find(header => doesAttributedStringContainTableCellId(header.description, cellId)) ||
+  null;
 
-export const pathAndPartOfTimestampItemWithIdInAttributedString = (parts, timestampId) =>
-  parts
+export const pathAndPartOfTimestampItemWithIdInAttributedString = (
+  attributedString: AttributedString,
+  timestampId: number
+): { path: (string | number)[]; timestampPart: ASTimestampRangePart } | null =>
+  attributedString
     .map((part, partIndex) => {
-      if (part.get('type') === 'timestamp-range' && part.get('id') === timestampId) {
+      if (part.type === 'timestamp-range' && part.id === timestampId) {
         return {
           path: [partIndex],
           timestampPart: part,
         };
-      } else if (part.get('type') === 'list') {
-        return part
-          .get('items')
+      } else if (part.type === 'list') {
+        return part.items
           .map((item, itemIndex) => {
             let pathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(
-              item.get('contents'),
+              item.contents,
               timestampId
             );
             if (!!pathAndPart) {
@@ -231,7 +279,7 @@ export const pathAndPartOfTimestampItemWithIdInAttributedString = (parts, timest
               };
             } else {
               let pathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(
-                item.get('titleLine'),
+                item.titleLine,
                 timestampId
               );
               if (!!pathAndPart) {
@@ -246,16 +294,14 @@ export const pathAndPartOfTimestampItemWithIdInAttributedString = (parts, timest
             }
           })
           .filter(result => !!result)
-          .first();
-      } else if (part.get('type') === 'table') {
-        return part
-          .get('contents')
+          .first(null);
+      } else if (part.type === 'table') {
+        return part.contents
           .map((row, rowIndex) => {
-            return row
-              .get('contents')
+            return row.contents
               .map((cell, cellIndex) => {
                 const pathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(
-                  cell.get('contents'),
+                  cell.contents,
                   timestampId
                 );
                 if (!!pathAndPart) {
@@ -276,32 +322,34 @@ export const pathAndPartOfTimestampItemWithIdInAttributedString = (parts, timest
                 }
               })
               .filter(result => !!result)
-              .first();
+              .first(null);
           })
           .filter(result => !!result)
-          .first();
+          .first(null);
       } else {
         return null;
       }
     })
     .filter(result => !!result)
-    .first();
+    .first(null);
 
-export const pathAndPartOfListItemWithIdInAttributedString = (parts, listItemId) =>
-  parts
+export const pathAndPartOfListItemWithIdInAttributedString = (
+  atttributedString: AttributedString,
+  listItemId: number
+): { path: (string | number)[]; listItemPart: ASListPartItem } | null =>
+  atttributedString
     .map((part, partIndex) => {
-      if (part.get('type') === 'list') {
-        return part
-          .get('items')
+      if (part.type === 'list') {
+        return part.items
           .map((item, itemIndex) => {
-            if (item.get('id') === listItemId) {
+            if (item.id === listItemId) {
               return {
                 path: [partIndex, 'items', itemIndex],
                 listItemPart: item,
               };
             } else {
               const pathAndPart = pathAndPartOfListItemWithIdInAttributedString(
-                item.get('contents'),
+                item.contents,
                 listItemId
               );
               if (!!pathAndPart) {
@@ -316,29 +364,31 @@ export const pathAndPartOfListItemWithIdInAttributedString = (parts, listItemId)
             }
           })
           .filter(result => !!result)
-          .first();
+          .first(null);
       } else {
         return null;
       }
     })
     .filter(result => !!result)
-    .first();
+    .first(null);
 
-export const pathAndPartOfTableContainingCellIdInAttributedString = (parts, cellId) =>
-  parts
+export const pathAndPartOfTableContainingCellIdInAttributedString = (
+  attributedString: AttributedString,
+  cellId: number
+): { path: (string | number)[]; tablePart: ASTablePart } | null =>
+  attributedString
     .map((part, partIndex) => {
-      if (part.get('type') === 'table') {
+      if (part.type === 'table') {
         if (tablePartContainsCellId(part, cellId)) {
           return { path: [partIndex], tablePart: part };
         } else {
           return null;
         }
-      } else if (part.get('type') === 'list') {
-        return part
-          .get('items')
+      } else if (part.type === 'list') {
+        return part.items
           .map((item, itemIndex) => {
             const pathAndPart = pathAndPartOfTableContainingCellIdInAttributedString(
-              item.get('contents'),
+              item.contents,
               cellId
             );
             if (!!pathAndPart) {
@@ -352,19 +402,22 @@ export const pathAndPartOfTableContainingCellIdInAttributedString = (parts, cell
             }
           })
           .filter(result => !!result)
-          .first();
+          .first(null);
       } else {
         return null;
       }
     })
     .filter(result => !!result)
-    .first();
+    .first(null);
 
-export const pathAndPartOfTimestampItemWithIdInHeaders = (headers, timestampId) =>
+export const pathAndPartOfTimestampItemWithIdInHeaders = (
+  headers: List<Header>,
+  timestampId: number
+): { path: (string | number)[]; timestampPart: ASTimestampRangePart } | null =>
   headers
     .map((header, headerIndex) => {
       let pathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(
-        header.getIn(['titleLine', 'title']),
+        header.titleLine.title,
         timestampId
       );
       if (!!pathAndPart) {
@@ -376,7 +429,7 @@ export const pathAndPartOfTimestampItemWithIdInHeaders = (headers, timestampId) 
       }
 
       pathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(
-        header.get('description'),
+        header.description,
         timestampId
       );
       if (!!pathAndPart) {
@@ -387,15 +440,14 @@ export const pathAndPartOfTimestampItemWithIdInHeaders = (headers, timestampId) 
         };
       }
 
-      pathAndPart = header
-        .get('propertyListItems')
+      pathAndPart = header.propertyListItems
         .map((propertyListItem, propertyListItemIndex) => {
-          if (!propertyListItem.get('value')) {
+          if (!propertyListItem.value) {
             return null;
           }
 
           const plistPathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(
-            propertyListItem.get('value'),
+            propertyListItem.value,
             timestampId
           );
           if (!!plistPathAndPart) {
@@ -409,7 +461,7 @@ export const pathAndPartOfTimestampItemWithIdInHeaders = (headers, timestampId) 
           return null;
         })
         .filter(result => !!result)
-        .first();
+        .first(null);
       if (!!pathAndPart) {
         return pathAndPart;
       }
@@ -417,13 +469,16 @@ export const pathAndPartOfTimestampItemWithIdInHeaders = (headers, timestampId) 
       return null;
     })
     .filter(result => !!result)
-    .first();
+    .first(null);
 
-export const pathAndPartOfListItemWithIdInHeaders = (headers, listItemId) =>
+export const pathAndPartOfListItemWithIdInHeaders = (
+  headers: List<Header>,
+  listItemId: number
+): { path: (string | number)[]; listItemPart: ASListPartItem } | null =>
   headers
     .map((header, headerIndex) => {
       const pathAndPart = pathAndPartOfListItemWithIdInAttributedString(
-        header.get('description'),
+        header.description,
         listItemId
       );
       if (!pathAndPart) {
@@ -437,13 +492,16 @@ export const pathAndPartOfListItemWithIdInHeaders = (headers, listItemId) =>
       };
     })
     .filter(result => !!result)
-    .first();
+    .first(null);
 
-export const pathAndPartOfTableContainingCellIdInHeaders = (headers, cellId) =>
+export const pathAndPartOfTableContainingCellIdInHeaders = (
+  headers: List<Header>,
+  cellId: number
+): { path: (string | number)[]; tablePart: ASTablePart } | null =>
   headers
     .map((header, headerIndex) => {
       const pathAndPart = pathAndPartOfTableContainingCellIdInAttributedString(
-        header.get('description'),
+        header.description,
         cellId
       );
       if (!pathAndPart) {
@@ -457,17 +515,30 @@ export const pathAndPartOfTableContainingCellIdInHeaders = (headers, cellId) =>
       };
     })
     .filter(result => !!result)
-    .first();
+    .first(null);
 
-export const updateTableContainingCellId = (headers, cellId, updaterCallbackGenerator) => {
-  const { path, tablePart } = pathAndPartOfTableContainingCellIdInHeaders(headers, cellId);
+export const updateTableContainingCellId = (
+  headers: List<Header>,
+  cellId: number,
+  updaterCallbackGenerator: (
+    rowIndex: number,
+    columnIndex?: number
+  ) => (rows: List<ASTablePartRow>) => List<ASTablePartRow>
+) => {
+  const pathAndPart = pathAndPartOfTableContainingCellIdInHeaders(headers, cellId);
+  if (!pathAndPart) {
+    return null;
+  }
+  const { path, tablePart } = pathAndPart;
 
-  const rowIndexContainingCellId = tablePart
-    .get('contents')
-    .findIndex(row => row.get('contents').some(cell => cell.get('id') === cellId));
-  const columnIndexContainingCellId = tablePart
-    .getIn(['contents', rowIndexContainingCellId, 'contents'])
-    .findIndex(cell => cell.get('id') === cellId);
+  const rowIndexContainingCellId = tablePart.contents.findIndex(row =>
+    row.contents.some(cell => cell.id === cellId)
+  );
+  const row = tablePart.contents.get(rowIndexContainingCellId);
+  if (!row) {
+    return null;
+  }
+  const columnIndexContainingCellId = row.contents.findIndex(cell => cell.id === cellId);
 
   return headers.updateIn(
     path.concat(['contents']),
@@ -475,32 +546,41 @@ export const updateTableContainingCellId = (headers, cellId, updaterCallbackGene
   );
 };
 
-export const newEmptyTableRowLikeRows = rows =>
-  rows
-    .get(0)
-    .set('id', generateId())
-    .update('contents', contents =>
-      contents.map(cell =>
-        cell
-          .set('id', generateId())
-          .set('contents', new List())
-          .set('rawContents', '')
-      )
-    );
-
-export const newEmptyTableCell = () =>
-  fromJS({
-    id: generateId(),
-    contents: [],
-    rawContents: '',
-  });
-
-export const timestampWithIdInAttributedString = (parts, timestampId) => {
-  if (!parts) {
+export const newEmptyTableRowLikeRows = (rows: List<ASTablePartRow>) => {
+  const firstRow = rows.get(0);
+  if (!firstRow) {
     return null;
   }
 
-  const pathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(parts, timestampId);
+  return firstRow.set('id', generateId()).update('contents', contents =>
+    contents.map(cell =>
+      cell
+        .set('id', generateId())
+        .set('contents', List())
+        .set('rawContents', '')
+    )
+  );
+};
+
+export const newEmptyTableCell = () =>
+  makeTablePartCell({
+    id: generateId(),
+    contents: List(),
+    rawContents: '',
+  });
+
+export const timestampWithIdInAttributedString = (
+  attributedString: AttributedString,
+  timestampId: number
+) => {
+  if (!attributedString) {
+    return null;
+  }
+
+  const pathAndPart = pathAndPartOfTimestampItemWithIdInAttributedString(
+    attributedString,
+    timestampId
+  );
   if (!!pathAndPart) {
     return pathAndPart.timestampPart;
   } else {
@@ -508,27 +588,30 @@ export const timestampWithIdInAttributedString = (parts, timestampId) => {
   }
 };
 
-export const timestampWithId = (headers, timestampId) =>
+export const timestampWithId = (headers: List<Header>, timestampId: number) =>
   headers
     .map(
       header =>
-        timestampWithIdInAttributedString(header.getIn(['titleLine', 'title']), timestampId) ||
-        timestampWithIdInAttributedString(header.get('description'), timestampId) ||
-        header
-          .get('propertyListItems')
+        timestampWithIdInAttributedString(header.titleLine.title, timestampId) ||
+        timestampWithIdInAttributedString(header.description, timestampId) ||
+        header.propertyListItems
           .map(propertyListItem =>
-            timestampWithIdInAttributedString(propertyListItem.get('value'), timestampId)
+            timestampWithIdInAttributedString(propertyListItem.value, timestampId)
           )
           .filter(result => !!result)
-          .first()
+          .first(null)
     )
-    .find(result => !!result);
+    .find(result => !!result) || null;
 
-export const todoKeywordSetForKeyword = (todoKeywordSets, keyword) =>
-  todoKeywordSets.find(keywordSet => keywordSet.get('keywords').contains(keyword)) ||
-  todoKeywordSets.first();
+export const todoKeywordSetForKeyword = (todoKeywordSets: List<TodoKeywordSet>, keyword: string) =>
+  todoKeywordSets.find(keywordSet => keywordSet.keywords.includes(keyword)) ||
+  todoKeywordSets.first(null);
 
-export const isTodoKeywordCompleted = (todoKeywordSets, keyword) =>
-  todoKeywordSetForKeyword(todoKeywordSets, keyword)
-    .get('completedKeywords')
-    .includes(keyword);
+export const isTodoKeywordCompleted = (todoKeywordSets: List<TodoKeywordSet>, keyword: string) => {
+  const todoKeywordSet = todoKeywordSetForKeyword(todoKeywordSets, keyword);
+  if (!todoKeywordSet) {
+    return false;
+  }
+
+  return todoKeywordSet.completedKeywords.includes(keyword);
+};
