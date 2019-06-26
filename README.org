@@ -43,6 +43,13 @@ To run the app, run:
 yarn start
 #+END_SRC
 
+To run the app behind a base or custom URL, first build the app using the ~PUBLIC_URL~ variable, then start the app. For example, to use a url base of ~/org-web~:
+
+#+BEGIN_SRC
+PUBLIC_URL="/org-web" yarn build
+serve -s build -l 3000
+#+END_SRC
+
 To test against your actual Dropbox, you'll need to create a ~.env~ file by copying ~.env.sample~ to just ~.env~. To test against your Google Drive you'll need to generate an API key as described on [[https://developers.google.com/drive/api/v3/quickstart/js][this page]].
 
 Note that this will only work if you're running the app on ~http://localhost:3000~ because all redirect URIs must be specified ahead of time on the Dropbox and Google developer consoles.
