@@ -27,11 +27,6 @@ function readFixture(name) {
   return fs.readFileSync(path.join(__dirname, `./fixtures/${name}.org`)).toString();
 }
 
-/**
- * This is a convenience wrapper around paring an org file using
- * `parseOrg` and then export it using `exportOrg`.
- * @param {String} testOrgFile - contents of an org file
- */
 function parseAndExportOrgFile(testOrgFile) {
   const parsedFile = parseOrg(testOrgFile);
   const headers = parsedFile.get('headers');
@@ -57,21 +52,21 @@ describe('Unit Tests for org file', () => {
       });
     });
 
-    describe("Planning items", () => {
-      test("Parsing a basic list should not mangle the list", () => {
-        const testDescription = "  - indented list\n     - Foo"
-        const parsedFile = _parsePlanningItems(testDescription)
-        expect(parsedFile.strippedDescription).toEqual(testDescription)
-      })
+    describe('Planning items', () => {
+      test('Parsing a basic list should not mangle the list', () => {
+        const testDescription = '  - indented list\n     - Foo';
+        const parsedFile = _parsePlanningItems(testDescription);
+        expect(parsedFile.strippedDescription).toEqual(testDescription);
+      });
 
-      test("Parsing a list with planning items should not mangle the list", () => {
-        const testDescription = "  - indented list\n     - Foo"
-        const parsedFile = _parsePlanningItems(`SCHEDULED: <2019-07-30 Tue>\n${testDescription}`)
-        expect(parsedFile.strippedDescription).toEqual(testDescription)
-      })
+      test('Parsing a list with planning items should not mangle the list', () => {
+        const testDescription = '  - indented list\n     - Foo';
+        const parsedFile = _parsePlanningItems(`SCHEDULED: <2019-07-30 Tue>\n${testDescription}`);
+        expect(parsedFile.strippedDescription).toEqual(testDescription);
+      });
 
-      describe("Planning items are formatted as is default Emacs", () => {
-        test("For basic files", () => {
+      describe('Planning items are formatted as is default Emacs', () => {
+        test('For basic files', () => {
           const testOrgFile = readFixture('schedule');
           const exportedFile = parseAndExportOrgFile(testOrgFile);
           // The call to `trimRight` is a work-around, because org-web
@@ -80,17 +75,16 @@ describe('Unit Tests for org file', () => {
           // does it for org-files, too. However, this is to be fixed
           // at another time. And when it is, this expectation will
           // fail and the call to `trimRight` can be safely removed.
-          expect(exportedFile).toEqual(testOrgFile.trimRight())
-        })
+          expect(exportedFile).toEqual(testOrgFile.trimRight());
+        });
 
-        test("For files with multiple planning items", () => {
-          const testOrgFile = readFixture('schedule_and_deadline')
+        test('For files with multiple planning items', () => {
+          const testOrgFile = readFixture('schedule_and_deadline');
           const exportedFile = parseAndExportOrgFile(testOrgFile);
-          expect(exportedFile).toEqual(testOrgFile.trimRight())
-        })
-      })
-    })
-
+          expect(exportedFile).toEqual(testOrgFile.trimRight());
+        });
+      });
+    });
   });
 });
 

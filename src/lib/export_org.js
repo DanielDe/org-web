@@ -242,10 +242,13 @@ export default (headers, todoKeywordSets) => {
         contents += ` :${header.titleLine.tags.filter(tag => !!tag).join(':')}:`;
       }
 
-      if (header.planningItems.length) {
-        const planningItemsContent = header.planningItems.map(planningItem => {
-          return `${planningItem.type}: ${renderAsText(fromJS(planningItem.timestamp))}`
-        }).join(' ').trimRight();
+      if (header.planningItems.length > 0) {
+        const planningItemsContent = header.planningItems
+          .map(
+            planningItem => `${planningItem.type}: ${renderAsText(fromJS(planningItem.timestamp))}`
+          )
+          .join(' ')
+          .trimRight();
         contents += `\n  ${planningItemsContent}`;
       }
 
