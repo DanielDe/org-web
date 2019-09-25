@@ -416,14 +416,6 @@ export const _parsePlanningItems = rawText => {
       ')?'
   );
 
-  // FIXME: The whitespace part of the regex matches `rawText` inputs
-  //        like " - indented list\n - Foo".
-  //        This is a mistake, because the input isn't really a
-  //        planning item. If the regexp could be adapted, we could
-  //        return earlier after the regexp check.
-  //        Before this can get cleaned up, this function needs loads
-  //        more tests, because currently it matches too many things.
-  //        It does work well for planning items, though.
   const planningRegex = concatRegexes(
     /^\s*/,
     optionalSinglePlanningItemRegex,
