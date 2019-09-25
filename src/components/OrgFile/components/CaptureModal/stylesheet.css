@@ -10,6 +10,10 @@
   margin-top: 5px;
 }
 
+.capture-modal-header-path--top-level {
+  font-style: italic;
+}
+
 .capture-modal-textarea {
   border: 1px solid lightgray;
   font-family: Courier;

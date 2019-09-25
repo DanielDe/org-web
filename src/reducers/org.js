@@ -212,23 +212,20 @@ const advanceTodoState = (state, action) => {
         secondTimestamp: null,
       },
     ];
-    state = state.updateIn(
-      ['headers', headerIndex, 'propertyListItems'],
-      propertyListItems =>
-        propertyListItems.some(item => item.get('property') === 'LAST_REPEAT')
-          ? propertyListItems.map(
-              item =>
-                item.get('property') === 'LAST_REPEAT'
-                  ? item.set('value', fromJS(newLastRepeatValue))
-                  : item
-            )
-          : propertyListItems.push(
-              fromJS({
-                property: 'LAST_REPEAT',
-                value: newLastRepeatValue,
-                id: generateId(),
-              })
-            )
+    state = state.updateIn(['headers', headerIndex, 'propertyListItems'], propertyListItems =>
+      propertyListItems.some(item => item.get('property') === 'LAST_REPEAT')
+        ? propertyListItems.map(item =>
+            item.get('property') === 'LAST_REPEAT'
+              ? item.set('value', fromJS(newLastRepeatValue))
+              : item
+          )
+        : propertyListItems.push(
+            fromJS({
+              property: 'LAST_REPEAT',
+              value: newLastRepeatValue,
+              id: generateId(),
+            })
+          )
     );
 
     state = state.updateIn(['headers', headerIndex], header => {
@@ -671,14 +668,12 @@ const moveTableColumnLeft = (state, action) => {
       columnIndex === 0
         ? rows
         : rows.map(row =>
-            row.update(
-              'contents',
-              contents =>
-                contents.size === 0
-                  ? contents
-                  : contents
-                      .insert(columnIndex - 1, contents.get(columnIndex))
-                      .delete(columnIndex + 1)
+            row.update('contents', contents =>
+              contents.size === 0
+                ? contents
+                : contents
+                    .insert(columnIndex - 1, contents.get(columnIndex))
+                    .delete(columnIndex + 1)
             )
           )
     )
@@ -698,14 +693,12 @@ const moveTableColumnRight = (state, action) => {
       columnIndex + 1 >= rows.getIn([0, 'contents']).size
         ? rows
         : rows.map(row =>
-            row.update(
-              'contents',
-              contents =>
-                contents.size === 0
-                  ? contents
-                  : contents
-                      .insert(columnIndex, contents.get(columnIndex + 1))
-                      .delete(columnIndex + 2)
+            row.update('contents', contents =>
+              contents.size === 0
+                ? contents
+                : contents
+                    .insert(columnIndex, contents.get(columnIndex + 1))
+                    .delete(columnIndex + 2)
             )
           )
     )
@@ -732,25 +725,33 @@ const insertCapture = (state, action) => {
   const headers = state.get('headers');
   const { template, content, shouldPrepend } = action;
 
-  const parentHeader = headerWithPath(headers, template.get('headerPaths'));
-  if (!parentHeader) {
+  const isTopLevelTarget = template.get('headerPaths').filter(path => path.length !== 0).size === 0;
+
+  const parentHeader = isTopLevelTarget
+    ? null
+    : headerWithPath(headers, template.get('headerPaths'));
+  if (!parentHeader && !isTopLevelTarget) {
     return state;
   }
 
   const newHeader = newHeaderFromText(content, state.get('todoKeywordSets')).set(
     'nestingLevel',
-    parentHeader.get('nestingLevel') + 1
+    isTopLevelTarget ? 1 : parentHeader.get('nestingLevel') + 1
   );
 
-  const parentHeaderIndex = indexOfHeaderWithId(headers, parentHeader.get('id'));
-  const numSubheaders = numSubheadersOfHeaderWithId(headers, parentHeader.get('id'));
-  const newIndex = parentHeaderIndex + 1 + (shouldPrepend ? 0 : numSubheaders);
+  if (isTopLevelTarget) {
+    return state.update('headers', headers => headers.push(newHeader));
+  } else {
+    const parentHeaderIndex = indexOfHeaderWithId(headers, parentHeader.get('id'));
+    const numSubheaders = numSubheadersOfHeaderWithId(headers, parentHeader.get('id'));
+    const newIndex = parentHeaderIndex + 1 + (shouldPrepend ? 0 : numSubheaders);
 
-  state = state.update('headers', headers => headers.insert(newIndex, newHeader));
+    state = state.update('headers', headers => headers.insert(newIndex, newHeader));
 
-  state = updateCookiesOfHeaderWithId(state, parentHeader.get('id'));
+    state = updateCookiesOfHeaderWithId(state, parentHeader.get('id'));
 
-  return state;
+    return state;
+  }
 };
 
 const clearPendingCapture = state => state.set('pendingCapture', null);
@@ -918,10 +919,8 @@ const addNewPlanningItem = (state, action) => {
     timestamp: getCurrentTimestamp(),
   });
 
-  return state.updateIn(
-    ['headers', headerIndex, 'planningItems'],
-    planningItems =>
-      !!planningItems ? planningItems.push(newPlanningItem) : List([newPlanningItem])
+  return state.updateIn(['headers', headerIndex, 'planningItems'], planningItems =>
+    !!planningItems ? planningItems.push(newPlanningItem) : List([newPlanningItem])
   );
 };
 
