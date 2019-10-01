@@ -49,7 +49,7 @@ To test against your actual Dropbox, you'll need to create a ~.env~ file by copy
 
 Note that this will only work if you're running the app on ~http://localhost:3000~ because all redirect URIs must be specified ahead of time on the Dropbox and Google developer consoles.
 
-Alternatively, you can create your own 'application' on Dropbox [[https://www.dropbox.com/developers/apps/][here]] and then use this app key. Make sure to add your own URL as =Redirect URI=.
+Alternatively, you can create your own 'application' on Dropbox [[https://www.dropbox.com/developers/apps/][here]] and then use this app key. Make sure to add your own URL as a =Redirect URI=. (See the discussion [[https://github.com/DanielDe/org-web/issues/74][here]] for more detail). 
 
 *** Contributions
 
