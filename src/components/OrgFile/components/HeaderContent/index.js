@@ -123,7 +123,7 @@ class HeaderContent extends PureComponent {
       } else {
         this.setState({ shouldIgnoreBlur: false });
       }
-    }, 0);
+    }, 100);
   }
 
   handleTableCellSelect(cellId) {
@@ -286,7 +286,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(HeaderContent);
+export default connect(mapStateToProps, mapDispatchToProps)(HeaderContent);

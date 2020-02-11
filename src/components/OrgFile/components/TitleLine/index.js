@@ -131,7 +131,7 @@ class TitleLine extends PureComponent {
       } else {
         this.setState({ shouldIgnoreBlur: false });
       }
-    }, 0);
+    }, 100);
   }
 
   handleTitleChange(event) {
@@ -282,7 +282,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TitleLine);
+export default connect(mapStateToProps, mapDispatchToProps)(TitleLine);
