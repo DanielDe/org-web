@@ -179,7 +179,14 @@ const advanceTodoState = (state, action) => {
   const currentTodoSet = todoKeywordSetForKeyword(state.get('todoKeywordSets'), currentTodoState);
 
   const currentStateIndex = currentTodoSet.get('keywords').indexOf(currentTodoState);
-  const newStateIndex = currentStateIndex + 1;
+  let newStateIndex = currentStateIndex + 1;
+  if (action.skipNoTodoState)
+  {
+    if (newStateIndex >= currentTodoSet.get('keywords').size)
+    {
+      newStateIndex = 0;
+    }
+  }
   const newTodoState = currentTodoSet.get('keywords').get(newStateIndex) || '';
 
   const indexedPlanningItemsWithRepeaters = header
