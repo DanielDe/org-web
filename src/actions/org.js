@@ -137,9 +137,10 @@ export const selectHeaderAndOpenParents = headerId => dispatch => {
   dispatch({ type: 'OPEN_PARENTS_OF_HEADER', headerId });
 };
 
-export const advanceTodoState = (headerId = null) => ({
+export const advanceTodoState = (headerId = null, skipNoTodoState = false) => ({
   type: 'ADVANCE_TODO_STATE',
   headerId,
+  skipNoTodoState,
   dirtying: true,
 });
 
