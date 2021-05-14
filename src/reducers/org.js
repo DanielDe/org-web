@@ -30,6 +30,11 @@ import {
   pathAndPartOfListItemWithIdInHeaders,
   pathAndPartOfTimestampItemWithIdInHeaders,
   todoKeywordSetForKeyword,
+  newListItem,
+  parentListItemWithIdInHeaders,
+  updateListContainingListItemId,
+  headerThatContainsListItemId,
+  updateContentsWithListItemAddition,
 } from '../lib/org_utils';
 import { getCurrentTimestamp, applyRepeater, renderAsText } from '../lib/timestamps';
 import generateId from '../lib/id_generator';
@@ -837,6 +842,284 @@ const advanceCheckboxState = (state, action) => {
   return state;
 };
 
+const setSelectedListItemId = (state, action) => state.set('selectedListItemId', action.listItemId);
+
+const updateDescriptionOfHeaderContainingListItem = (state, listItemId, header = null) => {
+  let headerIndex = -1;
+  const headers = state.get('headers');
+  if (!header) {
+    const pathAndPart = pathAndPartOfListItemWithIdInHeaders(headers, listItemId);
+    headerIndex = pathAndPart.path[0];
+  } else {
+    headerIndex = indexOfHeaderWithId(headers, header.get('id'));
+  }
+
+  if (headerIndex >= 0) {
+    return state.updateIn(['headers', headerIndex], header =>
+      header.set('rawDescription', attributedStringToRawText(header.get('description')))
+    );
+  } else {
+    return state;
+  }
+};
+
+const updateListTitleValue = (state, action) => {
+  const selectedListItemId = action.listItemId;
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      items.updateIn([itemIndex], item =>
+        item.set('titleLine', fromJS(parseMarkupAndCookies(action.newValue)))
+      )
+    )
+  );
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
+const updateListContentsValue = (state, action) => {
+  const selectedListItemId = action.listItemId;
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      items.updateIn([itemIndex], item =>
+        item.set('contents', fromJS(parseMarkupAndCookies(action.newValue)))
+      )
+    )
+  );
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
+const addNewListItem = (state, action) => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      items.insert(itemIndex + 1, newListItem())
+    )
+  );
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
+const removeListItem = (state, action) => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  const containingHeader = headerThatContainsListItemId(state.get('headers'), selectedListItemId);
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      items.delete(itemIndex)
+    )
+  );
+
+  state = state.set('selectedListItemId', null);
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId, containingHeader);
+};
+
+const moveListItemUp = state => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      itemIndex === 0
+        ? items
+        : items.insert(itemIndex - 1, items.get(itemIndex)).delete(itemIndex + 1)
+    )
+  );
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
+const moveListItemDown = state => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      itemIndex + 1 === items.size
+        ? items
+        : items.insert(itemIndex, items.get(itemIndex + 1)).delete(itemIndex + 2)
+    )
+  );
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
+const moveListItemLeft = state => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  const pathAndPart = pathAndPartOfListItemWithIdInHeaders(
+    state.get('headers'),
+    selectedListItemId
+  );
+
+  const hasChildrenItem = pathAndPart.listItemPart
+    .get('contents')
+    .filter(part => part.get('type') === 'list')
+    .some(listPart => listPart.get('items').size > 0);
+  if (hasChildrenItem) {
+    return state;
+  }
+  return moveListSubtreeLeft(state);
+};
+
+const moveListItemRight = state => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  const pathAndPart = pathAndPartOfListItemWithIdInHeaders(
+    state.get('headers'),
+    selectedListItemId
+  );
+  let { path, listItemPart: selectedListItem } = pathAndPart;
+  const listPart = state.getIn(['headers'].concat(path.slice(0, path.length - 2)));
+  const prevSiblingItemIndex = path[path.length - 1] - 1;
+
+  if (prevSiblingItemIndex < 0) {
+    return state;
+  }
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      items.delete(itemIndex)
+    )
+  );
+
+  const prevSiblingItemContentsPath = ['headers']
+    .concat(path.slice(0, path.length - 1))
+    .concat(prevSiblingItemIndex)
+    .concat('contents');
+
+  const childrenListParts = selectedListItem
+    .get('contents')
+    .filter(part => part.get('type') === 'list');
+
+  selectedListItem = selectedListItem.update('contents', contents =>
+    contents.filter(part => part.get('type') !== 'list')
+  );
+
+  state = state.updateIn(prevSiblingItemContentsPath, contents =>
+    updateContentsWithListItemAddition(contents, selectedListItem, listPart)
+  );
+
+  childrenListParts.map(listPart =>
+    listPart.get('items').forEach((item, itemIndex) => {
+      state = state.updateIn(prevSiblingItemContentsPath, contents =>
+        updateContentsWithListItemAddition(contents, item, listPart)
+      );
+    })
+  );
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
+const moveListSubtreeLeft = state => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  const pathAndPart = pathAndPartOfListItemWithIdInHeaders(
+    state.get('headers'),
+    selectedListItemId
+  );
+  let { path, listItemPart: selectedListItem } = pathAndPart;
+  const selectedListItemIndex = path[path.length - 1];
+  if (path.filter(partOfPath => partOfPath === 'items').length < 2) {
+    return state;
+  }
+
+  const parentListItem = parentListItemWithIdInHeaders(
+    state.getIn(['headers']),
+    selectedListItemId
+  );
+
+  parentListItem
+    .get('contents')
+    .filter(part => part.get('type') === 'list')
+    .map(listPart =>
+      listPart.get('items').forEach((item, itemIndex) => {
+        if (itemIndex > selectedListItemIndex) {
+          selectedListItem = selectedListItem.update('contents', contents =>
+            updateContentsWithListItemAddition(contents, item, listPart)
+          );
+        }
+      })
+    );
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      items.filter((_item, index) => index < selectedListItemIndex)
+    )
+  );
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, parentListItem.get('id'), itemIndex => items =>
+      items.insert(itemIndex + 1, selectedListItem)
+    )
+  );
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
+const moveListSubtreeRight = state => {
+  const selectedListItemId = state.get('selectedListItemId');
+  if (!selectedListItemId) {
+    return state;
+  }
+
+  const pathAndPart = pathAndPartOfListItemWithIdInHeaders(
+    state.get('headers'),
+    selectedListItemId
+  );
+  const { path, listItemPart: selectedListItem } = pathAndPart;
+  const listPart = state.getIn(['headers'].concat(path.slice(0, path.length - 2)));
+  const prevSiblingItemIndex = path[path.length - 1] - 1;
+  if (prevSiblingItemIndex < 0) {
+    return state;
+  }
+
+  state = state.update('headers', headers =>
+    updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
+      itemIndex === 0 ? items : items.delete(itemIndex)
+    )
+  );
+
+  state = state.updateIn(
+    ['headers']
+      .concat(path.slice(0, path.length - 1))
+      .concat(prevSiblingItemIndex)
+      .concat('contents'),
+    contents => updateContentsWithListItemAddition(contents, selectedListItem, listPart)
+  );
+
+  return updateDescriptionOfHeaderContainingListItem(state, selectedListItemId);
+};
+
 const setLastSyncAt = (state, action) => state.set('lastSyncAt', action.lastSyncAt);
 
 const setHeaderTags = (state, action) => {
@@ -1018,6 +1301,28 @@ export default (state = new Map(), action) => {
       return clearPendingCapture(state, action);
     case 'ADVANCE_CHECKBOX_STATE':
       return advanceCheckboxState(state, action);
+    case 'SET_SELECTED_LIST_ITEM_ID':
+      return setSelectedListItemId(state, action);
+    case 'UPDATE_LIST_TITLE_VALUE':
+      return updateListTitleValue(state, action);
+    case 'UPDATE_LIST_CONTENTS_VALUE':
+      return updateListContentsValue(state, action);
+    case 'ADD_NEW_LIST_ITEM':
+      return addNewListItem(state, action);
+    case 'REMOVE_LIST_ITEM':
+      return removeListItem(state, action);
+    case 'MOVE_LIST_ITEM_UP':
+      return moveListItemUp(state, action);
+    case 'MOVE_LIST_ITEM_DOWN':
+      return moveListItemDown(state, action);
+    case 'MOVE_LIST_ITEM_LEFT':
+      return moveListItemLeft(state, action);
+    case 'MOVE_LIST_ITEM_RIGHT':
+      return moveListItemRight(state, action);
+    case 'MOVE_LIST_SUBTREE_LEFT':
+      return moveListSubtreeLeft(state, action);
+    case 'MOVE_LIST_SUBTREE_RIGHT':
+      return moveListSubtreeRight(state, action);
     case 'SET_LAST_SYNC_AT':
       return setLastSyncAt(state, action);
     case 'SET_HEADER_TAGS':
