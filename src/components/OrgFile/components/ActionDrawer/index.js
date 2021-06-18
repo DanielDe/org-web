@@ -24,6 +24,7 @@ const ActionDrawer = ({
   captureTemplates,
   path,
   selectedTableCellId,
+  selectedListItemId,
   inEditMode,
   isLoading,
   shouldDisableSyncButtons,
@@ -51,20 +52,38 @@ const ActionDrawer = ({
   );
 
   const handleUpClick = () =>
-    !!selectedHeaderId ? org.moveHeaderUp(selectedHeaderId) : org.moveTableRowUp();
+    !!selectedHeaderId
+      ? org.moveHeaderUp(selectedHeaderId)
+      : !!selectedTableCellId
+      ? org.moveTableRowUp()
+      : org.moveListItemUp();
 
   const handleDownClick = () =>
-    !!selectedHeaderId ? org.moveHeaderDown(selectedHeaderId) : org.moveTableRowDown();
+    !!selectedHeaderId
+      ? org.moveHeaderDown(selectedHeaderId)
+      : !!selectedTableCellId
+      ? org.moveTableRowDown()
+      : org.moveListItemDown();
 
   const handleLeftClick = () =>
-    !!selectedHeaderId ? org.moveHeaderLeft(selectedHeaderId) : org.moveTableColumnLeft();
+    !!selectedHeaderId
+      ? org.moveHeaderLeft(selectedHeaderId)
+      : !!selectedTableCellId
+      ? org.moveTableColumnLeft()
+      : org.moveListItemLeft();
 
   const handleRightClick = () =>
-    !!selectedHeaderId ? org.moveHeaderRight(selectedHeaderId) : org.moveTableColumnRight();
+    !!selectedHeaderId
+      ? org.moveHeaderRight(selectedHeaderId)
+      : !!selectedTableCellId
+      ? org.moveTableColumnRight()
+      : org.moveListItemRight();
 
-  const handleMoveSubtreeLeftClick = () => org.moveSubtreeLeft(selectedHeaderId);
+  const handleMoveSubtreeLeftClick = () =>
+    !!selectedHeaderId ? org.moveSubtreeLeft(selectedHeaderId) : org.moveListSubtreeLeft();
 
-  const handleMoveSubtreeRightClick = () => org.moveSubtreeRight(selectedHeaderId);
+  const handleMoveSubtreeRightClick = () =>
+    !!selectedHeaderId ? org.moveSubtreeRight(selectedHeaderId) : org.moveListSubtreeRight();
 
   const handleDoneClick = () => org.exitEditMode();
 
@@ -83,11 +102,10 @@ const ActionDrawer = ({
             template.get('isAvailableInAllOrgFiles') ||
             template
               .get('orgFilesWhereAvailable')
-              .map(
-                availablePath =>
-                  availablePath.trim().startsWith('/')
-                    ? availablePath.trim()
-                    : '/' + availablePath.trim()
+              .map(availablePath =>
+                availablePath.trim().startsWith('/')
+                  ? availablePath.trim()
+                  : '/' + availablePath.trim()
               )
               .includes((path || '').trim())
         );
@@ -188,6 +206,25 @@ const ActionDrawer = ({
       }),
     };
 
+    let subIconNameStr = null;
+    let tooltipUpStr = 'Move header up';
+    let tooltipDownStr = 'Move header down';
+    let tooltipLeftStr = 'Move header left';
+    let tooltipRightStr = 'Move header right';
+    if (!!selectedTableCellId) {
+      subIconNameStr = 'table';
+      tooltipUpStr = 'Move row up';
+      tooltipDownStr = 'Move row down';
+      tooltipLeftStr = 'Move column left';
+      tooltipRightStr = 'Move column right';
+    } else if (!!selectedListItemId) {
+      subIconNameStr = 'list';
+      tooltipUpStr = 'Move list up';
+      tooltipDownStr = 'Move list down';
+      tooltipLeftStr = 'Move list left';
+      tooltipRightStr = 'Move list right';
+    }
+
     return (
       <Motion style={animatedStyles}>
         {style => (
@@ -198,25 +235,25 @@ const ActionDrawer = ({
             <ActionButton
               additionalClassName="action-drawer__arrow-button"
               iconName="arrow-up"
-              subIconName={!!selectedTableCellId ? 'table' : null}
+              subIconName={subIconNameStr}
               isDisabled={false}
               onClick={handleUpClick}
               style={{ ...baseArrowButtonStyle, bottom: style.topRowYOffset }}
-              tooltip={!!selectedTableCellId ? 'Move row up' : 'Move header up'}
+              tooltip={tooltipUpStr}
             />
             <ActionButton
               additionalClassName="action-drawer__arrow-button"
               iconName="arrow-down"
-              subIconName={!!selectedTableCellId ? 'table' : null}
+              subIconName={subIconNameStr}
               isDisabled={false}
               onClick={handleDownClick}
               style={{ ...baseArrowButtonStyle, bottom: style.bottomRowYOffset }}
-              tooltip={!!selectedTableCellId ? 'Move row down' : 'Move header down'}
+              tooltip={tooltipDownStr}
             />
             <ActionButton
               additionalClassName="action-drawer__arrow-button"
               iconName="arrow-left"
-              subIconName={!!selectedTableCellId ? 'table' : null}
+              subIconName={subIconNameStr}
               isDisabled={false}
               onClick={handleLeftClick}
               style={{
@@ -224,12 +261,12 @@ const ActionDrawer = ({
                 bottom: style.bottomRowYOffset,
                 right: style.firstColumnXOffset,
               }}
-              tooltip={!!selectedTableCellId ? 'Move column left' : 'Move header left'}
+              tooltip={tooltipLeftStr}
             />
             <ActionButton
               additionalClassName="action-drawer__arrow-button"
               iconName="arrow-right"
-              subIconName={!!selectedTableCellId ? 'table' : null}
+              subIconName={subIconNameStr}
               isDisabled={false}
               onClick={handleRightClick}
               style={{
@@ -237,13 +274,14 @@ const ActionDrawer = ({
                 bottom: style.bottomRowYOffset,
                 left: style.firstColumnXOffset,
               }}
-              tooltip={!!selectedTableCellId ? 'Move column right' : 'Move header right'}
+              tooltip={tooltipRightStr}
             />
             {!selectedTableCellId && (
               <Fragment>
                 <ActionButton
                   additionalClassName="action-drawer__arrow-button"
                   iconName="chevron-left"
+                  subIconName={subIconNameStr}
                   isDisabled={false}
                   onClick={handleMoveSubtreeLeftClick}
                   style={{
@@ -256,6 +294,7 @@ const ActionDrawer = ({
                 <ActionButton
                   additionalClassName="action-drawer__arrow-button"
                   iconName="chevron-right"
+                  subIconName={subIconNameStr}
                   isDisabled={false}
                   onClick={handleMoveSubtreeRightClick}
                   style={{
@@ -270,7 +309,7 @@ const ActionDrawer = ({
 
             <ActionButton
               iconName={isDisplayingArrowButtons ? 'times' : 'arrows-alt'}
-              subIconName={!!selectedTableCellId ? 'table' : null}
+              subIconName={subIconNameStr}
               additionalClassName="action-drawer__main-arrow-button"
               isDisabled={false}
               onClick={handleMainArrowButtonClick}
@@ -329,6 +368,7 @@ const mapStateToProps = (state, props) => {
     isDirty: state.org.present.get('isDirty'),
     isFocusedHeaderActive: !!state.org.present.get('focusedHeaderId'),
     selectedTableCellId: state.org.present.get('selectedTableCellId'),
+    selectedListItemId: state.org.present.get('selectedListItemId'),
     captureTemplates: state.capture.get('captureTemplates', new List()),
     path: state.org.present.get('path'),
     isLoading: state.base.get('isLoading'),
