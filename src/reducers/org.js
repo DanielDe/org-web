@@ -910,9 +910,7 @@ const addNewListItem = (state, action) => {
 
   let newItem = newListItem();
   if (pathAndPart.listItemPart.get('isCheckbox')) {
-    newItem = newItem
-      .set('isCheckbox', true)
-      .set('checkboxState', 'unchecked');
+    newItem = newItem.set('isCheckbox', true).set('checkboxState', 'unchecked');
   }
 
   state = state.update('headers', headers =>
@@ -1321,6 +1319,8 @@ export default (state = new Map(), action) => {
       return updateListContentsValue(state, action);
     case 'ADD_NEW_LIST_ITEM':
       return addNewListItem(state, action);
+    case 'SELECT_NEXT_SIBLING_LIST_ITEM':
+      return selectNextSiblingListItem(state, action);
     case 'REMOVE_LIST_ITEM':
       return removeListItem(state, action);
     case 'MOVE_LIST_ITEM_UP':
