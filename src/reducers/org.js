@@ -889,7 +889,7 @@ const updateListContentsValue = (state, action) => {
   state = state.update('headers', headers =>
     updateListContainingListItemId(headers, selectedListItemId, itemIndex => items =>
       items.updateIn([itemIndex], item =>
-        item.set('contents', fromJS(parseMarkupAndCookies(action.newValue)))
+        item.set('contents', fromJS(parseRawText(action.newValue)))
       )
     )
   );
