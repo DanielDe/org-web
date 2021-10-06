@@ -289,6 +289,15 @@ export const pathAndPartOfTimestampItemWithIdInAttributedString = (parts, timest
     .filter(result => !!result)
     .first();
 
+const listPartContainsItemId = (listPart, itemId) =>
+  listPart.get('items').some(item => item.get('id') === itemId);
+
+export const headerThatContainsListItemId = (headers, listItemId) => {
+  const pathAndPart = pathAndPartOfListItemWithIdInHeaders(headers, listItemId);
+  const headerIndex = pathAndPart.path[0];
+  return headers.get(headerIndex);
+};
+
 export const pathAndPartOfListItemWithIdInAttributedString = (parts, listItemId) =>
   parts
     .map((part, partIndex) => {
@@ -355,6 +364,60 @@ export const pathAndPartOfTableContainingCellIdInAttributedString = (parts, cell
           })
           .filter(result => !!result)
           .first();
+      } else {
+        return null;
+      }
+    })
+    .filter(result => !!result)
+    .first();
+
+export const pathAndPartOfListContainingItemIdInHeaders = (headers, itemId) =>
+  headers
+    .map((header, headerIndex) => {
+      const pathAndPart = pathAndPartOfListContainingItemIdInAttributedString(
+        header.get('description'),
+        itemId
+      );
+      if (!pathAndPart) {
+        return null;
+      }
+
+      const { path, listPart } = pathAndPart;
+      return {
+        path: [headerIndex, 'description'].concat(path),
+        listPart,
+      };
+    })
+    .filter(result => !!result)
+    .first();
+
+export const pathAndPartOfListContainingItemIdInAttributedString = (parts, itemId) =>
+  parts
+    .map((part, partIndex) => {
+      if (part.get('type') === 'list') {
+        if (listPartContainsItemId(part, itemId)) {
+          return { path: [partIndex], listPart: part };
+        } else {
+          return part
+            .get('items')
+            .map((item, itemIndex) => {
+              const pathAndPart = pathAndPartOfListContainingItemIdInAttributedString(
+                item.get('contents'),
+                itemId
+              );
+              if (!!pathAndPart) {
+                const { path, listPart } = pathAndPart;
+                return {
+                  path: [partIndex, 'items', itemIndex, 'contents'].concat(path),
+                  listPart,
+                };
+              } else {
+                return null;
+              }
+            })
+            .filter(result => !!result)
+            .first();
+        }
       } else {
         return null;
       }
@@ -496,6 +559,61 @@ export const newEmptyTableCell = () =>
     contents: [],
     rawContents: '',
   });
+
+export const newListPart = () =>
+  fromJS({
+    type: 'list',
+    id: generateId(),
+    items: [],
+    bulletCharacter: '-',
+    numberTerminatorCharacter: null,
+    isOrdered: false,
+  });
+
+export const newListPartLikePart = part => part.set('id', generateId()).set('items', new List());
+
+export const newListItem = () =>
+  fromJS({
+    id: generateId(),
+    titleLine: [],
+    contents: [],
+    forceNumber: null,
+    isCheckbox: false,
+  });
+
+export const parentListItemWithIdInHeaders = (headers, listItemId) => {
+  const pathAndPart = pathAndPartOfListItemWithIdInHeaders(headers, listItemId);
+  let { path } = pathAndPart;
+  return headers.getIn(path.slice(0, path.length - 4));
+};
+
+export const updateListContainingListItemId = (headers, listItemId, updaterCallbackGenerator) => {
+  const { path, listPart } = pathAndPartOfListContainingItemIdInHeaders(headers, listItemId);
+
+  const itemIndexContainingId = listPart
+    .get('items')
+    .findIndex(item => item.get('id') === listItemId);
+
+  return headers.updateIn(path.concat(['items']), updaterCallbackGenerator(itemIndexContainingId));
+};
+
+export const updateContentsWithListItemAddition = (parts, listItem, listPart = null) => {
+  if (parts.size === 0) {
+    if (!!listPart) {
+      parts = parts.insert(0, newListPartLikePart(listPart));
+    } else {
+      parts = parts.insert(0, newListPart());
+    }
+  }
+  return parts.map(part => {
+    switch (part.get('type')) {
+      case 'list':
+        return part.update('items', items => items.push(listItem));
+      default:
+        return part;
+    }
+  });
+};
 
 export const timestampWithIdInAttributedString = (parts, timestampId) => {
   if (!parts) {
