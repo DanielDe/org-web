@@ -35,6 +35,15 @@ class HeaderContent extends PureComponent {
       'handleAddNewTableColumn',
       'handleRemoveTableColumn',
       'handleCheckboxClick',
+      'handleListItemSelect',
+      'handleEnterListTitleEditMode',
+      'handleExitListTitleEditMode',
+      'handleListTitleValueUpdate',
+      'handleEnterListContentsEditMode',
+      'handleExitListContentsEditMode',
+      'handleListContentsValueUpdate',
+      'handleAddNewListItem',
+      'handleRemoveListItem',
       'handleTimestampClick',
       'handleInsertTimestamp',
       'handlePlanningItemTimestampClick',
@@ -123,7 +132,7 @@ class HeaderContent extends PureComponent {
       } else {
         this.setState({ shouldIgnoreBlur: false });
       }
-    }, 0);
+    }, 100);
   }
 
   handleTableCellSelect(cellId) {
@@ -160,6 +169,42 @@ class HeaderContent extends PureComponent {
 
   handleCheckboxClick(listItemId) {
     this.props.org.advanceCheckboxState(listItemId);
+  }
+
+  handleListItemSelect(listItemId) {
+    this.props.org.setSelectedListItemId(listItemId);
+  }
+
+  handleEnterListTitleEditMode() {
+    this.props.org.enterEditMode('list-title');
+  }
+
+  handleExitListTitleEditMode() {
+    this.props.org.exitEditMode();
+  }
+
+  handleListTitleValueUpdate(listItemId, newValue) {
+    this.props.org.updateListTitleValue(listItemId, newValue);
+  }
+
+  handleEnterListContentsEditMode() {
+    this.props.org.enterEditMode('list-contents');
+  }
+
+  handleExitListContentsEditMode() {
+    this.props.org.exitEditMode();
+  }
+
+  handleListContentsValueUpdate(listItemId, newValue) {
+    this.props.org.updateListContentsValue(listItemId, newValue);
+  }
+
+  handleAddNewListItem() {
+    this.props.org.addNewListItemAndEdit();
+  }
+
+  handleRemoveListItem() {
+    this.props.org.removeListItem();
   }
 
   handleTimestampClick(timestampId) {
@@ -199,6 +244,9 @@ class HeaderContent extends PureComponent {
       selectedTableCellId,
       inTableEditMode,
       shouldDisableActions,
+      selectedListItemId,
+      inListTitleEditMode,
+      inListContentsEditMode,
     } = this.props;
     const { containerWidth } = this.state;
 
@@ -257,6 +305,18 @@ class HeaderContent extends PureComponent {
                 onAddNewTableColumn: this.handleAddNewTableColumn,
                 onRemoveTableColumn: this.handleRemoveTableColumn,
                 onCheckboxClick: this.handleCheckboxClick,
+                onListItemSelect: this.handleListItemSelect,
+                onEnterListTitleEditMode: this.handleEnterListTitleEditMode,
+                onExitListTitleEditMode: this.handleExitListTitleEditMode,
+                onListTitleValueUpdate: this.handleListTitleValueUpdate,
+                onEnterListContentsEditMode: this.handleEnterListContentsEditMode,
+                onExitListContentsEditMode: this.handleExitListContentsEditMode,
+                onListContentsValueUpdate: this.handleListContentsValueUpdate,
+                onAddNewListItem: this.handleAddNewListItem,
+                onRemoveListItem: this.handleRemoveListItem,
+                selectedListItemId: selectedListItemId,
+                inListTitleEditMode: inListTitleEditMode,
+                inListContentsEditMode: inListContentsEditMode,
                 onTimestampClick: this.handleTimestampClick,
                 shouldDisableActions,
               }}
@@ -276,6 +336,9 @@ const mapStateToProps = (state, props) => {
     isSelected: state.org.present.get('selectedHeaderId') === props.header.get('id'),
     selectedTableCellId: state.org.present.get('selectedTableCellId'),
     inTableEditMode: state.org.present.get('editMode') === 'table',
+    selectedListItemId: state.org.present.get('selectedListItemId'),
+    inListTitleEditMode: state.org.present.get('editMode') === 'list-title',
+    inListContentsEditMode: state.org.present.get('editMode') === 'list-contents',
   };
 };
 
@@ -286,7 +349,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(HeaderContent);
+export default connect(mapStateToProps, mapDispatchToProps)(HeaderContent);

@@ -68,7 +68,9 @@ export const sync = ({
               path,
               exportOrg(
                 getState().org.present.get('headers'),
-                getState().org.present.get('todoKeywordSets')
+                getState().org.present.get('todoKeywordSets'),
+                getState().org.present.get('fileConfigLines'),
+                getState().org.present.get('linesBeforeHeadings')
               )
             )
             .then(() => {
@@ -129,6 +131,7 @@ export const selectHeader = headerId => dispatch => {
 
   if (!!headerId) {
     dispatch(setSelectedTableCellId(null));
+    dispatch(setSelectedListItemId(null));
   }
 };
 
@@ -263,6 +266,7 @@ export const setSelectedTableCellId = cellId => dispatch => {
 
   if (!!cellId) {
     dispatch(selectHeader(null));
+    dispatch(setSelectedListItemId(null));
   }
 };
 
@@ -387,6 +391,79 @@ export const insertPendingCapture = () => (dispatch, getState) => {
 export const advanceCheckboxState = listItemId => ({
   type: 'ADVANCE_CHECKBOX_STATE',
   listItemId,
+  dirtying: true,
+});
+
+export const setSelectedListItemId = listItemId => dispatch => {
+  dispatch({ type: 'SET_SELECTED_LIST_ITEM_ID', listItemId });
+
+  if (!!listItemId) {
+    dispatch(selectHeader(null));
+    dispatch(setSelectedTableCellId(null));
+  }
+};
+
+export const updateListTitleValue = (listItemId, newValue) => ({
+  type: 'UPDATE_LIST_TITLE_VALUE',
+  listItemId,
+  newValue,
+  dirtying: true,
+});
+
+export const updateListContentsValue = (listItemId, newValue) => ({
+  type: 'UPDATE_LIST_CONTENTS_VALUE',
+  listItemId,
+  newValue,
+  dirtying: true,
+});
+
+export const addNewListItem = () => ({
+  type: 'ADD_NEW_LIST_ITEM',
+  dirtying: true,
+});
+
+export const selectNextSiblingListItem = () => ({
+  type: 'SELECT_NEXT_SIBLING_LIST_ITEM',
+});
+
+export const addNewListItemAndEdit = () => dispatch => {
+  dispatch(addNewListItem());
+  dispatch(selectNextSiblingListItem());
+  dispatch(enterEditMode('list-title'));
+};
+
+export const removeListItem = () => ({
+  type: 'REMOVE_LIST_ITEM',
+  dirtying: true,
+});
+
+export const moveListItemUp = () => ({
+  type: 'MOVE_LIST_ITEM_UP',
+  dirtying: true,
+});
+
+export const moveListItemDown = () => ({
+  type: 'MOVE_LIST_ITEM_DOWN',
+  dirtying: true,
+});
+
+export const moveListItemLeft = () => ({
+  type: 'MOVE_LIST_ITEM_LEFT',
+  dirtying: true,
+});
+
+export const moveListItemRight = () => ({
+  type: 'MOVE_LIST_ITEM_RIGHT',
+  dirtying: true,
+});
+
+export const moveListSubtreeLeft = () => ({
+  type: 'MOVE_LIST_SUBTREE_LEFT',
+  dirtying: true,
+});
+
+export const moveListSubtreeRight = () => ({
+  type: 'MOVE_LIST_SUBTREE_RIGHT',
   dirtying: true,
 });
 
