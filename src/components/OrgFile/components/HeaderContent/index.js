@@ -109,7 +109,15 @@ class HeaderContent extends PureComponent {
       propertyListItemsText += '\n:END:';
     }
 
-    return planningItemsText + '\n' + propertyListItemsText + '\n' + header.get('rawDescription');
+    let descriptionText = '';
+    if (!!planningItemsText) {
+      descriptionText += planningItemsText + '\n';
+    }
+    if (!!propertyListItemsText) {
+      descriptionText += propertyListItemsText + '\n';
+    }
+    descriptionText += header.get('rawDescription');
+    return descriptionText;
   }
 
   handleTextareaRef(textarea) {
