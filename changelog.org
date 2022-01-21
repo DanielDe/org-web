@@ -1,3 +1,5 @@
+* January 20th, 2022
+** Fix a bug in which an extra newline is inserted for a new header
 * October 6th, 2021
 ** First-class support for plain lists thanks to @kjmatsuda on GitHub
 * November 1st, 2018 (afternoon)
