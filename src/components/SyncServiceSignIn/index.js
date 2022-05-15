@@ -1,4 +1,4 @@
-/* global process, gapi */
+/* global process, gapi, google */
 
 import React, { PureComponent } from 'react';
 
@@ -30,21 +30,23 @@ export default class SyncServiceSignIn extends PureComponent {
 
   handleGoogleDriveClick() {
     try {
-      gapi.load('client:auth2', () => {
-        gapi.client
+      gapi.load('client', () => {
+        window.gapi.client
           .init({
             apiKey: process.env.REACT_APP_GOOGLE_DRIVE_API_KEY,
-            clientId: process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID,
             discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-            scope: 'https://www.googleapis.com/auth/drive',
           })
-          .then(() => {
-            persistField('authenticatedSyncService', 'Google Drive');
-
-            gapi.auth2.getAuthInstance().signIn({
-              ux_mode: 'redirect',
-              redirect_uri: window.location.origin,
+          .then(async () => {
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+              client_id: process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID,
+              scope: 'https://www.googleapis.com/auth/drive.file',
+              callback: (accessToken) => {
+                persistField('authenticatedSyncService', 'Google Drive');
+                persistField('googleDriveAccessToken', JSON.stringify(accessToken));
+                window.location.reload();
+              },
             });
+            tokenClient.requestAccessToken({ prompt: 'consent' });
           });
       });
     } catch (error) {

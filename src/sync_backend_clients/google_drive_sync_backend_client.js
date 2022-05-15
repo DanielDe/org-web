@@ -1,21 +1,38 @@
 /* global process */
 
 import { fromJS, Map } from 'immutable';
+import { persistField, getPersistedField } from '../util/settings_persister';
 
 export default () => {
   const initGoogleDriveAPIClient = () =>
-    new Promise((resolve, reject) =>
-      window.gapi.load('client:auth2', () => {
-        window.location.hash = window.initialHash;
+    new Promise((resolve, reject) => {
+      window.gapi.load('client', () => {
         window.gapi.client
           .init({
-            client_id: process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID,
+            apiKey: process.env.REACT_APP_GOOGLE_DRIVE_API_KEY,
             discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-            scope: 'https://www.googleapis.com/auth/drive.file',
           })
-          .then(resolve);
-      })
-    );
+          .then(async () => {
+            const googleDriveAccessTokenString = getPersistedField('googleDriveAccessToken');
+            if (googleDriveAccessTokenString) {
+              const googleDriveAccessToken = JSON.parse(googleDriveAccessTokenString);
+              window.gapi.client.setToken(googleDriveAccessToken);
+              resolve();
+            } else {
+              const tokenClient = window.google.accounts.oauth2.initTokenClient({
+                client_id: process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: accessToken => {
+                  persistField('authenticatedSyncService', 'Google Drive');
+                  persistField('googleDriveAccessToken', JSON.stringify(accessToken));
+                  resolve();
+                },
+              });
+              tokenClient.requestAccessToken({ prompt: 'consent' });
+            }
+          });
+      });
+    });
 
   const getAPIClient = (() => {
     let isInited = false;
@@ -51,9 +68,11 @@ export default () => {
   }
 
   const isSignedIn = () =>
-    new Promise((resolve, reject) =>
-      getAPIClient().then(gapi => resolve(gapi.auth2.getAuthInstance().isSignedIn.get()))
-    );
+    new Promise((resolve, reject) => {
+      getAPIClient().then(gapi => {
+        resolve(gapi.client.getToken() !== null);
+      });
+    });
 
   const transformDirectoryListing = listing =>
     fromJS(
@@ -186,22 +205,19 @@ export default () => {
   const createFile = (name, parentId, contents) => {
     return new Promise((resolve, reject) => {
       fileIdByNameAndParent(name, parentId)
-        .then(
-          fileId =>
-            !!fileId
-              ? updateFile(fileId, contents)
+        .then(fileId =>
+          !!fileId
+            ? updateFile(fileId, contents).then(resolve).catch(reject)
+            : getAPIClient().then(gapi => {
+                gapi.client.drive.files
+                  .create({
+                    name,
+                    parents: parentId,
+                  })
+                  .then(response => updateFile(response.result.id, contents))
                   .then(resolve)
-                  .catch(reject)
-              : getAPIClient().then(gapi => {
-                  gapi.client.drive.files
-                    .create({
-                      name,
-                      parents: parentId,
-                    })
-                    .then(response => updateFile(response.result.id, contents))
-                    .then(resolve)
-                    .catch(reject);
-                })
+                  .catch(reject);
+              })
         )
         .catch(reject);
     });

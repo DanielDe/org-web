@@ -1,4 +1,4 @@
-/* global gapi */
+/* global gapi, google */
 
 import { setLoadingMessage, hideLoadingMessage, clearModalStack, setIsLoading } from './base';
 import {
@@ -18,7 +18,13 @@ export const signOut = () => (dispatch, getState) => {
       persistField('dropboxAccessToken', null);
       break;
     case 'Google Drive':
-      gapi.auth2.getAuthInstance().signOut();
+      const token = gapi.client.getToken();
+      if (token) {
+        persistField('googleDriveAccessToken', null);
+        google.accounts.oauth2.revoke(token);
+        gapi.client.setToken('');
+        window.location.reload();
+      }
       break;
     default:
   }
